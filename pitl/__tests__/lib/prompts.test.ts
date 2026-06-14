@@ -20,4 +20,14 @@ describe('buildPrompt', () => {
     expect(prompt).toContain('4P결과')
     expect(prompt).toContain('HTML')
   })
+
+  it('detailed-planning 프롬프트에 뉴스 내용을 포함한다', () => {
+    const prompt = buildPrompt('detailed-planning', {
+      idea: '',
+      newsContent: '삼성전자 AI 반도체 투자 확대 발표',
+    })
+    expect(prompt).toContain('삼성전자 AI 반도체 투자 확대 발표')
+    expect(prompt).toContain('Why')
+    expect(prompt).toContain('HTML')
+  })
 })

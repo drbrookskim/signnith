@@ -1316,7 +1316,6 @@ const _sb = supabase.createClient(_SB_URL, _SB_KEY);
   // ── 리포트 삭제 ──
   window.deleteReport = function(e, id) {
     e.stopPropagation();
-    if (!confirm('이 리포트를 삭제하시겠습니까?')) return;
     allReports = allReports.filter(r => r.id !== id);
     saveReports();
     if (activeId === id) {

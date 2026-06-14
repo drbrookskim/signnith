@@ -1,6 +1,9 @@
 export type Provider = 'claude' | 'openai' | 'gemini'
 export type WizardStep = 0 | 1 | 2 | 3
-export type GenerateStep = '3c' | '4p' | 'plan'
+export type GenerateStep = '3c' | '4p' | 'plan' | 'detailed-planning'
+export type AppMode = 'select' | 'idea' | 'news'
+export type NewsSource = 'naver' | 'rss' | 'paste'
+export type NewsMode = 'fast' | 'deep'
 
 export interface ProviderConfig {
   provider: Provider
@@ -30,4 +33,19 @@ export interface GenerateRequest {
   idea: string
   threeC?: string
   fourP?: string
+  newsContent?: string
+}
+
+export interface NewsArticle {
+  title: string
+  summary: string
+  content: string
+  url: string
+}
+
+export const RSS_CATEGORIES: Record<string, string> = {
+  economy: '경제',
+  it: 'IT/기술',
+  politics: '정치',
+  society: '사회',
 }

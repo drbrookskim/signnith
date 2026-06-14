@@ -5,11 +5,12 @@ import StreamingText from '@/components/ui/StreamingText'
 
 interface Step1ThreeCProps {
   config: ProviderConfig
+  initialIdea?: string
   onComplete: (idea: string, threeC: string) => void
 }
 
-export default function Step1ThreeC({ config, onComplete }: Step1ThreeCProps) {
-  const [idea, setIdea] = useState('')
+export default function Step1ThreeC({ config, initialIdea = '', onComplete }: Step1ThreeCProps) {
+  const [idea, setIdea] = useState(initialIdea)
   const [threeC, setThreeC] = useState('')
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState('')

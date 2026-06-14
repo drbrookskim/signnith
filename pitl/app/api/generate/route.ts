@@ -12,13 +12,21 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'Invalid request body' }, { status: 400 })
   }
 
-  const { provider, apiKey, model, step, idea, threeC, fourP } = body
+  const { provider, apiKey, model, step, idea, threeC, fourP, newsContent } = body
 
-  if (!provider || !apiKey || !model || !step || idea === undefined) {
+  if (!provider || !apiKey || !model || !step) {
     return NextResponse.json({ error: 'Missing required fields' }, { status: 400 })
   }
 
-  const prompt = buildPrompt(step, { idea, threeC, fourP })
+  if (step === 'detailed-planning' && !newsContent) {
+    return NextResponse.json({ error: 'Missing newsContent for detailed-planning' }, { status: 400 })
+  }
+
+  if (step !== 'detailed-planning' && idea === undefined) {
+    return NextResponse.json({ error: 'Missing idea' }, { status: 400 })
+  }
+
+  const prompt = buildPrompt(step, { idea: idea ?? '', threeC, fourP, newsContent })
 
   try {
     const generate = getProvider(provider)

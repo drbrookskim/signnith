@@ -197,10 +197,12 @@
 
   /* Snapshot area — 배경 투명, 파티클 투과 */
   .cmp-snap-area {
-    overflow: hidden;
+    overflow-y: auto;
+    overflow-x: hidden;
     flex-shrink: 0;
     border-bottom: 1px solid var(--border2);
     background: transparent;
+    max-height: 46vh;
   }
 
   /* Snapshot panel (reuse archive.html styles) */
@@ -678,14 +680,15 @@
   window.addEventListener('resize', onResize);
   onResize();
 
-  // ── 스냅샷 높이 동기화: 두 컬럼 중 더 큰 쪽에 맞춤 ──
+  // ── 스냅샷 높이 동기화: 두 컬럼 중 더 큰 쪽에 맞추되 46vh 초과 시 스크롤 ──
   requestAnimationFrame(() => {
     const snaps = area.querySelectorAll('.cmp-snap-area');
     if (snaps.length === 2) {
-      // 자연 높이 측정 후 더 큰 쪽에 맞춰 동일하게
       snaps.forEach(s => { s.style.height = 'auto'; s.style.maxHeight = 'none'; });
-      const h = Math.max(snaps[0].scrollHeight, snaps[1].scrollHeight);
-      snaps.forEach(s => { s.style.height = h + 'px'; s.style.flexShrink = '0'; });
+      const maxAllowed = window.innerHeight * 0.46;
+      const natural = Math.max(snaps[0].scrollHeight, snaps[1].scrollHeight);
+      const h = Math.min(natural, maxAllowed);
+      snaps.forEach(s => { s.style.height = h + 'px'; s.style.maxHeight = maxAllowed + 'px'; s.style.flexShrink = '0'; });
     }
   });
 })();

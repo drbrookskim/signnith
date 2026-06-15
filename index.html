@@ -137,7 +137,7 @@
   html.light .card {
     background: rgba(255,255,255,0.68);
     border-color: rgba(180,160,140,0.22);
-    box-shadow: 0 4px 24px rgba(100,80,60,0.08), 0 1px 4px rgba(100,80,60,0.06);
+    box-shadow: 0 4px 24px rgba(100,80,60,0.28), 0 1px 6px rgba(100,80,60,0.18);
     backdrop-filter: blur(16px);
     -webkit-backdrop-filter: blur(16px);
   }
@@ -636,6 +636,7 @@
     border: 1px solid var(--border);
     border-radius: 14px;
     padding: 18px 20px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.55), 0 1px 6px rgba(0,0,0,0.35);
   }
   .card-header {
     font-size: 0.65rem;
@@ -962,6 +963,22 @@
       box-sizing: border-box;
     }
   }
+
+  /* ═══ 기간별 추세 · 멀티 타임프레임 ═══ */
+  .mtf-row { display:grid; grid-template-columns:repeat(4,1fr); gap:10px; margin-top:12px; }
+  @media (max-width:640px){ .mtf-row { grid-template-columns:repeat(2,1fr); } }
+  .mtf-cell {
+    background:var(--card2); border:1px solid var(--border); border-radius:12px;
+    padding:13px 12px 12px; text-align:center; position:relative; overflow:hidden;
+  }
+  .mtf-cell::before { content:''; position:absolute; left:0; right:0; top:0; height:3px; background:var(--mtf-accent,var(--muted)); }
+  .mtf-cell .mtf-tf  { font-size:0.66rem; color:var(--muted); font-weight:700; letter-spacing:.03em; }
+  .mtf-cell .mtf-ret { font-size:1.35rem; font-weight:800; margin:7px 0 3px; line-height:1; }
+  .mtf-cell .mtf-ma  { font-size:0.65rem; color:var(--muted); }
+  .mtf-cell .mtf-sig { margin-top:9px; font-size:0.72rem; font-weight:700; }
+  .mtf-cell.na .mtf-ret { font-size:0.9rem; color:var(--muted2); font-weight:600; }
+  .mtf-summary { margin-top:12px; font-size:0.76rem; color:var(--text2); line-height:1.6;
+    background:var(--card2); border:1px solid var(--border); border-radius:10px; padding:9px 13px; }
 </style>
 </head>
 <body>
@@ -2765,6 +2782,40 @@ function computeSMC(bars) {
   return { smc_signal, bos, fvg, ob };
 }
 
+// ── 멀티 타임프레임: 단기/중기/분기/장기 추세 종합 ──
+function computeMultiTimeframe(bars) {
+  const C = bars.map(b=>b.close);
+  const n = C.length;
+  const sma = (w) => n>=w ? C.slice(n-w).reduce((a,b)=>a+b,0)/w : null;
+  const tfs = [
+    { tf:'단기 · 1주',   maLabel:'MA5',   w:5 },
+    { tf:'중기 · 1개월', maLabel:'MA20',  w:21 },
+    { tf:'분기 · 3개월', maLabel:'MA60',  w:63 },
+    { tf:'장기 · 6개월', maLabel:'MA120', w:126 },
+  ];
+  const rows = []; let sum=0, cnt=0, bull=0, bear=0, neut=0;
+  for (const t of tfs) {
+    if (n <= t.w) { rows.push({ ...t, na:true }); continue; }
+    const past = C[n-1-t.w];
+    const ret  = past ? (C[n-1]-past)/past : 0;
+    const ma   = sma(t.w);
+    const aboveMA = ma!=null ? (C[n-1] >= ma ? 1 : -1) : 0;
+    const score = (Math.tanh(ret*8) + aboveMA) / 2;
+    const sig   = score>0.33 ? 'bull' : score<-0.33 ? 'bear' : 'neutral';
+    if (sig==='bull') bull++; else if (sig==='bear') bear++; else neut++;
+    sum += score; cnt++;
+    rows.push({ ...t, ret: ret*100, aboveMA, score, sig });
+  }
+  const avg = cnt ? sum/cnt : 0;
+  let verdict, vlabel;
+  if (cnt>=2 && bull===cnt)      { verdict='bull';    vlabel='정배열 · 전 구간 상승'; }
+  else if (cnt>=2 && bear===cnt) { verdict='bear';    vlabel='역배열 · 전 구간 하락'; }
+  else if (avg>0.2)              { verdict='bull';    vlabel='상승 우위'; }
+  else if (avg<-0.2)            { verdict='bear';    vlabel='하락 우위'; }
+  else                          { verdict='neutral'; vlabel='혼조 · 방향성 불명확'; }
+  return { rows, avg, bull, bear, neut, cnt, verdict, vlabel };
+}
+
 // ══════════════════════════════════════════════════════
 //  Layer 3: 퀀트 팩터 스코어
 // ══════════════════════════════════════════════════════
@@ -3186,6 +3237,7 @@ async function runAnalysis() {
     const smc      = computeSMC(bars);
     // Layer 3: Quant factors
     const quant    = computeQuantFactors(bars, ind);
+    const mtf      = computeMultiTimeframe(bars);
     // Layer IPP: 변곡점 예측
     const ipp      = computeIPP(bars, ind);
     // Layer 5: Signal fusion (waccResult 계산 후 전달)
@@ -3218,7 +3270,7 @@ async function runAnalysis() {
       changeAmt, changePct, high52w, low52w, mktState, updatedAt,
       fundInfo, cs, ew, ichi, smc, quant, ipp, advanced,
       exchangeName: quote?.fullExchangeName || quote?.exchange || '',
-      waccResult,
+      waccResult, mtf,
     });
 
     // ── 보관함 자동저장 (로그인 상태일 때만) ──
@@ -3382,7 +3434,8 @@ function guessExchange(ticker) {
 
 function renderDashboard({ ticker, bars, ind, tech, fund, decision: d, price, isKr, currency,
     companyName, sector, changeAmt, changePct, high52w, low52w, mktState, updatedAt, fundInfo,
-    cs, ew, ichi, smc, quant, ipp, advanced, exchangeName, waccResult }) {
+    cs, ew, ichi, smc, quant, ipp, advanced, exchangeName, waccResult, mtf }) {
+  const mtfColor = v => v==='bull'?'var(--up)':v==='bear'?'var(--down)':'var(--yellow)';
   const flag      = isKr ? '🇰🇷' : '🇺🇸';
   const badgeCls  = {BUY:'buy',SELL:'sell',HOLD:'hold'}[d.action]||'hold';
   const badgeLbl  = {BUY:'● 매수 BUY',SELL:'● 매도 SELL',HOLD:'● 관망 HOLD'}[d.action];
@@ -3596,6 +3649,48 @@ function renderDashboard({ ticker, bars, ind, tech, fund, decision: d, price, is
           <div style="font-size:1.1rem;font-weight:700;color:${c}">${v.toFixed(2)}</div>
         </div>`;
       }).join('')}
+    </div>
+  </div>
+
+  <!-- ═══ 기간별 추세 · 멀티 타임프레임 ═══ -->
+  <div class="row" style="grid-template-columns:1fr;margin-top:0">
+    <div class="card">
+      <div class="card-header">
+        <span class="dot" style="background:var(--blue)"></span>기간별 추세 · 멀티 타임프레임 ${tip('기간별 추세 종합','단기(1주)·중기(1개월)·분기(3개월)·장기(6개월) 각 구간의 수익률과 이동평균 위치를 종합해 기간별 방향성을 한눈에 비교합니다.\n\n<b>판정</b>\n• 정배열 — 전 구간 상승 정렬 (강한 추세)\n• 역배열 — 전 구간 하락 정렬\n• 혼조 — 기간별 방향 불일치')}
+        <span style="float:right;font-weight:800;font-size:0.95rem;color:${mtfColor(mtf.verdict)}">${mtf.vlabel}</span>
+      </div>
+      <div class="mtf-row">
+        ${mtf.rows.map(r=>{
+          if (r.na) return `<div class="mtf-cell na" style="--mtf-accent:var(--border2)">
+            <div class="mtf-tf">${r.tf}</div>
+            <div class="mtf-ret">데이터 부족</div>
+            <div class="mtf-ma">${r.maLabel} 산출 불가</div>
+            <div class="mtf-sig" style="color:var(--muted2)">—</div>
+          </div>`;
+          const col = mtfColor(r.sig);
+          const sigLbl = r.sig==='bull'?'▲ 매수우위':r.sig==='bear'?'▼ 매도우위':'— 중립';
+          return `<div class="mtf-cell" style="--mtf-accent:${col}">
+            <div class="mtf-tf">${r.tf}</div>
+            <div class="mtf-ret" style="color:${r.ret>=0?'var(--up)':'var(--down)'}">${r.ret>=0?'+':''}${r.ret.toFixed(1)}%</div>
+            <div class="mtf-ma">가격 ${r.aboveMA>0?'>':'<'} ${r.maLabel}</div>
+            <div class="mtf-sig" style="color:${col}">${sigLbl}</div>
+          </div>`;
+        }).join('')}
+      </div>
+      <div class="mtf-summary">
+        ${(()=>{
+          const parts = [];
+          parts.push(`측정 ${mtf.cnt}개 구간 중 <b style="color:var(--up)">상승 ${mtf.bull}</b> · <b style="color:var(--yellow)">중립 ${mtf.neut}</b> · <b style="color:var(--down)">하락 ${mtf.bear}</b>`);
+          let msg;
+          if (mtf.verdict==='bull' && mtf.bull===mtf.cnt) msg='모든 기간이 상승 정렬 — 추세 추종 유리, 눌림목 매수 관점.';
+          else if (mtf.verdict==='bear' && mtf.bear===mtf.cnt) msg='모든 기간이 하락 정렬 — 반등은 기술적 반등으로 보수적 대응.';
+          else if (mtf.verdict==='bull') msg='중장기 상승 우위 — 단기 변동은 있으나 추세는 우상향.';
+          else if (mtf.verdict==='bear') msg='중장기 하락 우위 — 단기 반등 시 비중 축소 관점.';
+          else msg='기간별 방향이 엇갈림 — 단일 추세 추종보다 구간 대응 권장.';
+          parts.push(msg);
+          return parts.join('<br>');
+        })()}
+      </div>
     </div>
   </div>
 

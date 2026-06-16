@@ -259,52 +259,6 @@
     transition: background .15s, border-color .15s;
   }
   .btn-theme:hover { border-color: var(--blue); }
-  .btn-settings {
-    background: var(--card);
-    border: 1px solid var(--border);
-    border-radius: 8px;
-    padding: 6px 10px;
-    font-size: 1rem;
-    cursor: pointer;
-    line-height: 1;
-    transition: background .15s, border-color .15s;
-    color: var(--text);
-  }
-  .btn-settings:hover { border-color: var(--blue); }
-  /* 설정 모달 */
-  .settings-overlay {
-    display: none; position: fixed; inset: 0;
-    background: rgba(0,0,0,.55); z-index: 2000;
-    align-items: center; justify-content: center;
-  }
-  .settings-overlay.open { display: flex; }
-  .settings-modal {
-    background: var(--card); border: 1px solid var(--border);
-    border-radius: 16px; padding: 28px 32px; width: min(480px,92vw);
-    max-height: 85vh; overflow-y: auto;
-    animation: modalIn .18s ease;
-  }
-  .settings-title { font-size: 1.08rem; font-weight: 700; margin-bottom: 20px; }
-  .settings-section { margin-bottom: 22px; }
-  .settings-label { font-size: 0.76rem; color: var(--muted); font-weight: 600; margin-bottom: 6px; letter-spacing: .04em; text-transform: uppercase; }
-  .settings-input {
-    width: 100%; box-sizing: border-box;
-    background: var(--card2); border: 1px solid var(--border);
-    border-radius: 8px; padding: 9px 12px;
-    color: var(--text); font-size: 0.88rem;
-    outline: none; transition: border-color .15s;
-  }
-  .settings-input:focus { border-color: var(--blue); }
-  .settings-hint { font-size: 0.72rem; color: var(--muted); margin-top: 5px; line-height: 1.5; }
-  .settings-hint a { color: var(--blue); text-decoration: none; }
-  .settings-hint a:hover { text-decoration: underline; }
-  .settings-save {
-    width: 100%; padding: 10px; border-radius: 8px;
-    background: var(--blue); color: #fff; border: none;
-    font-size: 0.9rem; font-weight: 600; cursor: pointer;
-    transition: opacity .15s;
-  }
-  .settings-save:hover { opacity: .85; }
   .theme-toggle-switch {
     position: relative; width: 52px; height: 28px; border-radius: 999px;
     border: 1px solid var(--border2); background: var(--card2);
@@ -1013,31 +967,11 @@
     <button id="topbar-login-btn" onclick="openAuthModal()"
       style="display:none;height:30px;padding:0 14px;border-radius:20px;border:1px solid var(--border2);background:rgba(255,255,255,0.06);color:var(--text2);font-size:0.74rem;font-weight:600;cursor:pointer;transition:background .2s"
       onmouseover="this.style.background='rgba(59,130,246,0.15)'" onmouseout="this.style.background='rgba(255,255,255,0.06)'">로그인</button>
-    <button class="btn-settings" onclick="openSettings()" title="설정">⚙️</button>
+    <button id="theme-toggle-btn" onclick="toggleTheme()" class="theme-toggle-switch" title="테마 변경">
+      <span class="theme-toggle-knob">🌙</span>
+    </button>
   </div>
 </header>
-
-<!-- 설정 모달 -->
-<div class="settings-overlay" id="settingsOverlay" onclick="closeSettings(event)">
-  <div class="settings-modal">
-    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px">
-      <div class="settings-title">⚙️ 설정</div>
-      <button style="background:none;border:none;color:var(--muted);font-size:1.2rem;cursor:pointer" onclick="closeSettings()">✕</button>
-    </div>
-
-    <!-- ── 테마 ── -->
-    <div class="settings-section">
-      <div class="settings-label">🎨 테마</div>
-      <div style="display:flex;align-items:center;justify-content:space-between;margin-top:4px">
-        <span id="theme-toggle-label" style="font-size:0.84rem;color:var(--text2);font-weight:600">🌙 달</span>
-        <button id="theme-toggle-btn" onclick="toggleTheme()" class="theme-toggle-switch">
-          <span class="theme-toggle-knob">🌙</span>
-        </button>
-      </div>
-    </div>
-
-  </div>
-</div>
 
 <div class="search-wrap">
   <div class="search-outer">
@@ -1248,11 +1182,9 @@ function applyTheme(theme) {
   document.documentElement.classList.toggle('light', resolved === 'light');
   localStorage.setItem(THEME_KEY, theme);
   savePrefs({ theme });
-  // 설정 모달 토글 상태 반영
-  const knob  = document.querySelector('#theme-toggle-btn .theme-toggle-knob');
-  const label = document.getElementById('theme-toggle-label');
-  if (knob)  knob.textContent  = THEME_ICONS[resolved];
-  if (label) label.textContent = resolved === 'light' ? '☀️ 해' : '🌙 달';
+  // 토글 버튼 아이콘 반영
+  const knob = document.querySelector('#theme-toggle-btn .theme-toggle-knob');
+  if (knob) knob.textContent = THEME_ICONS[resolved];
   // 차트 범례 색상 즉시 반영 (차트 변수가 선언된 이후에만 접근)
   if (typeof Chart !== 'undefined') {
     Chart.defaults.color = getLegendColor();
@@ -1274,25 +1206,6 @@ function toggleTheme() {
 
 // 저장된 테마 복원
 applyTheme(localStorage.getItem(THEME_KEY) || 'dark');
-
-// ══════════════════════════════════════════════════════
-//  설정 모달
-// ══════════════════════════════════════════════════════
-
-// ── 모달 열기/닫기 ──
-function openSettings() {
-  // 테마 토글 상태 반영
-  const cur = localStorage.getItem(THEME_KEY) || 'dark';
-  const knob  = document.querySelector('#theme-toggle-btn .theme-toggle-knob');
-  const label = document.getElementById('theme-toggle-label');
-  if (knob)  knob.textContent  = THEME_ICONS[cur] || THEME_ICONS.dark;
-  if (label) label.textContent = cur === 'light' ? '☀️ 해' : '🌙 달';
-  document.getElementById('settingsOverlay').classList.add('open');
-}
-function closeSettings(e) {
-  if (e && !e.target.classList.contains('settings-overlay')) return;
-  document.getElementById('settingsOverlay').classList.remove('open');
-}
 
 // ══════════════════════════════════════════════════════
 //  차트 패턴 분석 v2 (chart_patterns_analysis_v2.md 기반)
@@ -5741,7 +5654,6 @@ function closeAuthModal() {
 async function authLogout() {
   await _sb.auth.signOut();
   localStorage.removeItem('signnith_session');
-  closeSettings();
   closeLogoutConfirm();
   updateTopbarUser();
   renderFavs();

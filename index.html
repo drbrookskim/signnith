@@ -1002,7 +1002,7 @@
   <div class="topbar-right">
     <span class="pill">Serverless Stock Analysis</span>
     <!-- 로그인 상태: 유저 칩 -->
-    <span id="topbar-user-chip" style="display:none;align-items:center;gap:7px;font-size:0.72rem;color:var(--muted);background:rgba(255,255,255,0.06);border:1px solid var(--border2);border-radius:20px;padding:3px 10px 3px 4px;letter-spacing:.02em;cursor:pointer" onclick="openArchive()" title="아카이브 열기">
+    <span id="topbar-user-chip" style="display:none;align-items:center;gap:7px;font-size:0.72rem;color:var(--muted);background:rgba(255,255,255,0.06);border:1px solid var(--border2);border-radius:20px;padding:3px 10px 3px 4px;letter-spacing:.02em;cursor:pointer" onclick="openLogoutConfirm()" title="로그아웃">
       <img id="topbar-user-avatar" src="" alt="" width="22" height="22" style="border-radius:50%;object-fit:cover;display:none;flex-shrink:0">
       <span id="topbar-user-avatar-fallback" style="width:22px;height:22px;border-radius:50%;background:var(--blue);color:#fff;font-size:0.65rem;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0">?</span>
       <span id="topbar-user-id" style="color:var(--text2);font-weight:600"></span>
@@ -1027,9 +1027,8 @@
     <div class="settings-section">
       <div class="settings-label">🎨 테마</div>
       <div style="display:flex;gap:8px;margin-top:4px">
-        <button id="theme-btn-dark"   onclick="applyTheme('dark')"   class="theme-opt-btn">🌙 다크</button>
-        <button id="theme-btn-light"  onclick="applyTheme('light')"  class="theme-opt-btn">🌞 라이트</button>
-        <button id="theme-btn-system" onclick="applyTheme('system')" class="theme-opt-btn">🖥️ 시스템</button>
+        <button id="theme-btn-dark"   onclick="applyTheme('dark')"   class="theme-opt-btn">🌙 달</button>
+        <button id="theme-btn-light"  onclick="applyTheme('light')"  class="theme-opt-btn">☀️ 해</button>
       </div>
     </div>
 
@@ -1110,6 +1109,25 @@
 
   </div><!-- /.modal-inner -->
 </div><!-- /#auth-modal -->
+
+<!-- ── 로그아웃 확인 모달 ── -->
+<div id="logout-modal" style="display:none;position:fixed;inset:0;z-index:9000;background:rgba(0,0,0,0.65);backdrop-filter:blur(6px);align-items:center;justify-content:center">
+  <div style="border:1px solid var(--border2);border-radius:20px;padding:32px 30px;width:100%;max-width:320px;position:relative;box-shadow:0 24px 60px rgba(0,0,0,0.5);text-align:center;background:var(--card)">
+    <button onclick="closeLogoutConfirm()" style="position:absolute;top:14px;right:16px;background:none;border:none;color:var(--muted);font-size:1.3rem;cursor:pointer;line-height:1">✕</button>
+    <div id="logout-modal-avatar-wrap" style="margin:6px auto 14px;width:52px;height:52px">
+      <img id="logout-modal-avatar" src="" alt="" width="52" height="52" style="border-radius:50%;object-fit:cover;display:none">
+      <div id="logout-modal-avatar-fallback" style="width:52px;height:52px;border-radius:50%;background:var(--blue);color:#fff;font-size:1.2rem;font-weight:700;display:flex;align-items:center;justify-content:center">?</div>
+    </div>
+    <div id="logout-modal-id" style="font-size:0.92rem;font-weight:700;color:var(--text);margin-bottom:4px"></div>
+    <div style="font-size:0.78rem;color:var(--muted);margin-bottom:24px">로그아웃 하시겠습니까?</div>
+    <div style="display:flex;gap:8px">
+      <button onclick="closeLogoutConfirm()"
+        style="flex:1;height:42px;border-radius:10px;border:1px solid var(--border2);background:var(--card2);color:var(--text2);font-size:0.82rem;font-weight:600;cursor:pointer">취소</button>
+      <button onclick="authLogout()"
+        style="flex:1;height:42px;border-radius:10px;border:1px solid rgba(255,75,110,0.35);background:rgba(255,75,110,0.10);color:var(--red);font-size:0.82rem;font-weight:700;cursor:pointer">로그아웃</button>
+    </div>
+  </div>
+</div>
 
 <!-- 검색 기록 -->
 <div class="history-wrap" id="history-wrap" style="display:none"></div>
@@ -1226,9 +1244,9 @@ function applyPrefs() {
   if (p.period) { const el = document.getElementById('period-select'); if (el) el.value = p.period; }
   if (p.theme)  applyTheme(p.theme);
 }
-// 테마 순서: dark → light → system
-const THEME_CYCLE = ['dark', 'light', 'system'];
-const THEME_ICONS = { dark: '🌙', light: '🌞', system: '🖥️' };
+// 테마 순서: dark → light
+const THEME_CYCLE = ['dark', 'light'];
+const THEME_ICONS = { dark: '🌙', light: '☀️' };
 
 // 항상 현재 테마 기준으로 범례 텍스트 색상 반환
 function getLegendColor() {
@@ -1243,7 +1261,7 @@ function applyTheme(theme) {
   localStorage.setItem(THEME_KEY, theme);
   savePrefs({ theme });
   // 설정 모달 버튼 활성 상태 반영
-  ['dark','light','system'].forEach(t => {
+  ['dark','light'].forEach(t => {
     const b = document.getElementById(`theme-btn-${t}`);
     if (b) b.classList.toggle('active', t === theme);
   });
@@ -1266,11 +1284,6 @@ function toggleTheme() {
   applyTheme(THEME_CYCLE[(idx + 1) % THEME_CYCLE.length]);
 }
 
-// 시스템 테마 변경 감지 (system 모드일 때 자동 반영)
-window.matchMedia('(prefers-color-scheme: light)').addEventListener('change', () => {
-  if ((localStorage.getItem(THEME_KEY) || 'dark') === 'system') applyTheme('system');
-});
-
 // 저장된 테마 복원
 applyTheme(localStorage.getItem(THEME_KEY) || 'dark');
 
@@ -1282,7 +1295,7 @@ applyTheme(localStorage.getItem(THEME_KEY) || 'dark');
 function openSettings() {
   // 테마 버튼 활성 상태
   const cur = localStorage.getItem(THEME_KEY) || 'dark';
-  ['dark','light','system'].forEach(t => {
+  ['dark','light'].forEach(t => {
     const b = document.getElementById(`theme-btn-${t}`);
     if (b) b.classList.toggle('active', t === cur);
   });
@@ -1746,20 +1759,12 @@ function setTicker(t, el) {
 const DEFAULT_FAVS = {
   us:  [
     { ticker:'AAPL',    name:'Apple',           market:'NASDAQ' },
-    { ticker:'MSFT',    name:'Microsoft',        market:'NASDAQ' },
-    { ticker:'NVDA',    name:'NVIDIA',           market:'NASDAQ' },
     { ticker:'TSLA',    name:'Tesla',            market:'NASDAQ' },
-    { ticker:'META',    name:'Meta',             market:'NASDAQ' },
-    { ticker:'GOOGL',   name:'Alphabet',         market:'NASDAQ' },
-    { ticker:'SPY',     name:'S&P 500 ETF',      market:'NYSE'   },
-    { ticker:'QQQ',     name:'NASDAQ 100 ETF',   market:'NASDAQ' },
+    { ticker:'NVDA',    name:'NVIDIA',           market:'NASDAQ' },
   ],
   kr: [
     { ticker:'005930.KS', name:'삼성전자',      market:'KOSPI'  },
     { ticker:'000660.KS', name:'SK하이닉스',    market:'KOSPI'  },
-    { ticker:'035420.KS', name:'NAVER',         market:'KOSPI'  },
-    { ticker:'086520.KQ', name:'에코프로',      market:'KOSDAQ' },
-    { ticker:'373220.KS', name:'LG에너지솔루션',market:'KOSPI'  },
     { ticker:'005380.KS', name:'현대차',        market:'KOSPI'  },
   ]
 };
@@ -3715,8 +3720,8 @@ function renderDashboard({ ticker, bars, ind, tech, fund, decision: d, price, is
             wacc: 'WACC vs ROE 가치창출 분석\nROE > WACC×1.2 → 가치창출(매수)\nROE < WACC×0.8 → 가치훼손(매도)\n그 외 → 중립',
             ipp:  'IPP 변곡점 예측\nRSI·OBV·BB수축·ATR수축·거래량 이상 규칙 기반\nIPP≥+20 → 상승전환 임박(매수)\nIPP≤-20 → 하락전환 임박(매도)',
           };
-          const bg = v.score>0?'rgba(52,211,153,0.12)':v.score<0?'rgba(255,75,110,0.12)':'var(--border)';
-          const tc = v.score>0?'var(--green)':v.score<0?'var(--red)':'var(--muted)';
+          const bg = v.score>0?'rgba(255,75,110,0.12)':v.score<0?'rgba(59,130,246,0.12)':'var(--border)';
+          const tc = v.score>0?'var(--up)':v.score<0?'var(--down)':'var(--muted)';
           return `<div style="flex:1;min-width:120px;background:${bg};border-radius:10px;padding:8px 12px;text-align:center">
             <div style="font-size:0.7rem;color:var(--muted);margin-bottom:4px">${nameMap[key]||key} <span style="font-size:0.62rem;opacity:0.7">w=${v.weight}</span>${tip(tipMap[key]||'')}</div>
             <div style="font-size:0.88rem;font-weight:700;color:${tc}">${v.label}</div>
@@ -5755,9 +5760,36 @@ async function authLogout() {
   await _sb.auth.signOut();
   localStorage.removeItem('signnith_session');
   closeSettings();
+  closeLogoutConfirm();
   updateTopbarUser();
   renderFavs();
   renderHistory();
+}
+
+function openLogoutConfirm() {
+  const idLabel  = document.getElementById('logout-modal-id');
+  const avatar   = document.getElementById('logout-modal-avatar');
+  const avatarFb = document.getElementById('logout-modal-avatar-fallback');
+  const uid = currentUser();
+  if (idLabel) idLabel.textContent = uid ? uid.split('@')[0] : '';
+  const avatarUrl = _sbSession?.user?.user_metadata?.avatar_url
+                 || _sbSession?.user?.user_metadata?.picture
+                 || '';
+  if (avatar && avatarFb) {
+    if (avatarUrl) {
+      avatar.src = avatarUrl;
+      avatar.style.display = 'block';
+      avatarFb.style.display = 'none';
+    } else {
+      avatar.style.display = 'none';
+      avatarFb.style.display = 'flex';
+      avatarFb.textContent = uid ? uid[0].toUpperCase() : '?';
+    }
+  }
+  document.getElementById('logout-modal').style.display = 'flex';
+}
+function closeLogoutConfirm() {
+  document.getElementById('logout-modal').style.display = 'none';
 }
 
 function updateTopbarUser() {
@@ -5802,6 +5834,9 @@ updateTopbarUser();
 // 모달 바깥 클릭 시 닫기
 document.getElementById('auth-modal').addEventListener('click', function(e) {
   if (e.target === this) closeAuthModal();
+});
+document.getElementById('logout-modal').addEventListener('click', function(e) {
+  if (e.target === this) closeLogoutConfirm();
 });
 
 // ── 보관함 리포트 자동저장 ──

@@ -2252,9 +2252,10 @@ function computeWACC(fundInfo, isKr) {
   // ── 타인자본비용 ──
   const E  = fundInfo.marketCap  || 0;
   const D  = fundInfo.totalDebt  || 0;
-  const V  = E + D || 1;
-  const deRatio = D / V;
-  const eRatio  = E / V;
+  const V  = E + D;
+  // 시총·부채 데이터 없으면 순자기자본(100%) 가정
+  const eRatio  = V > 0 ? E / V : 1;
+  const deRatio = V > 0 ? D / V : 0;
 
   // 부채비용: 이자보상비율로 추정 or 기본값
   const ebitda   = fundInfo.ebitda || 0;
@@ -3085,8 +3086,6 @@ async function runAnalysis() {
   let ticker;
   try {
     ticker = await resolveTicker(raw);
-    // 입력란에 실제 티커로 업데이트
-    document.getElementById('ticker-input').value = ticker;
   } catch(e) {
     dash.innerHTML = `<div class="center-msg"><div class="icon">⚠️</div>
       <div style="color:var(--red);font-weight:600;margin-bottom:8px;">종목 검색 실패</div>
@@ -3097,8 +3096,6 @@ async function runAnalysis() {
 
   const tickerDisplayName = resolveTickerName(ticker) || '';
   const tickerLabel = tickerDisplayName ? `${tickerDisplayName} · ${ticker}` : ticker;
-  // 검색창에도 종목명 표시
-  document.getElementById('ticker-input').value = tickerDisplayName ? `${tickerDisplayName} (${ticker})` : ticker;
   dash.innerHTML = `<div class="center-msg"><div class="spinner"></div><div>${tickerLabel} 데이터 수집 중…</div></div>`;
 
   try {
@@ -3150,9 +3147,9 @@ async function runAnalysis() {
     const resolvedName = fundInfo.companyName || quote?.longName || quote?.shortName || resolveTickerName(ticker) || '';
     saveHistory(ticker, resolvedName || ticker);
 
-    // 검색창을 최종 종목명으로 업데이트
+    // 검색 완료 후 입력창 초기화
     const inputEl = document.getElementById('ticker-input');
-    if (inputEl) inputEl.value = resolvedName ? `${resolvedName} (${ticker})` : ticker;
+    if (inputEl) inputEl.value = '';
 
     // 마지막 분석 상태 저장 (새로고침 복원용)
     try {
@@ -3811,17 +3808,17 @@ function renderDashboard({ ticker, bars, ind, tech, fund, decision: d, price, is
 
   <!-- ── Row 4: 차트 (최하단) ── -->
   <div class="card" style="padding:14px 16px;margin-top:0">
-    <div class="card-header"><div class="card-header-row"><span class="dot" style="background:var(--green)"></span>종가 · Bollinger Band</div><span class="card-sub">변동성 및 가격의 상대적 위치 분석</span></div>
+    <div class="card-header"><div class="card-header-row"><span class="dot" style="background:var(--green)"></span>종가 · Bollinger Band<span id="bbEntrySummary" style="margin-left:8px;display:inline-flex;gap:4px;align-items:center"></span></div><span class="card-sub">변동성 및 가격의 상대적 위치 분석</span></div>
     <div class="chart-scroll"><div class="chart-container"><canvas id="priceChart"></canvas></div></div>
     <div id="bbEntryPanel" style="margin-top:10px"></div>
     <div class="rsi-macd-grid">
       <div>
-        <div class="card-header"><div class="card-header-row"><span class="dot" style="background:var(--purple)"></span>RSI (14)</div><span class="card-sub">가격의 모멘텀 및 과매수/과매도 측정</span></div>
+        <div class="card-header"><div class="card-header-row"><span class="dot" style="background:var(--purple)"></span>RSI (14)<span id="rsiEntrySummary" style="margin-left:8px;display:inline-flex;gap:4px;align-items:center"></span></div><span class="card-sub">가격의 모멘텀 및 과매수/과매도 측정</span></div>
         <div class="chart-scroll"><div class="chart-container-sm"><canvas id="rsiChart"></canvas></div></div>
         <div id="rsiEntryPanel" style="margin-top:8px"></div>
       </div>
       <div>
-        <div class="card-header"><div class="card-header-row"><span class="dot" style="background:var(--blue)"></span>MACD</div><span class="card-sub">단기/장기 이동평균선 사이의 수렴과 확산</span></div>
+        <div class="card-header"><div class="card-header-row"><span class="dot" style="background:var(--blue)"></span>MACD<span id="macdEntrySummary" style="margin-left:8px;display:inline-flex;gap:4px;align-items:center"></span></div><span class="card-sub">단기/장기 이동평균선 사이의 수렴과 확산</span></div>
         <div class="chart-scroll"><div class="chart-container-sm"><canvas id="macdChart"></canvas></div></div>
         <div id="macdEntryPanel" style="margin-top:8px"></div>
       </div>
@@ -4031,6 +4028,23 @@ function renderDashboard({ ticker, bars, ind, tech, fund, decision: d, price, is
   renderEntryPanel('bbEntryPanel',   bbEntries.slice(-10).reverse(), 2);
   renderEntryPanel('rsiEntryPanel',  rsiEntries.slice(-10).reverse(), 1, 5);
   renderEntryPanel('macdEntryPanel', macdEntries.slice(-10).reverse(), 1, 5);
+
+  // ── 타이틀 우측 최근 3개 액션 배지 ──
+  function renderEntrySummary(elId, entries) {
+    const el = document.getElementById(elId);
+    if (!el) return;
+    const recent = entries.slice(-3).reverse();
+    if (!recent.length) { el.innerHTML = ''; return; }
+    el.innerHTML = recent.map(html => {
+      const isBuy = html.includes('▲ 매수 진입');
+      return `<span style="font-size:0.62rem;font-weight:700;padding:1px 6px;border-radius:4px;white-space:nowrap;
+        background:${isBuy?'rgba(255,75,110,0.15)':'rgba(59,130,246,0.15)'};
+        color:${isBuy?'var(--up)':'var(--down)'}">${isBuy?'▲매수':'▼매도'}</span>`;
+    }).join('');
+  }
+  renderEntrySummary('bbEntrySummary',   bbEntries);
+  renderEntrySummary('rsiEntrySummary',  rsiEntries);
+  renderEntrySummary('macdEntrySummary', macdEntries);
 
   // ── Knowledge Graph 렌더링 ──
   renderKnowledgeGraph({ ticker, d, I, M, cs, ew, ichi, smc, quant, price, currency, isKr, changeAmt, companyName });

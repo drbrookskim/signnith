@@ -1088,8 +1088,16 @@
 </div>
 
 <footer class="footer">
-  <p>⚠️ 이 도구는 참고 목적으로만 제공됩니다. 투자 결정에 대한 책임은 사용자 본인에게 있습니다.</p>
-  <p style="margin-top:6px">
+  <p>⚠️ 본 서비스는 <b>투자자문·유사투자자문 서비스가 아니며</b>, 무료로 제공되는 참고·교육용 분석 도구입니다.
+     모든 신호·점수·목표가·신뢰도는 알고리즘이 산출한 참고 정보이며,
+     <b>자체 백테스트 검증 결과 시장 대비 초과수익(알파)은 확인되지 않았습니다.</b>
+     투자 결정과 그 손익에 대한 책임은 전적으로 사용자 본인에게 있습니다.</p>
+  <p style="margin-top:10px">
+    <a href="#" onclick="openPolicyModal('privacy');return false">개인정보 처리방침</a>
+    &nbsp;·&nbsp;
+    <a href="#" onclick="openPolicyModal('disclaimer');return false">면책 고지 · 이용 안내</a>
+  </p>
+  <p style="margin-top:8px">
     © 2026 Provided by Dr. Brooks.
   </p>
 </footer>
@@ -6142,6 +6150,68 @@ if ('serviceWorker' in navigator) {
     navigator.serviceWorker.register('/signnith/service-worker.js')
       .catch(() => {});
   });
+}
+</script>
+
+<!-- ── 정책 모달 (개인정보 처리방침 · 면책 고지) ── -->
+<div id="policy-modal" style="display:none;position:fixed;inset:0;z-index:9500;background:rgba(0,0,0,0.65);backdrop-filter:blur(6px);align-items:center;justify-content:center;padding:20px" onclick="if(event.target===this)closePolicyModal()">
+  <div style="border:1px solid var(--border2);border-radius:18px;width:100%;max-width:620px;max-height:82vh;overflow-y:auto;background:var(--card);box-shadow:0 24px 60px rgba(0,0,0,0.5);position:relative">
+    <button onclick="closePolicyModal()" style="position:absolute;top:14px;right:16px;background:none;border:none;color:var(--muted);font-size:1.2rem;cursor:pointer;line-height:1">✕</button>
+    <div style="padding:28px 30px">
+      <div id="policy-modal-title" style="font-size:1.15rem;font-weight:700;color:var(--text);margin-bottom:16px"></div>
+      <div id="policy-modal-body" style="font-size:0.82rem;color:var(--text2);line-height:1.7"></div>
+    </div>
+  </div>
+</div>
+<script>
+const POLICY_CONTENT = {
+  privacy: {
+    title: '개인정보 처리방침',
+    body: `<p style="margin-bottom:12px">SIGNNITH(이하 "서비스")는 이용자의 개인정보를 중요하게 생각하며, 「개인정보 보호법」을 준수합니다. 본 서비스는 무료로 제공되는 참고·교육용 도구입니다.</p>
+<p style="font-weight:700;color:var(--text);margin:14px 0 4px">1. 수집하는 개인정보 항목</p>
+<p>· Google 계정 로그인 시: 이메일 주소, 프로필 이름, 프로필 이미지(아바타)<br>
+· 서비스 이용 시: 즐겨찾기 종목, 검색 기록<br>
+· 자동 수집: 접속 로그·이용 통계(Google Analytics를 통한 익명 사용 데이터)</p>
+<p style="font-weight:700;color:var(--text);margin:14px 0 4px">2. 수집·이용 목적</p>
+<p>· 로그인 인증 및 본인 식별<br>
+· 즐겨찾기·검색 기록의 기기 간 동기화<br>
+· 서비스 품질 개선 및 이용 통계 분석</p>
+<p style="font-weight:700;color:var(--text);margin:14px 0 4px">3. 보유 및 이용 기간</p>
+<p>· 회원 정보: 로그아웃 및 계정 데이터 삭제 요청 시까지 보관 후 파기<br>
+· 이용 통계: Google Analytics 정책에 따름</p>
+<p style="font-weight:700;color:var(--text);margin:14px 0 4px">4. 제3자 제공 및 처리 위탁</p>
+<p>본 서비스는 다음 외부 서비스를 통해 개인정보를 처리하며, 데이터가 해외 서버에 저장될 수 있습니다.<br>
+· <b>Supabase</b> — 로그인 인증 및 데이터(즐겨찾기·기록) 저장<br>
+· <b>Google</b> — OAuth 로그인 인증, Google Analytics 통계</p>
+<p style="font-weight:700;color:var(--text);margin:14px 0 4px">5. 이용자의 권리</p>
+<p>이용자는 언제든 본인 개인정보의 열람·정정·삭제를 요청할 수 있으며, 로그아웃 및 Google 계정 연결 해제를 통해 동의를 철회할 수 있습니다.</p>
+<p style="font-weight:700;color:var(--text);margin:14px 0 4px">6. 문의</p>
+<p>개인정보 관련 문의는 서비스 운영자에게 요청할 수 있습니다.</p>
+<p style="margin-top:14px;color:var(--muted);font-size:0.75rem">시행일: 2026-06-20</p>`
+  },
+  disclaimer: {
+    title: '면책 고지 · 이용 안내',
+    body: `<p style="margin-bottom:12px"><b>본 서비스는 자본시장법상 투자자문업 또는 유사투자자문업 서비스가 아닙니다.</b> 무료로 제공되는 참고·교육 목적의 기술적 분석 도구이며, 특정 종목의 매수·매도를 권유하지 않습니다.</p>
+<p style="font-weight:700;color:var(--text);margin:14px 0 4px">1. 분석 결과의 성격</p>
+<p>화면에 표시되는 모든 매수/매도/관망 신호, 점수, 목표가, 손절가, 신뢰도(confidence) 수치는 공개된 알고리즘이 과거 가격·재무 데이터를 바탕으로 산출한 <b>참고 정보</b>입니다. 미래 수익을 보장하거나 예측하지 않습니다.</p>
+<p style="font-weight:700;color:var(--text);margin:14px 0 4px">2. 검증 결과 고지</p>
+<p>자체 워크포워드 백테스트(과거 시점 데이터만으로 결정→이후 수익 측정) 결과, <b>본 분석 신호는 시장 평균(단순 보유) 대비 통계적으로 유의한 초과수익(알파)이 확인되지 않았습니다.</b> 화면의 신뢰도(%) 수치는 알고리즘 내부 점수일 뿐, 적중 확률이 아닙니다.</p>
+<p style="font-weight:700;color:var(--text);margin:14px 0 4px">3. 데이터 한계</p>
+<p>시세·재무 데이터는 Yahoo Finance 등 무료 외부 소스를 통해 제공되며, 지연·누락·오류가 있을 수 있습니다. 데이터 정확성을 보장하지 않습니다.</p>
+<p style="font-weight:700;color:var(--text);margin:14px 0 4px">4. 책임의 한계</p>
+<p>본 서비스가 제공하는 정보를 근거로 한 투자 판단과 그 결과(손익)에 대한 책임은 <b>전적으로 이용자 본인</b>에게 있으며, 운영자는 어떠한 법적 책임도 부담하지 않습니다. 투자 결정 전 반드시 전문가와 상담하시기 바랍니다.</p>
+<p style="margin-top:14px;color:var(--muted);font-size:0.75rem">시행일: 2026-06-20</p>`
+  }
+};
+function openPolicyModal(kind) {
+  const c = POLICY_CONTENT[kind];
+  if (!c) return;
+  document.getElementById('policy-modal-title').textContent = c.title;
+  document.getElementById('policy-modal-body').innerHTML = c.body;
+  document.getElementById('policy-modal').style.display = 'flex';
+}
+function closePolicyModal() {
+  document.getElementById('policy-modal').style.display = 'none';
 }
 </script>
 </body>

@@ -15,6 +15,12 @@
 <link rel="icon" type="image/png" sizes="32x32" href="assets/icons/icon-32.png"/>
 <link rel="icon" type="image/png" sizes="16x16" href="assets/icons/icon-16.png"/>
 <link rel="apple-touch-icon" sizes="180x180" href="assets/icons/icon-180.png"/>
+<link rel="manifest" href="manifest.webmanifest"/>
+<meta name="theme-color" content="#080c18"/>
+<meta name="mobile-web-app-capable" content="yes"/>
+<meta name="apple-mobile-web-app-capable" content="yes"/>
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
+<meta name="apple-mobile-web-app-title" content="SIGNNITH"/>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&display=swap" rel="stylesheet">
@@ -6129,6 +6135,14 @@ function openReport() {
   // 최초 실행
   requestAnimationFrame(draw);
 })();
+</script>
+<script>
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('/signnith/service-worker.js')
+      .catch(() => {});
+  });
+}
 </script>
 </body>
 </html>

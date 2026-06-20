@@ -1217,13 +1217,13 @@ function applyTheme(theme) {
 }
 
 function toggleTheme() {
-  const cur = localStorage.getItem(THEME_KEY) || 'dark';
+  const cur = localStorage.getItem(THEME_KEY) || 'light';
   const idx = THEME_CYCLE.indexOf(cur);
   applyTheme(THEME_CYCLE[(idx + 1) % THEME_CYCLE.length]);
 }
 
 // 저장된 테마 복원
-applyTheme(localStorage.getItem(THEME_KEY) || 'dark');
+applyTheme(localStorage.getItem(THEME_KEY) || 'light');
 
 // ══════════════════════════════════════════════════════
 //  차트 패턴 분석 v2 (chart_patterns_analysis_v2.md 기반)
@@ -5593,7 +5593,7 @@ document.addEventListener('click', e => {
 });
 
 // 페이지 로드 시 초기화
-applyTheme(localStorage.getItem(THEME_KEY) || 'dark');
+applyTheme(localStorage.getItem(THEME_KEY) || 'light');
 refreshFavsFromDB(); // DB 기반 즐겨찾기 (renderFavs 포함)
 renderHistory();
 

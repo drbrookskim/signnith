@@ -4089,9 +4089,19 @@ function renderDashboard({ ticker, bars, ind, tech, fund, decision: d, price, is
   const TICK_SIZE = 11;
   const LEG_SIZE  = 10;
   const _chartDark  = !document.documentElement.classList.contains('light');
-  const _tickColor  = _chartDark ? '#cbd5e1' : '#475569';
-  const _gridColor  = _chartDark ? '#0f1825' : '#e2e8f0';
+  const _tickColor  = _chartDark ? '#cbd5e1' : '#374151';
+  const _gridColor  = _chartDark ? '#0f1825' : '#d1d5db';
   const _legColor   = getLegendColor();
+  // 테마별 데이터셋 색상
+  const _closeLine  = _chartDark ? '#e2e8f0' : '#1e293b';
+  const _bbBand     = _chartDark ? 'rgba(148,163,184,.3)'  : 'rgba(71,85,105,.6)';
+  const _bbFill     = _chartDark ? 'rgba(148,163,184,.05)' : 'rgba(71,85,105,.07)';
+  const _rsiRef70   = _chartDark ? 'rgba(255,75,110,.4)'   : 'rgba(220,38,38,.7)';
+  const _rsiRef30   = _chartDark ? 'rgba(59,130,246,.4)'   : 'rgba(37,99,235,.7)';
+  const _macdLine   = _chartDark ? '#60a5fa' : '#2563eb';
+  const _macdSig    = _chartDark ? '#f97316' : '#c2410c';
+  const _histPos    = _chartDark ? 'rgba(239,68,68,.5)'    : 'rgba(185,28,28,.75)';
+  const _histNeg    = _chartDark ? 'rgba(59,130,246,.5)'   : 'rgba(29,78,216,.75)';
   // Chart.js v4 전역 기본 색 — generateLabels 텍스트에 실제 적용됨
   Chart.defaults.color = _legColor;
   const _tooltipBg  = _chartDark ? '#1e2a40' : '#ffffff';
@@ -4193,11 +4203,11 @@ function renderDashboard({ ticker, bars, ind, tech, fund, decision: d, price, is
     type:'line',
     plugins: [volProfilePlugin],
     data:{ labels, datasets:[
-      {data:closes,   borderColor:'#e2e8f0', borderWidth:1.5, pointRadius:0, tension:.3},
+      {data:closes,   borderColor:_closeLine, borderWidth:1.5, pointRadius:0, tension:.3},
       {data:ind.sma20,borderColor:'#f59e0b', borderWidth:1,   pointRadius:0, tension:.3},
-      {data:ind.bbU,  borderColor:'rgba(148,163,184,.3)', borderDash:[4,4], borderWidth:1, pointRadius:0},
-      {data:ind.bbL,  borderColor:'rgba(148,163,184,.3)', borderDash:[4,4], borderWidth:1, pointRadius:0,
-       fill:{target:2, above:'rgba(148,163,184,.05)'}},
+      {data:ind.bbU,  borderColor:_bbBand, borderDash:[4,4], borderWidth:1, pointRadius:0},
+      {data:ind.bbL,  borderColor:_bbBand, borderDash:[4,4], borderWidth:1, pointRadius:0,
+       fill:{target:2, above:_bbFill}},
       {data:closes.map(()=>d.targetPrice), borderColor:'rgba(0,212,170,.5)', borderDash:[6,3], borderWidth:1, pointRadius:0},
       {data:closes.map(()=>d.stopLoss),    borderColor:'rgba(255,75,110,.5)', borderDash:[6,3], borderWidth:1, pointRadius:0},
       // 보조 신호
@@ -4227,8 +4237,8 @@ function renderDashboard({ ticker, bars, ind, tech, fund, decision: d, price, is
     type:'line',
     data:{ labels, datasets:[
       {data:ind.rsi,             borderColor:'#a78bfa',borderWidth:1.5,pointRadius:0,tension:.3},
-      {data:ind.rsi.map(()=>70), borderColor:'rgba(255,75,110,.4)',borderDash:[4,3],borderWidth:1,pointRadius:0},
-      {data:ind.rsi.map(()=>30), borderColor:'rgba(59,130,246,.4)', borderDash:[4,3],borderWidth:1,pointRadius:0},
+      {data:ind.rsi.map(()=>70), borderColor:_rsiRef70,borderDash:[4,3],borderWidth:1.2,pointRadius:0},
+      {data:ind.rsi.map(()=>30), borderColor:_rsiRef30,borderDash:[4,3],borderWidth:1.2,pointRadius:0},
       // 보조 신호
       sigDS(rsiOB,      'rgba(239,68,68,0.7)', 'RSI 과매수 진입(≥70) — 고점 경계'),
       sigDS(rsiOS,      'rgba(59,130,246,0.7)',  'RSI 과매도 진입(≤30) — 저점 반등 후보'),
@@ -4256,9 +4266,9 @@ function renderDashboard({ ticker, bars, ind, tech, fund, decision: d, price, is
   macdChart = new Chart(document.getElementById('macdChart'), {
     type:'bar',
     data:{ labels, datasets:[
-      {type:'bar',  data:ind.hist, backgroundColor:ind.hist.map(v=>v!=null?(v>=0?'rgba(239,68,68,.5)':'rgba(59,130,246,.5)'):null), borderRadius:1},
-      {type:'line', data:ind.macdLine,borderColor:'#60a5fa',borderWidth:1.2,pointRadius:0},
-      {type:'line', data:ind.sigLine, borderColor:'#f97316',borderWidth:1.2,pointRadius:0},
+      {type:'bar',  data:ind.hist, backgroundColor:ind.hist.map(v=>v!=null?(v>=0?_histPos:_histNeg):null), borderRadius:1},
+      {type:'line', data:ind.macdLine,borderColor:_macdLine,borderWidth:1.5,pointRadius:0},
+      {type:'line', data:ind.sigLine, borderColor:_macdSig, borderWidth:1.5,pointRadius:0},
       // 보조 신호
       sigDS(histCrossUp,'rgba(96,165,250,0.8)', '히스토그램 양전환 — 상승 모멘텀 발생'),
       sigDS(histCrossDn,'rgba(249,115,22,0.8)', '히스토그램 음전환 — 하락 모멘텀 발생'),

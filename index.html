@@ -4093,9 +4093,10 @@ function renderDashboard({ ticker, bars, ind, tech, fund, decision: d, price, is
   const _gridColor  = _chartDark ? '#0f1825' : '#d1d5db';
   const _legColor   = getLegendColor();
   // 테마별 데이터셋 색상
-  const _closeLine  = _chartDark ? '#e2e8f0' : '#1e293b';
-  const _bbBand     = _chartDark ? 'rgba(148,163,184,.3)'  : 'rgba(71,85,105,.6)';
-  const _bbFill     = _chartDark ? 'rgba(148,163,184,.05)' : 'rgba(71,85,105,.07)';
+  const _closeLine  = _chartDark ? '#f1f5f9' : '#1e293b';
+  const _closeWidth = _chartDark ? 2 : 1.5;
+  const _bbBand     = _chartDark ? 'rgba(148,163,184,.45)' : 'rgba(71,85,105,.6)';
+  const _bbFill     = _chartDark ? 'rgba(148,163,184,.07)' : 'rgba(71,85,105,.07)';
   const _rsiRef70   = _chartDark ? 'rgba(255,75,110,.4)'   : 'rgba(220,38,38,.7)';
   const _rsiRef30   = _chartDark ? 'rgba(59,130,246,.4)'   : 'rgba(37,99,235,.7)';
   const _macdLine   = _chartDark ? '#60a5fa' : '#2563eb';
@@ -4203,7 +4204,7 @@ function renderDashboard({ ticker, bars, ind, tech, fund, decision: d, price, is
     type:'line',
     plugins: [volProfilePlugin],
     data:{ labels, datasets:[
-      {data:closes,   borderColor:_closeLine, borderWidth:1.5, pointRadius:0, tension:.3},
+      {data:closes,   borderColor:_closeLine, borderWidth:_closeWidth, pointRadius:0, tension:.3},
       {data:ind.sma20,borderColor:'#f59e0b', borderWidth:1,   pointRadius:0, tension:.3},
       {data:ind.bbU,  borderColor:_bbBand, borderDash:[4,4], borderWidth:1, pointRadius:0},
       {data:ind.bbL,  borderColor:_bbBand, borderDash:[4,4], borderWidth:1, pointRadius:0,

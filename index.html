@@ -1277,7 +1277,7 @@ function computeChartPatternV2(bars, ind) {
     if (prevMa5 && prevMa50) {
       if (prevMa5 <= prevMa50 && ma5 > ma50) {
         detected.push({
-          id:'GOLDEN_CROSS', name:'골든크로스', signal:'BUY', confidence:80,
+          id:'GOLDEN_CROSS', name:'골든크로스', signal:'BUY', confidence:55,
           category:'ma_cross',
           entry:'단기선(MA5) 장기선(MA50) 상향 돌파 확인',
           stop:'장기선(MA50) 하향 이탈 시',
@@ -1285,7 +1285,7 @@ function computeChartPatternV2(bars, ind) {
         });
       } else if (prevMa5 >= prevMa50 && ma5 < ma50) {
         detected.push({
-          id:'DEAD_CROSS', name:'데드크로스', signal:'SELL', confidence:80,
+          id:'DEAD_CROSS', name:'데드크로스', signal:'SELL', confidence:55,
           category:'ma_cross',
           entry:'단기선(MA5) 장기선(MA50) 하향 이탈 확인',
           stop:'장기선(MA50) 상향 돌파 시',
@@ -1298,7 +1298,7 @@ function computeChartPatternV2(bars, ind) {
   // ── 2. MA20 이탈 ──
   if (ma20 && last.close < ma20 * 0.98 && prev.close >= ma20) {
     detected.push({
-      id:'MA20_BREAKDOWN', name:'20일선 이탈', signal:'SELL', confidence:75,
+      id:'MA20_BREAKDOWN', name:'20일선 이탈', signal:'SELL', confidence:53,
       category:'ma_cross',
       entry:'종가 20일선 하향 이탈',
       stop:'20일선 회복 시',
@@ -1312,7 +1312,7 @@ function computeChartPatternV2(bars, ind) {
     const currBody = last.close - last.open;
     if (currBody > prevBody * 1.0 && last.close > prev.open && last.open < prev.close) {
       detected.push({
-        id:'BULLISH_ENGULFING', name:'상승 장악형', signal:'STRONG_BUY', confidence:90,
+        id:'BULLISH_ENGULFING', name:'상승 장악형', signal:'STRONG_BUY', confidence:60,
         category:'candle_advanced',
         entry:'전일 음봉 완전 포함 대형 양봉',
         stop:'전일 저점 하향 이탈',
@@ -1324,7 +1324,7 @@ function computeChartPatternV2(bars, ind) {
   // ── 4. Gap Up / Gap Down ──
   if (last.open > prev.high * 1.005) {
     detected.push({
-      id:'GAP_UP', name:'갭 상승', signal:'BUY', confidence:85,
+      id:'GAP_UP', name:'갭 상승', signal:'BUY', confidence:58,
       category:'gap_patterns',
       entry:`갭 상승 (전고: ${prev.high?.toFixed?.(0)} → 시가: ${last.open?.toFixed?.(0)})`,
       stop:'갭 하단 이탈 시',
@@ -1332,7 +1332,7 @@ function computeChartPatternV2(bars, ind) {
     });
   } else if (last.open < prev.low * 0.995) {
     detected.push({
-      id:'GAP_DOWN', name:'갭 하락', signal:'SELL', confidence:80,
+      id:'GAP_DOWN', name:'갭 하락', signal:'SELL', confidence:57,
       category:'gap_patterns',
       entry:`갭 하락 (전저: ${prev.low?.toFixed?.(0)} → 시가: ${last.open?.toFixed?.(0)})`,
       stop:'갭 상단 돌파 시',
@@ -1353,7 +1353,7 @@ function computeChartPatternV2(bars, ind) {
         const neckLow = Math.min(...bars.slice(p1.i, p2.i).map(b=>b.low));
         if (last.close < neckLow * 0.99) {
           detected.push({
-            id:'DOUBLE_TOP', name:'쌍봉 (Double Top)', signal:'STRONG_SELL', confidence:100,
+            id:'DOUBLE_TOP', name:'쌍봉 (Double Top)', signal:'STRONG_SELL', confidence:67,
             category:'reversal_bearish',
             entry:'넥라인 하향 이탈 확인 — 매도',
             stop:`두 번째 고점(${p2.v?.toFixed?.(0)}) 위`,
@@ -1371,7 +1371,7 @@ function computeChartPatternV2(bars, ind) {
         const neckHigh = Math.max(...bars.slice(p1.i, p2.i).map(b=>b.high));
         if (last.close > neckHigh * 1.01) {
           detected.push({
-            id:'DOUBLE_BOTTOM', name:'쌍바닥 (Double Bottom)', signal:'STRONG_BUY', confidence:85,
+            id:'DOUBLE_BOTTOM', name:'쌍바닥 (Double Bottom)', signal:'STRONG_BUY', confidence:66,
             category:'reversal_bullish',
             entry:'넥라인 상향 돌파 확인 — 매수',
             stop:`두 번째 저점(${p2.v?.toFixed?.(0)}) 아래`,
@@ -1388,7 +1388,7 @@ function computeChartPatternV2(bars, ind) {
         const neckLow = Math.min(...bars.slice(s1.i, s2.i).map(b=>b.low));
         if (last.close < neckLow * 0.99) {
           detected.push({
-            id:'HEAD_AND_SHOULDERS', name:'헤드앤숄더', signal:'STRONG_SELL', confidence:90,
+            id:'HEAD_AND_SHOULDERS', name:'헤드앤숄더', signal:'STRONG_SELL', confidence:68,
             category:'reversal_bearish',
             entry:'넥라인 하향 이탈 + 거래량 확인',
             stop:`오른쪽 어깨(${s2.v?.toFixed?.(0)}) 위`,
@@ -1405,7 +1405,7 @@ function computeChartPatternV2(bars, ind) {
         const neckHigh = Math.max(...bars.slice(s1.i, s2.i).map(b=>b.high));
         if (last.close > neckHigh * 1.01) {
           detected.push({
-            id:'INVERSE_HEAD_AND_SHOULDERS', name:'역헤드앤숄더', signal:'STRONG_BUY', confidence:85,
+            id:'INVERSE_HEAD_AND_SHOULDERS', name:'역헤드앤숄더', signal:'STRONG_BUY', confidence:65,
             category:'reversal_bullish',
             entry:'넥라인 상향 돌파 + 거래량 급증',
             stop:`오른쪽 어깨(${s2.v?.toFixed?.(0)}) 아래`,
@@ -1427,7 +1427,7 @@ function computeChartPatternV2(bars, ind) {
       if ((maxH - minH)/maxH < 0.03 && lastL > firstL * 1.02) {
         if (last.close > maxH * 1.005) {
           detected.push({
-            id:'ASCENDING_TRIANGLE', name:'상승 삼각형', signal:'STRONG_BUY', confidence:100,
+            id:'ASCENDING_TRIANGLE', name:'상승 삼각형', signal:'STRONG_BUY', confidence:66,
             category:'continuation',
             entry:'수평 저항선 상향 돌파 + 거래량 확인',
             stop:'삼각형 내 재진입',
@@ -1444,7 +1444,7 @@ function computeChartPatternV2(bars, ind) {
       if ((maxL - minL)/maxL < 0.03 && lastH < firstH * 0.98) {
         if (last.close < minL * 0.995) {
           detected.push({
-            id:'DESCENDING_TRIANGLE', name:'하락 삼각형', signal:'SELL', confidence:80,
+            id:'DESCENDING_TRIANGLE', name:'하락 삼각형', signal:'SELL', confidence:64,
             category:'continuation',
             entry:'수평 지지선 하향 이탈',
             stop:'삼각형 내 재진입',
@@ -1478,7 +1478,7 @@ function computeChartPatternV2(bars, ind) {
       const consolidation = (flagHigh - flagLow) / flagHigh;
       if (poleRise > 0.07 && consolidation < 0.05 && last.close > flagHigh * 1.005) {
         detected.push({
-          id:'BULLISH_FLAG', name:'상승 깃발', signal:'STRONG_BUY', confidence:100,
+          id:'BULLISH_FLAG', name:'상승 깃발', signal:'STRONG_BUY', confidence:64,
           category:'reversal_bullish',
           entry:'깃발 상단 돌파 + 거래량 증가',
           stop:'깃발 하단 이탈',
@@ -1490,7 +1490,7 @@ function computeChartPatternV2(bars, ind) {
       const poleDrop = (flagpole[0].close - flagpole[flagpole.length-1].close) / flagpole[0].close;
       if (poleDrop > 0.07 && consolidation < 0.05 && last.close < flagLow * 0.995) {
         detected.push({
-          id:'BEARISH_FLAG', name:'하락 깃발', signal:'SELL', confidence:80,
+          id:'BEARISH_FLAG', name:'하락 깃발', signal:'SELL', confidence:62,
           category:'reversal_bearish',
           entry:'깃발 하단 이탈',
           stop:'깃발 상단 돌파',
@@ -1510,7 +1510,7 @@ function computeChartPatternV2(bars, ind) {
         // 저점이 고점보다 가파르게 상승 → 수렴 쐐기
         if (last.close < seg[seg.length-1].low * 0.995) {
           detected.push({
-            id:'RISING_WEDGE', name:'상승 쐐기형', signal:'SELL', confidence:75,
+            id:'RISING_WEDGE', name:'상승 쐐기형', signal:'SELL', confidence:60,
             category:'reversal_bearish',
             entry:'하단 추세선 이탈',
             stop:'쐐기 상단 돌파',
@@ -1580,11 +1580,11 @@ function renderChartPatternV2(patterns) {
       <div style="display:flex;gap:12px;margin-bottom:8px">
         <div style="flex:1;background:rgba(34,139,34,0.08);border-radius:8px;padding:8px 10px">
           <div style="font-size:0.65rem;font-weight:700;color:#228B22;margin-bottom:4px">▲ 매수 신호 (${bullish.length})</div>
-          ${bullish.map(p=>`<div style="font-size:0.65rem;color:var(--muted2);line-height:1.5">· ${p.name} (${p.confidence}%)</div>`).join('')}
+          ${bullish.map(p=>`<div style="font-size:0.65rem;color:var(--muted2);line-height:1.5">· ${p.name} (~${p.confidence}%)</div>`).join('')}
         </div>
         <div style="flex:1;background:rgba(220,20,60,0.08);border-radius:8px;padding:8px 10px">
           <div style="font-size:0.65rem;font-weight:700;color:#DC143C;margin-bottom:4px">▼ 매도 신호 (${bearish.length})</div>
-          ${bearish.map(p=>`<div style="font-size:0.65rem;color:var(--muted2);line-height:1.5">· ${p.name} (${p.confidence}%)</div>`).join('')}
+          ${bearish.map(p=>`<div style="font-size:0.65rem;color:var(--muted2);line-height:1.5">· ${p.name} (~${p.confidence}%)</div>`).join('')}
         </div>
       </div>
       <div style="font-size:0.7rem;background:rgba(255,255,255,0.04);border-radius:8px;padding:8px 12px;border-left:3px solid ${biasColor}">
@@ -1602,7 +1602,7 @@ function renderChartPatternV2(patterns) {
       <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px">
         <span style="background:${sc.bg};color:${sc.text};font-size:0.62rem;font-weight:700;padding:2px 8px;border-radius:20px;letter-spacing:.06em">${icon} ${sc.label}</span>
         <span style="font-size:0.72rem;font-weight:700;color:var(--text)">${p.name}</span>
-        <span style="margin-left:auto;font-size:0.62rem;color:var(--muted)">${p.confidence}%</span>
+        <span style="margin-left:auto;font-size:0.62rem;color:var(--muted)">~${p.confidence}%</span>
       </div>
       <div style="font-size:0.68rem;color:var(--muted2);margin-bottom:6px;line-height:1.5">
         <span style="color:var(--up);font-weight:600">진입</span> ${p.entry}
@@ -3803,7 +3803,7 @@ function renderDashboard({ ticker, bars, ind, tech, fund, decision: d, price, is
         <div class="card-header-row">
           <span class="dot" style="background:var(--blue)"></span>차트 패턴 분석
         </div>
-        <span class="card-sub">캔들·이평선·Gap·추세 패턴 자동 감지 (chart_patterns_analysis_v2 기반)</span>
+        <span class="card-sub">캔들·이평선·Gap·추세 패턴 자동 감지 (chart_patterns_analysis_v2 기반) · 신뢰도(~%)는 과거 동일 패턴의 평균 도달률 추정치이며 미래 수익을 보장하지 않습니다</span>
       </div>
       <div id="chart-pattern-v2-content" style="display:flex;gap:12px;flex-wrap:wrap;margin-top:8px">
         <div style="color:var(--muted);font-size:0.82rem;padding:16px 0">분석 중…</div>

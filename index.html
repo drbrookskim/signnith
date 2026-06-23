@@ -1005,6 +1005,7 @@
   <button class="btn-run" id="run-btn" onclick="runAnalysis()">🔍 분석 시작</button>
   <button class="btn-report" id="report-btn" onclick="openReport()" title="상세 리포트 보기">📄 리포트</button>
   <button class="btn-report" id="archive-btn" onclick="openArchive()" title="분석 리포트 아카이브">🗂️ 아카이브</button>
+  <button class="btn-report" id="newsfinder-btn" onclick="openNewsFinder()" title="종목 뉴스 찾기">📰 뉴스 찾기</button>
 </div>
 
 <!-- ── 로그인 모달 ── -->
@@ -5934,6 +5935,16 @@ function openReport() {
   const ticker = (parenMatch ? parenMatch[1] : raw).toUpperCase();
   const url = `report.html?ticker=${encodeURIComponent(ticker)}&period=${encodeURIComponent(period)}&style=${encodeURIComponent(style)}`;
   window.open(url, '_blank');
+}
+
+function openNewsFinder() {
+  const last = sessionStorage.getItem('last_ticker');
+  const raw  = document.getElementById('ticker-input').value.trim();
+  const parenMatch = raw.match(/\(([A-Z0-9]+(?:\.[A-Z]{1,3})?)\)\s*$/i);
+  const inputTicker = raw ? (parenMatch ? parenMatch[1] : raw).toUpperCase() : '';
+  const ticker = last || inputTicker;
+  const base = 'https://drbrookskim.github.io/newsfinder/';
+  window.open(ticker ? `${base}?ticker=${encodeURIComponent(ticker)}` : base, '_blank');
 }
 
 // ══════════════════════════════════════════════════════

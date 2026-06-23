@@ -3681,15 +3681,15 @@ function renderDashboard({ ticker, bars, ind, tech, fund, decision: d, price, is
           solidBg='#92400e'; glow='rgba(146,64,14,0.35)';
           desc='방향성 불확실 — 명확한 신호 형성 대기';
         }
-        return `<div style="margin-top:10px;padding:10px 14px;border-radius:10px;background:${bg};border:1px solid ${bg.replace(/[\d.]+\)$/,'0.22)')}">
-          <div style="display:flex;align-items:center;gap:14px;flex-wrap:wrap">
-            <span style="font-size:0.68rem;font-weight:600;color:var(--muted)">시그널 종합 (${total}개)</span>
-            <span style="font-size:0.73rem;font-weight:700;color:var(--up)">▲ 매수 ${nBuy}</span>
-            <span style="font-size:0.73rem;font-weight:700;color:var(--yellow)">◆ 관망 ${nHold}</span>
-            <span style="font-size:0.73rem;font-weight:700;color:var(--down)">▼ 매도 ${nSell}</span>
+        return `<div style="margin-top:10px;padding:8px 14px;border-radius:10px;background:${bg};border:1px solid ${bg.replace(/[\d.]+\)$/,'0.22)')}">
+          <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+            <span style="font-size:0.72rem;font-weight:700;color:var(--up)">▲ ${nBuy}</span>
+            <span style="font-size:0.72rem;font-weight:700;color:var(--yellow)">◆ ${nHold}</span>
+            <span style="font-size:0.72rem;font-weight:700;color:var(--down)">▼ ${nSell}</span>
+            <span style="font-size:0.67rem;color:var(--muted2)">·</span>
+            <span style="font-size:0.67rem;color:var(--muted2)">${desc}</span>
             <span style="margin-left:auto;background:${solidBg};color:#fff;font-size:0.72rem;font-weight:900;padding:5px 14px;border-radius:5px;letter-spacing:0.08em;box-shadow:0 3px 14px ${glow};text-shadow:0 1px 3px rgba(0,0,0,0.3);white-space:nowrap">${icon} ${label}</span>
           </div>
-          <div style="margin-top:5px;font-size:0.67rem;color:var(--muted2)">${desc}</div>
         </div>`;
       })()}
     </div>

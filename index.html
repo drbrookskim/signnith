@@ -3639,25 +3639,51 @@ function renderDashboard({ ticker, bars, ind, tech, fund, decision: d, price, is
         }).join('')}
       </div>
       ${(() => {
-        const vals  = Object.values(advanced.details);
-        const nBuy  = vals.filter(v => v.score > 0).length;
-        const nSell = vals.filter(v => v.score < 0).length;
-        const nHold = vals.filter(v => v.score === 0).length;
-        const total = vals.length;
-        let icon, label, color, bg;
-        if (nBuy > nSell && nBuy >= nHold) {
-          icon='▲'; label='매수 우세'; color='var(--up)'; bg='rgba(255,75,110,0.08)';
-        } else if (nSell > nBuy && nSell >= nHold) {
-          icon='▼'; label='매도 우세'; color='var(--down)'; bg='rgba(59,130,246,0.08)';
+        const vals   = Object.values(advanced.details);
+        const nBuy   = vals.filter(v => v.score > 0).length;
+        const nSell  = vals.filter(v => v.score < 0).length;
+        const nHold  = vals.filter(v => v.score === 0).length;
+        const total  = vals.length;
+        const comp   = d.advancedComposite;
+        // 가중 매수/매도 합산
+        const wBuy   = vals.filter(v=>v.score>0).reduce((s,v)=>s+(v.weight||1),0);
+        const wSell  = vals.filter(v=>v.score<0).reduce((s,v)=>s+(v.weight||1),0);
+        // 핵심 고가중 지표(quant w=2, ew w=2) 방향
+        const keyBuy  = ['quant','ew'].filter(k=>(advanced.details[k]?.score??0)>0).length;
+        const keySell = ['quant','ew'].filter(k=>(advanced.details[k]?.score??0)<0).length;
+        // 복합점수 방향 vs 투표 다수 일치 여부
+        const compDir = comp>0.05?1:comp<-0.05?-1:0;
+        const voteDir = nBuy>nSell?1:nSell>nBuy?-1:0;
+        const mixed   = compDir!==0 && voteDir!==0 && compDir!==voteDir;
+        let icon, label, color, bg, desc;
+        if (mixed) {
+          icon='◆'; label='신호 혼재'; color='var(--orange)'; bg='rgba(249,115,22,0.08)';
+          desc='복합점수 방향과 개수 방향 불일치 — 추가 확인 권장';
+        } else if (comp>=0.3 && nBuy>nSell) {
+          icon='▲'; label='매수'; color='var(--up)'; bg='rgba(255,75,110,0.10)';
+          desc=keyBuy===2?'핵심 지표(퀀트·파동) 모두 매수 일치 — 신뢰도 높음':`${nBuy}개 시그널·가중합 ${wBuy.toFixed(1)} 매수 우세`;
+        } else if (comp>0.05 && wBuy>=wSell) {
+          icon='▲'; label='매수 고려'; color='var(--up)'; bg='rgba(255,75,110,0.07)';
+          desc=keyBuy>keySell?'핵심 지표 매수 우세, 단 복합점수 약함 — 분할 접근 고려':`가중 매수 ${wBuy.toFixed(1)} > 매도 ${wSell.toFixed(1)}`;
+        } else if (comp<=-0.3 && nSell>nBuy) {
+          icon='▼'; label='매도'; color='var(--down)'; bg='rgba(59,130,246,0.10)';
+          desc=keySell===2?'핵심 지표(퀀트·파동) 모두 매도 일치 — 신뢰도 높음':`${nSell}개 시그널·가중합 ${wSell.toFixed(1)} 매도 우세`;
+        } else if (comp<-0.05 && wSell>=wBuy) {
+          icon='▼'; label='매도 고려'; color='var(--down)'; bg='rgba(59,130,246,0.07)';
+          desc=keySell>keyBuy?'핵심 지표 매도 우세, 단 복합점수 약함 — 비중 축소 고려':`가중 매도 ${wSell.toFixed(1)} > 매수 ${wBuy.toFixed(1)}`;
         } else {
-          icon='◆'; label='관망'; color='var(--yellow)'; bg='rgba(245,158,11,0.08)';
+          icon='◆'; label='관망 유지'; color='var(--yellow)'; bg='rgba(245,158,11,0.08)';
+          desc='방향성 불확실 — 명확한 신호 형성 대기';
         }
-        return `<div style="margin-top:10px;padding:9px 14px;border-radius:10px;background:${bg};display:flex;align-items:center;gap:16px;flex-wrap:wrap;border:1px solid ${bg.replace('0.08','0.25')}">
-          <span style="font-size:0.68rem;font-weight:600;color:var(--muted)">시그널 투표 (${total}개)</span>
-          <span style="font-size:0.75rem;font-weight:700;color:var(--up)">▲ 매수 ${nBuy}</span>
-          <span style="font-size:0.75rem;font-weight:700;color:var(--yellow)">◆ 관망 ${nHold}</span>
-          <span style="font-size:0.75rem;font-weight:700;color:var(--down)">▼ 매도 ${nSell}</span>
-          <span style="margin-left:auto;font-size:0.92rem;font-weight:800;color:${color}">${icon} ${label}</span>
+        return `<div style="margin-top:10px;padding:10px 14px;border-radius:10px;background:${bg};border:1px solid ${bg.replace(/[\d.]+\)$/,'0.22)')}">
+          <div style="display:flex;align-items:center;gap:14px;flex-wrap:wrap">
+            <span style="font-size:0.68rem;font-weight:600;color:var(--muted)">시그널 종합 (${total}개)</span>
+            <span style="font-size:0.73rem;font-weight:700;color:var(--up)">▲ 매수 ${nBuy}</span>
+            <span style="font-size:0.73rem;font-weight:700;color:var(--yellow)">◆ 관망 ${nHold}</span>
+            <span style="font-size:0.73rem;font-weight:700;color:var(--down)">▼ 매도 ${nSell}</span>
+            <span style="margin-left:auto;font-size:0.95rem;font-weight:800;color:${color}">${icon} ${label}</span>
+          </div>
+          <div style="margin-top:5px;font-size:0.67rem;color:var(--muted2)">${desc}</div>
         </div>`;
       })()}
     </div>

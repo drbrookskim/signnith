@@ -1005,7 +1005,7 @@
   <button class="btn-run" id="run-btn" onclick="runAnalysis()">🔍 분석 시작</button>
   <button class="btn-report" id="report-btn" onclick="openReport()" title="상세 리포트 보기">📄 리포트</button>
   <button class="btn-report" id="archive-btn" onclick="openArchive()" title="분석 리포트 아카이브">🗂️ 아카이브</button>
-  <button class="btn-report" id="newsfinder-btn" onclick="openNewsFinder()" title="종목 뉴스 찾기">📰 뉴스 찾기</button>
+  <button class="btn-report" id="newsfinder-btn" onclick="openNewsFinder()" title="이 종목 관련 뉴스를 꼭 확인하세요">📰 지금 뉴스 확인</button>
 </div>
 
 <!-- ── 로그인 모달 ── -->
@@ -3173,6 +3173,8 @@ async function runAnalysis() {
     // 마지막 분석 상태 저장 (새로고침 복원용)
     try {
       sessionStorage.setItem('last_ticker',  ticker);
+      const nfBtn = document.getElementById('newsfinder-btn');
+      if (nfBtn) nfBtn.innerHTML = `📰 ${ticker} 뉴스 꼭 확인`;
       sessionStorage.setItem('last_period',  document.getElementById('period-select').value);
       sessionStorage.setItem('last_style',   document.getElementById('style-select').value);
     } catch(e) {}

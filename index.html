@@ -3174,7 +3174,7 @@ async function runAnalysis() {
     try {
       sessionStorage.setItem('last_ticker',  ticker);
       const nfBtn = document.getElementById('newsfinder-btn');
-      if (nfBtn) nfBtn.innerHTML = `📰 ${ticker} 이 뉴스는?`;
+      if (nfBtn) nfBtn.innerHTML = `📰 ${ticker} 뉴스 확인!`;
       sessionStorage.setItem('last_period',  document.getElementById('period-select').value);
       sessionStorage.setItem('last_style',   document.getElementById('style-select').value);
     } catch(e) {}

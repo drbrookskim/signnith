@@ -3638,6 +3638,28 @@ function renderDashboard({ ticker, bars, ind, tech, fund, decision: d, price, is
           </div>`;
         }).join('')}
       </div>
+      ${(() => {
+        const vals  = Object.values(advanced.details);
+        const nBuy  = vals.filter(v => v.score > 0).length;
+        const nSell = vals.filter(v => v.score < 0).length;
+        const nHold = vals.filter(v => v.score === 0).length;
+        const total = vals.length;
+        let icon, label, color, bg;
+        if (nBuy > nSell && nBuy >= nHold) {
+          icon='▲'; label='매수 우세'; color='var(--up)'; bg='rgba(255,75,110,0.08)';
+        } else if (nSell > nBuy && nSell >= nHold) {
+          icon='▼'; label='매도 우세'; color='var(--down)'; bg='rgba(59,130,246,0.08)';
+        } else {
+          icon='◆'; label='관망'; color='var(--yellow)'; bg='rgba(245,158,11,0.08)';
+        }
+        return `<div style="margin-top:10px;padding:9px 14px;border-radius:10px;background:${bg};display:flex;align-items:center;gap:16px;flex-wrap:wrap;border:1px solid ${bg.replace('0.08','0.25')}">
+          <span style="font-size:0.68rem;font-weight:600;color:var(--muted)">시그널 투표 (${total}개)</span>
+          <span style="font-size:0.75rem;font-weight:700;color:var(--up)">▲ 매수 ${nBuy}</span>
+          <span style="font-size:0.75rem;font-weight:700;color:var(--yellow)">◆ 관망 ${nHold}</span>
+          <span style="font-size:0.75rem;font-weight:700;color:var(--down)">▼ 매도 ${nSell}</span>
+          <span style="margin-left:auto;font-size:0.92rem;font-weight:800;color:${color}">${icon} ${label}</span>
+        </div>`;
+      })()}
     </div>
   </div>
 

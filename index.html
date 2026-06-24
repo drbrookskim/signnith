@@ -3174,7 +3174,9 @@ async function runAnalysis() {
     try {
       sessionStorage.setItem('last_ticker',  ticker);
       const nfBtn = document.getElementById('newsfinder-btn');
-      if (nfBtn) nfBtn.innerHTML = `📰 ${ticker} 뉴스 확인!`;
+      const _nfName = fundInfo.companyName || quote?.longName || quote?.shortName || resolveTickerName(ticker) || ticker;
+      sessionStorage.setItem('last_name', _nfName);
+      if (nfBtn) nfBtn.innerHTML = `📰 ${_nfName} 뉴스 확인!`;
       sessionStorage.setItem('last_period',  document.getElementById('period-select').value);
       sessionStorage.setItem('last_style',   document.getElementById('style-select').value);
     } catch(e) {}
@@ -5940,13 +5942,14 @@ function openReport() {
 }
 
 function openNewsFinder() {
-  const last = sessionStorage.getItem('last_ticker');
+  const lastName = sessionStorage.getItem('last_name');
+  const lastTicker = sessionStorage.getItem('last_ticker');
   const raw  = document.getElementById('ticker-input').value.trim();
   const parenMatch = raw.match(/\(([A-Z0-9]+(?:\.[A-Z]{1,3})?)\)\s*$/i);
   const inputTicker = raw ? (parenMatch ? parenMatch[1] : raw).toUpperCase() : '';
-  const ticker = last || inputTicker;
+  const query = lastName || lastTicker || inputTicker;
   const base = 'https://drbrookskim.github.io/newsfinder/';
-  window.open(ticker ? `${base}?ticker=${encodeURIComponent(ticker)}` : base, '_blank');
+  window.open(query ? `${base}?ticker=${encodeURIComponent(query)}` : base, '_blank');
 }
 
 // ══════════════════════════════════════════════════════

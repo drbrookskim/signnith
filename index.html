@@ -912,6 +912,9 @@
   }
   .footer a { color: var(--green); text-decoration: none; }
   @media (max-width: 900px) {
+    .btn-label { display: none; }
+    .btn-report { padding: 0 12px; }
+
     .row-top    { grid-template-columns: 1fr; }
     .row-bottom { grid-template-columns: 1fr; grid-template-rows: auto; }
     .mini-row   { grid-template-columns: 1fr 1fr; }
@@ -1003,9 +1006,9 @@
     <option value="long_term">장기</option>
   </select>
   <button class="btn-run" id="run-btn" onclick="runAnalysis()">🔍 분석 시작</button>
-  <button class="btn-report" id="report-btn" onclick="openReport()" title="상세 리포트 보기">📄 리포트</button>
-  <button class="btn-report" id="archive-btn" onclick="openArchive()" title="분석 리포트 아카이브">🗂️ 아카이브</button>
-  <button class="btn-report" id="newsfinder-btn" onclick="openNewsFinder()" title="이 종목 관련 뉴스를 확인하세요">📰 이 종목 이 뉴스는?</button>
+  <button class="btn-report" id="report-btn" onclick="openReport()" title="상세 리포트 보기">📄<span class="btn-label"> 리포트</span></button>
+  <button class="btn-report" id="archive-btn" onclick="openArchive()" title="분석 리포트 아카이브">🗂️<span class="btn-label"> 아카이브</span></button>
+  <button class="btn-report" id="newsfinder-btn" onclick="openNewsFinder()" title="이 종목 관련 뉴스를 확인하세요">📰<span class="btn-label"> 이 종목 이 뉴스는?</span></button>
 </div>
 
 <!-- ── 로그인 모달 ── -->
@@ -3176,7 +3179,7 @@ async function runAnalysis() {
       const nfBtn = document.getElementById('newsfinder-btn');
       const _nfName = fundInfo.companyName || quote?.longName || quote?.shortName || resolveTickerName(ticker) || ticker;
       sessionStorage.setItem('last_name', _nfName);
-      if (nfBtn) nfBtn.innerHTML = `📰 ${_nfName} 뉴스 확인!`;
+      if (nfBtn) nfBtn.innerHTML = `📰<span class="btn-label"> ${_nfName} 뉴스 확인!</span>`;
       sessionStorage.setItem('last_period',  document.getElementById('period-select').value);
       sessionStorage.setItem('last_style',   document.getElementById('style-select').value);
     } catch(e) {}

@@ -3103,7 +3103,7 @@ async function runAnalysis() {
   [priceChart, rsiChart, macdChart].forEach(c => c?.destroy());
   priceChart = rsiChart = macdChart = null;
 
-  dash.innerHTML = `<div class="center-msg"><div class="spinner"></div><div>"${raw}" 종목 검색 중…</div></div>`;
+  dash.innerHTML = `<div class="center-msg"><div class="spinner"></div><div>"${escapeHtml(raw)}" 종목 검색 중…</div></div>`;
 
   let ticker;
   try {
@@ -3179,7 +3179,7 @@ async function runAnalysis() {
       const nfBtn = document.getElementById('newsfinder-btn');
       const _nfName = fundInfo.companyName || quote?.longName || quote?.shortName || resolveTickerName(ticker) || ticker;
       sessionStorage.setItem('last_name', _nfName);
-      if (nfBtn) nfBtn.innerHTML = `📰<span class="btn-label"> ${_nfName} 뉴스 확인!</span>`;
+      if (nfBtn) nfBtn.innerHTML = `📰<span class="btn-label"> ${escapeHtml(_nfName)} 뉴스 확인!</span>`;
       sessionStorage.setItem('last_period',  document.getElementById('period-select').value);
       sessionStorage.setItem('last_style',   document.getElementById('style-select').value);
     } catch(e) {}
@@ -3423,7 +3423,7 @@ function renderDashboard({ ticker, bars, ind, tech, fund, decision: d, price, is
     <div class="card">
       <div class="card-header"><span class="dot" style="background:var(--blue)"></span>current-state</div>
       <div style="margin-bottom:10px">
-        <div style="font-size:1rem;font-weight:700">${flag} ${companyName}</div>
+        <div style="font-size:1rem;font-weight:700">${flag} ${escapeHtml(companyName)}</div>
         <div style="font-size:0.73rem;color:var(--muted);margin-top:3px;display:flex;align-items:center;gap:6px">
           ${ticker} <span class="sector-pill">${sector}</span> ${mktBadge}
         </div>
@@ -3459,8 +3459,7 @@ function renderDashboard({ ticker, bars, ind, tech, fund, decision: d, price, is
         </div>
       </div>
       <div style="margin-top:14px">
-        <button id="fav-btn" class="btn-fav${isFaved(ticker)?' starred':''}"
-          onclick="toggleFavFromResult('${ticker}','${(companyName||ticker).replace(/'/g,"\\'")}','${isKr ? '' : guessExchange(ticker)}')">
+        <button id="fav-btn" class="btn-fav${isFaved(ticker)?' starred':''}">
           ${isFaved(ticker) ? '⭐ 즐겨찾기 해제' : '☆ 즐겨찾기 추가'}
         </button>
       </div>
@@ -3967,6 +3966,13 @@ function renderDashboard({ ticker, bars, ind, tech, fund, decision: d, price, is
     </div>
   </div>
   `;
+
+  // 즐겨찾기 버튼: 값을 HTML로 보간하지 않고 JS 값으로 직접 바인딩 (인젝션 방지)
+  {
+    const _favBtn = document.getElementById('fav-btn');
+    if (_favBtn) _favBtn.onclick = () =>
+      toggleFavFromResult(ticker, companyName || ticker, isKr ? '' : guessExchange(ticker));
+  }
 
   // ══════════════════════════════════════════════════════
   // ── 분석 포인트 & 진입점 감지 ──
@@ -5953,6 +5959,16 @@ function openNewsFinder() {
   const query = lastName || lastTicker || inputTicker;
   const base = 'https://drbrookskim.github.io/newsfinder/';
   window.open(query ? `${base}?ticker=${encodeURIComponent(query)}` : base, '_blank');
+}
+
+// 외부(프록시 경유 API·사용자 입력) 문자열을 innerHTML에 삽입하기 전 이스케이프
+function escapeHtml(s) {
+  return String(s == null ? '' : s)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
 }
 
 // ══════════════════════════════════════════════════════

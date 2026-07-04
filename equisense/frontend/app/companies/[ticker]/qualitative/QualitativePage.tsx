@@ -334,7 +334,7 @@ function QualitativeContent() {
         </Card>
 
         {/* Right: AI memo */}
-        <Card style={{ background: 'var(--surface-2)' }}>
+        <Card>
           <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 14 }}>
             <span style={{
               width: 26, height: 26, borderRadius: 6, background: 'var(--accent)',

@@ -37,13 +37,18 @@ export default function LoginPage() {
     }}>
       <div aria-hidden style={{
         position: 'absolute', top: '20%', left: '50%', transform: 'translateX(-140%)',
-        width: 240, height: 240, borderRadius: '50%', background: 'var(--accent)',
-        opacity: 0.28, filter: 'blur(60px)', pointerEvents: 'none',
+        width: 300, height: 300, borderRadius: '50%', background: 'var(--accent)',
+        opacity: 0.42, filter: 'blur(65px)', pointerEvents: 'none',
       }} />
       <div aria-hidden style={{
         position: 'absolute', bottom: '15%', left: '50%', transform: 'translateX(60%)',
-        width: 260, height: 260, borderRadius: '50%', background: 'var(--ink-3)',
-        opacity: 0.22, filter: 'blur(65px)', pointerEvents: 'none',
+        width: 320, height: 320, borderRadius: '50%', background: 'var(--ink-3)',
+        opacity: 0.35, filter: 'blur(70px)', pointerEvents: 'none',
+      }} />
+      <div aria-hidden style={{
+        position: 'absolute', top: '55%', left: '50%', transform: 'translateX(10%)',
+        width: 220, height: 220, borderRadius: '50%', background: 'var(--ink-2)',
+        opacity: 0.22, filter: 'blur(60px)', pointerEvents: 'none',
       }} />
       <div className="eq-glass" style={{
         width: '100%', maxWidth: 380,

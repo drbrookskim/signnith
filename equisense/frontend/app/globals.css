@@ -52,7 +52,7 @@ body::before {
   pointer-events: none;
   background: radial-gradient(
     ellipse 80% 50% at 50% -5%,
-    rgba(255, 255, 255, 0.14),
+    rgba(255, 255, 255, 0.24),
     rgba(255, 255, 255, 0) 70%
   );
 }
@@ -86,7 +86,7 @@ body::before {
 :root[data-theme="dark"] body::before {
   background: radial-gradient(
     ellipse 80% 50% at 50% -5%,
-    rgba(255, 255, 255, 0.06),
+    rgba(255, 255, 255, 0.11),
     rgba(255, 255, 255, 0) 70%
   );
 }

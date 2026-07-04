@@ -24,13 +24,23 @@ export default async function CompanyLayout({
       <Header />
       {/* 글래스 Card 뒤에 비칠 배경 — 스크롤과 무관하게 고정 */}
       <div aria-hidden style={{
-        position: 'fixed', top: '6%', left: '6%', width: 240, height: 240,
-        borderRadius: '50%', background: 'var(--accent)', opacity: 0.22,
-        filter: 'blur(60px)', pointerEvents: 'none', zIndex: -1,
+        position: 'fixed', top: '4%', left: '4%', width: 340, height: 340,
+        borderRadius: '50%', background: 'var(--accent)', opacity: 0.4,
+        filter: 'blur(65px)', pointerEvents: 'none', zIndex: -1,
       }} />
       <div aria-hidden style={{
-        position: 'fixed', bottom: '4%', right: '8%', width: 280, height: 280,
-        borderRadius: '50%', background: 'var(--ink-3)', opacity: 0.2,
+        position: 'fixed', top: '10%', right: '6%', width: 300, height: 300,
+        borderRadius: '50%', background: 'var(--ink-2)', opacity: 0.3,
+        filter: 'blur(65px)', pointerEvents: 'none', zIndex: -1,
+      }} />
+      <div aria-hidden style={{
+        position: 'fixed', bottom: '4%', right: '10%', width: 360, height: 360,
+        borderRadius: '50%', background: 'var(--ink-3)', opacity: 0.38,
+        filter: 'blur(75px)', pointerEvents: 'none', zIndex: -1,
+      }} />
+      <div aria-hidden style={{
+        position: 'fixed', bottom: '8%', left: '12%', width: 260, height: 260,
+        borderRadius: '50%', background: 'var(--accent)', opacity: 0.25,
         filter: 'blur(70px)', pointerEvents: 'none', zIndex: -1,
       }} />
       <CompanyScoresProvider>

@@ -1,0 +1,155 @@
+@import "tailwindcss";
+
+/* ── Tailwind v4: class 기반 dark mode 활성화 ── */
+@custom-variant dark (&:is(.dark, .dark *));
+
+@theme inline {
+  --font-mono: var(--font-geist-mono);
+}
+
+/* ── Design tokens: archive tone (warm paper — default) ── */
+:root {
+  --bg: #fbfaf7;
+  --surface: #ffffff;
+  --surface-2: #f1f0eb;
+  --surface-3: #e8e6df;
+  --ink: #1b1a15;
+  --ink-2: #5b564a;
+  --ink-3: #968f7d;
+  --line: rgba(30, 26, 15, 0.10);
+  --line-2: rgba(30, 26, 15, 0.18);
+  --accent: #1c6e4a;
+  --surface-rgb: 255, 255, 255;
+
+  --font-display: var(--font-space-grotesk), var(--font-noto-serif-kr), Georgia, serif;
+  --font-ui: var(--font-space-grotesk), var(--font-noto-serif-kr), system-ui, sans-serif;
+  --font-mono: var(--font-geist-mono), ui-monospace, monospace;
+
+  /* 수급 상태 표시 색상 */
+  --status-go:       #16a34a;
+  --status-go-bg:    rgba(22, 163, 74, 0.10);
+  --status-warn:     #b45309;
+  --status-warn-bg:  rgba(180, 83, 9, 0.10);
+  --status-stop:     #dc2626;
+  --status-stop-bg:  rgba(220, 38, 38, 0.10);
+  --status-info:     #2563eb;
+  --status-info-bg:  rgba(37, 99, 235, 0.08);
+}
+
+body {
+  position: relative;
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--font-ui);
+}
+
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background: radial-gradient(
+    ellipse 80% 50% at 50% -5%,
+    rgba(255, 255, 255, 0.14),
+    rgba(255, 255, 255, 0) 70%
+  );
+}
+
+/* ── Dark theme ── */
+:root[data-theme="dark"] {
+  --bg: #141412;
+  --surface: #1e1e1b;
+  --surface-2: #272724;
+  --surface-3: #2f2f2b;
+  --ink: #f0ece4;
+  --ink-2: #a8a49c;
+  --ink-3: #686460;
+  --line: rgba(240, 236, 228, 0.08);
+  --line-2: rgba(240, 236, 228, 0.15);
+  --accent: #1c8a58;
+  --surface-rgb: 30, 30, 27;
+
+  /* 다크 모드: 더 밝고 선명한 상태 색상 */
+  --status-go:       #4ade80;
+  --status-go-bg:    rgba(74, 222, 128, 0.12);
+  --status-warn:     #fbbf24;
+  --status-warn-bg:  rgba(251, 191, 36, 0.12);
+  --status-stop:     #f87171;
+  --status-stop-bg:  rgba(248, 113, 113, 0.12);
+  --status-info:     #60a5fa;
+  --status-info-bg:  rgba(96, 165, 250, 0.12);
+}
+
+:root[data-theme="dark"] body::before {
+  background: radial-gradient(
+    ellipse 80% 50% at 50% -5%,
+    rgba(255, 255, 255, 0.06),
+    rgba(255, 255, 255, 0) 70%
+  );
+}
+
+/* ── Hover lift card ── */
+.eq-lift {
+  transition: transform 0.18s ease, box-shadow 0.18s ease;
+}
+.eq-lift:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px -8px rgba(0, 0, 0, 0.18);
+}
+
+/* ── Tab ribbon — hide scrollbar on mobile ── */
+.eq-ribbon-scroll::-webkit-scrollbar { display: none; }
+.eq-ribbon-scroll { scrollbar-width: none; }
+
+/* ── Company page main content ── */
+.eq-company-main {
+  max-width: 1080px;
+  margin: 0 auto;
+  padding: 30px 32px 80px;
+}
+
+/* ── Landing page layout ── */
+.eq-landing-main {
+  max-width: 980px;
+  margin: 0 auto;
+  padding: 0 32px;
+}
+.eq-module-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 14px;
+  margin: 64px 0 40px;
+}
+
+/* ── Mobile responsive (< 640px) ── */
+@media (max-width: 640px) {
+  .eq-company-main {
+    padding: 20px 16px 80px;
+  }
+  .eq-landing-main {
+    padding: 0 16px;
+  }
+  .eq-module-grid {
+    display: flex;
+    flex-direction: row;
+    overflow-x: auto;
+    scrollbar-width: none;
+    -webkit-overflow-scrolling: touch;
+    gap: 10px;
+    margin: 40px -16px 30px;
+    padding: 0 16px;
+  }
+  .eq-module-grid > * {
+    flex: 0 0 140px;
+    min-width: 0;
+  }
+}
+
+/* ── Tab content fade-in ── */
+.eq-tab-body { animation: eq-fadein 0.22s ease; }
+@keyframes eq-fadein {
+  from { opacity: 0; transform: translateY(4px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+

@@ -8,7 +8,7 @@ export function Eyebrow({ children, n }: { children: React.ReactNode; n?: number
     <div style={{
       display: 'flex', alignItems: 'center', gap: 8,
       fontFamily: 'var(--font-mono)', fontSize: 10.5, letterSpacing: '.16em',
-      textTransform: 'uppercase', color: 'var(--ink-3)', whiteSpace: 'nowrap',
+      textTransform: 'uppercase', color: 'var(--ink-3)',
     }}>
       {n != null && (
         <span style={{ color: 'var(--accent)', flexShrink: 0 }}>
@@ -125,16 +125,20 @@ export function Stat({
   )
 }
 
-/* ── Card shell ── */
+/* ── Card shell — glass ── */
+const cardGlassStyle: React.CSSProperties = {
+  background: 'rgba(var(--surface-rgb), 0.47)',
+  border: '1px solid rgba(var(--glow-tone), 0.35)',
+  borderRadius: 12,
+  padding: 22,
+  backdropFilter: 'blur(18px) saturate(160%)',
+  WebkitBackdropFilter: 'blur(18px) saturate(160%)',
+  boxShadow: '0 14px 34px rgba(0, 0, 0, 0.14), inset 0 1px 0 rgba(var(--glow-tone), 0.4)',
+}
+
 export function Card({ children, style }: { children: React.ReactNode; style?: React.CSSProperties }) {
   return (
-    <div style={{
-      background: 'var(--surface)',
-      border: '1px solid var(--line)',
-      borderRadius: 12,
-      padding: 22,
-      ...style,
-    }}>
+    <div className="eq-card-glass" style={{ ...cardGlassStyle, ...style }}>
       {children}
     </div>
   )

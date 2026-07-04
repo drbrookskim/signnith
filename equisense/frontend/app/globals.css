@@ -20,6 +20,7 @@
   --line-2: rgba(30, 26, 15, 0.18);
   --accent: #1c6e4a;
   --surface-rgb: 255, 255, 255;
+  --glow-tone: 255, 255, 255;
 
   --font-display: var(--font-space-grotesk), var(--font-noto-serif-kr), Georgia, serif;
   --font-ui: var(--font-space-grotesk), var(--font-noto-serif-kr), system-ui, sans-serif;
@@ -69,6 +70,7 @@ body::before {
   --line-2: rgba(240, 236, 228, 0.15);
   --accent: #1c8a58;
   --surface-rgb: 30, 30, 27;
+  --glow-tone: 63, 62, 56;
 
   /* 다크 모드: 더 밝고 선명한 상태 색상 */
   --status-go:       #4ade80;
@@ -151,5 +153,14 @@ body::before {
 @keyframes eq-fadein {
   from { opacity: 0; transform: translateY(4px); }
   to   { opacity: 1; transform: translateY(0); }
+}
+
+/* ── Card: backdrop-filter 미지원 브라우저 폴백 ── */
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  .eq-card-glass {
+    background: var(--surface) !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+  }
 }
 

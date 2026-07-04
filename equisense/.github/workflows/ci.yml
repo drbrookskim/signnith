@@ -1,0 +1,94 @@
+name: CI
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main, develop]
+  workflow_call:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  # ── 백엔드 (Python) ────────────────────────────────────────────────────
+  backend:
+    name: Backend — Lint / Security / Test
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: backend
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+          cache-dependency-path: backend/pyproject.toml
+
+      - name: Install dev dependencies
+        run: pip install -e ".[dev]"
+
+      - name: Lint (ruff)
+        run: ruff check .
+
+      - name: Format check (black)
+        run: black --check .
+
+      # -ll: MEDIUM 이상 심각도, -ii: MEDIUM 이상 신뢰도만 보고
+      - name: Security scan (bandit)
+        run: bandit -r core/ lambdas/ -ll -ii -q
+
+      - name: Run tests with coverage
+        run: |
+          pytest tests/ \
+            --cov=core \
+            --cov=lambdas \
+            --cov-report=term-missing \
+            --cov-report=xml:coverage.xml \
+            --cov-fail-under=80
+
+      - name: Upload coverage report
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: coverage-report
+          path: backend/coverage.xml
+
+  # ── 프론트엔드 (TypeScript/Next.js) ────────────────────────────────────
+  frontend:
+    name: Frontend — Lint / Type / Build
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: frontend
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: ESLint
+        run: npm run lint
+
+      - name: TypeScript type check
+        run: npx tsc --noEmit
+
+      - name: Next.js build
+        run: npm run build
+        env:
+          NEXT_PUBLIC_API_BASE_URL: "https://api.equisense.io"
+          UPSTASH_REDIS_REST_URL: "https://placeholder.upstash.io"
+          UPSTASH_REDIS_REST_TOKEN: "placeholder_token"

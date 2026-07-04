@@ -1,0 +1,12 @@
+name = "equisense-proxy"
+main = "src/index.js"
+compatibility_date = "2024-09-23"
+
+# DART API 키는 secret으로 등록:
+#   wrangler secret put DART_API_KEY
+#
+# 배포:
+#   wrangler deploy
+#
+# 배포 후 Worker URL (예: https://equisense-proxy.<계정>.workers.dev)을
+# GitHub Secrets > NEXT_PUBLIC_PROXY_URL 에 등록하세요.

@@ -14,26 +14,40 @@ import { useIsMobile } from '@/lib/hooks/useIsMobile'
 
 // ── Fear-Greed 계산 ───────────────────────────────────────
 
-function computeFearGreed(vix: number | null, bullishPct: number): {
-  score: number; label: string; description: string
-} {
+function computeFearGreed(
+  vix: number | null,
+  bullishPct: number,
+  shortPctOfFloat?: number | null,
+  positionPct?: number | null,
+): { score: number; label: string; description: string } {
   // VIX → 공포지수 기여 (inverse: 낮을수록 탐욕)
   const vixScore = vix == null ? 55
-    : vix <= 12 ? 85
-    : vix <= 17 ? 70
-    : vix <= 22 ? 50
-    : vix <= 30 ? 30
-    : 15
+    : vix <= 12 ? 85 : vix <= 17 ? 70 : vix <= 22 ? 50 : vix <= 30 ? 30 : 15
 
-  // 애널리스트 컨센서스 기여 (bullish % → 탐욕 신호)
+  // 애널리스트 컨센서스 기여
   const consScore = Math.min(100, Math.max(0, bullishPct))
 
-  const score = Math.round(vixScore * 0.6 + consScore * 0.4)
+  // 공매도 비율 기여 (낮을수록 탐욕)
+  const shortScore = shortPctOfFloat == null ? 55
+    : shortPctOfFloat < 0.03 ? 78
+    : shortPctOfFloat < 0.08 ? 60
+    : shortPctOfFloat < 0.15 ? 40
+    : shortPctOfFloat < 0.25 ? 24
+    : 10
+
+  // 52주 위치 기여 (높을수록 탐욕)
+  const posScore = positionPct == null ? 55 : Math.min(100, Math.max(0, positionPct))
+
+  const score = Math.round(
+    vixScore * 0.30 + consScore * 0.30 + shortScore * 0.20 + posScore * 0.20,
+  )
   const label = score >= 75 ? '극단적 탐욕' : score >= 55 ? '탐욕 Greed'
     : score >= 45 ? '중립 Neutral' : score >= 25 ? '공포 Fear' : '극단적 공포'
-  const description = score >= 55 ? '기관 심리 우호적 · 과열 구간 진입 주의'
-    : score >= 45 ? '기관 심리 중립 · 방향성 탐색 구간'
-    : '기관 심리 위축 · 역발상 진입 고려 구간'
+  const description = score >= 55
+    ? '기관 심리 우호적 · 공매도 포지션 낮음 · 과열 구간 주의'
+    : score >= 45
+      ? '기관 심리 중립 · 방향성 탐색 구간'
+      : '기관 심리 위축 · 공매도 포지션 높음 · 역발상 진입 고려'
 
   return { score, label, description }
 }
@@ -281,19 +295,29 @@ function QualitativeContent() {
     setTabBadge('qualitative', { label, tone, score: Math.round(bullishPct) })
   }, [bullishPct, setTabBadge])
 
-  const { score: fgScore, label: fgLabel, description: fgDesc } = computeFearGreed(vix, bullishPct ?? 55)
+  const shortPct = sentiment?.short_data?.short_pct_of_float ?? null
+  const positionPct = sentiment?.fifty_two_week?.position_pct ?? null
+
+  const { score: fgScore, label: fgLabel, description: fgDesc } = computeFearGreed(
+    vix, bullishPct ?? 55, shortPct, positionPct,
+  )
   const { grade: mgmtGrade, color: mgmtColor } = computeManagementGrade(sentiment, bullishPct ?? 55)
 
-  // 12주 Fear-Greed 추이 (VIX 기반 프록시, 시뮬레이션 변동)
-  const fgHistory = Array.from({ length: 12 }, (_, i) => {
-    const wk = i - 11
-    const noise = Math.sin(i * 0.7) * 8 + Math.cos(i * 1.2) * 5
-    const trend = (i / 11) * (fgScore - 50) * 0.6
-    const v = Math.round(Math.max(10, Math.min(90, 50 + trend + noise)))
-    const d = new Date()
-    d.setDate(d.getDate() + wk * 7)
-    return { week: `${d.getMonth() + 1}/${d.getDate()}`, score: v }
-  })
+  // 매수 컨센서스 추이 — 실제 3개월 데이터 (가짜 시뮬레이션 제거)
+  const fgHistory = sentiment?.rec_trend?.length
+    ? [...sentiment.rec_trend].reverse().map((t) => {
+        const total = t.strong_buy + t.buy + t.hold + t.sell + t.strong_sell
+        const bullPct = total > 0 ? Math.round(((t.strong_buy + t.buy) / total) * 100) : 0
+        const label = t.period === '0m' ? '현재' : t.period === '-1m' ? '1개월전'
+          : t.period === '-2m' ? '2개월전' : '3개월전'
+        return { week: label, score: bullPct }
+      })
+    : []
+
+  // 업/다운그레이드 집계 (90일)
+  const udHistory = sentiment?.upgrade_downgrade ?? []
+  const upgradeCount = udHistory.filter(u => u.action === 'up').length
+  const downgradeCount = udHistory.filter(u => u.action === 'down').length
 
   const fmtDate = (dt: string) =>
     !dt || dt.length !== 8 ? dt
@@ -347,30 +371,37 @@ function QualitativeContent() {
         </Card>
       </div>
 
-      {/* Depth 2 — 심리 추이 + 컨센서스 */}
+      {/* Depth 2 — 컨센서스 추이 + 컨센서스 현황 */}
       <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1fr minmax(0,340px)', gap: isMobile ? 16 : 28, marginTop: 22 }}>
-        {/* 심리 추이 12주 */}
+        {/* 매수 컨센서스 추이 3개월 */}
         <Card>
-          <Eyebrow n={2}>심리 추이 · 12주</Eyebrow>
+          <Eyebrow n={2}>매수 컨센서스 추이 · 3개월</Eyebrow>
           <div style={{ marginTop: 12 }}>
-            <ResponsiveContainer width="100%" height={160}>
-              <AreaChart data={fgHistory} margin={{ top: 4, right: 4, left: -10, bottom: 0 }}>
-                <defs>
-                  <linearGradient id="fg-hist-grad" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="var(--accent)" stopOpacity={0.2} />
-                    <stop offset="95%" stopColor="var(--accent)" stopOpacity={0} />
-                  </linearGradient>
-                </defs>
-                <CartesianGrid strokeDasharray="3 3" stroke="var(--line)" strokeOpacity={0.4} />
-                <XAxis dataKey="week" tick={{ fontSize: 9, fill: 'var(--ink-3)', fontFamily: 'var(--font-mono)' }} axisLine={false} tickLine={false} interval={2} />
-                <YAxis domain={[0, 100]} tick={{ fontSize: 9, fill: 'var(--ink-3)' }} axisLine={false} tickLine={false} width={28} />
-                <Tooltip
-                  contentStyle={{ background: 'var(--surface)', border: '1px solid var(--line)', borderRadius: 6, fontSize: 10 }}
-                  formatter={(v) => [`${v}`, 'Fear-Greed']}
-                />
-                <Area type="monotone" dataKey="score" stroke="var(--accent)" strokeWidth={2} fill="url(#fg-hist-grad)" dot={false} />
-              </AreaChart>
-            </ResponsiveContainer>
+            {fgHistory.length > 0 ? (
+              <ResponsiveContainer width="100%" height={160}>
+                <AreaChart data={fgHistory} margin={{ top: 4, right: 4, left: -10, bottom: 0 }}>
+                  <defs>
+                    <linearGradient id="fg-hist-grad" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="5%" stopColor="var(--accent)" stopOpacity={0.2} />
+                      <stop offset="95%" stopColor="var(--accent)" stopOpacity={0} />
+                    </linearGradient>
+                  </defs>
+                  <CartesianGrid strokeDasharray="3 3" stroke="var(--line)" strokeOpacity={0.4} />
+                  <XAxis dataKey="week" tick={{ fontSize: 9, fill: 'var(--ink-3)', fontFamily: 'var(--font-mono)' }} axisLine={false} tickLine={false} />
+                  <YAxis domain={[0, 100]} tick={{ fontSize: 9, fill: 'var(--ink-3)' }} axisLine={false} tickLine={false} width={28}
+                    tickFormatter={(v: number) => `${v}%`} />
+                  <Tooltip
+                    contentStyle={{ background: 'var(--surface)', border: '1px solid var(--line)', borderRadius: 6, fontSize: 10 }}
+                    formatter={(v) => [`${v}%`, '매수 비중']}
+                  />
+                  <Area type="monotone" dataKey="score" stroke="var(--accent)" strokeWidth={2} fill="url(#fg-hist-grad)" dot={{ fill: 'var(--accent)', r: 3 }} />
+                </AreaChart>
+              </ResponsiveContainer>
+            ) : (
+              <div style={{ height: 160, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <p style={{ fontSize: 12, color: 'var(--ink-3)' }}>데이터 없음</p>
+              </div>
+            )}
           </div>
         </Card>
 
@@ -386,6 +417,119 @@ function QualitativeContent() {
           </div>
         </Card>
       </div>
+
+      {/* Depth 2 — 포지셔닝 신호 */}
+      <Card style={{ marginTop: 22 }}>
+        <Eyebrow n={2}>포지셔닝 신호 · Positioning</Eyebrow>
+        {sentimentLoading ? (
+          <div style={{ height: 60, borderRadius: 6, background: 'var(--surface-2)', marginTop: 12, animation: 'pulse 1.5s ease-in-out infinite' }} />
+        ) : (
+          <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr 1fr', gap: isMobile ? 20 : 28, marginTop: 14 }}>
+
+            {/* 공매도 비율 */}
+            <div>
+              <div style={{ fontFamily: 'var(--font-mono)', fontSize: 10, color: 'var(--ink-3)', marginBottom: 6, letterSpacing: '.04em' }}>공매도 비율 · Short Float</div>
+              {shortPct != null ? (() => {
+                const pct = shortPct * 100
+                const color = pct < 3 ? 'var(--accent)' : pct < 8 ? '#b45309' : '#dc2626'
+                const signal = pct < 3 ? '낮음 — 베어 포지션 경미'
+                  : pct < 8 ? '보통 — 일부 헤지 포지션'
+                  : pct < 15 ? '높음 — 강한 베어 포지셔닝'
+                  : '매우 높음 — 숏 스퀴즈 가능성'
+                return (
+                  <div>
+                    <div style={{ fontFamily: 'var(--font-display)', fontSize: 28, fontWeight: 700, color, lineHeight: 1 }}>
+                      {pct.toFixed(1)}<span style={{ fontFamily: 'var(--font-mono)', fontSize: 13, color: 'var(--ink-3)', marginLeft: 2 }}>%</span>
+                    </div>
+                    <div style={{ fontSize: 11, color, marginTop: 4 }}>{signal}</div>
+                    {sentiment?.short_data?.short_ratio != null && (
+                      <div style={{ fontFamily: 'var(--font-mono)', fontSize: 10, color: 'var(--ink-3)', marginTop: 4 }}>
+                        커버일수 {sentiment.short_data.short_ratio.toFixed(1)}일
+                      </div>
+                    )}
+                  </div>
+                )
+              })() : (
+                <div style={{ fontSize: 13, color: 'var(--ink-3)' }}>데이터 없음</div>
+              )}
+            </div>
+
+            {/* 52주 위치 */}
+            <div>
+              <div style={{ fontFamily: 'var(--font-mono)', fontSize: 10, color: 'var(--ink-3)', marginBottom: 6, letterSpacing: '.04em' }}>52주 위치 · 52W Range</div>
+              {positionPct != null && sentiment?.fifty_two_week ? (() => {
+                const { low, high, current } = sentiment.fifty_two_week
+                const color = positionPct >= 70 ? 'var(--accent)' : positionPct >= 40 ? '#b45309' : '#dc2626'
+                const signal = positionPct >= 80 ? '신고점 근방 — 강한 모멘텀'
+                  : positionPct >= 60 ? '상단 구간 — 강세'
+                  : positionPct >= 40 ? '중간 구간 — 중립'
+                  : positionPct >= 20 ? '하단 구간 — 약세'
+                  : '신저점 근방 — 역발상 검토'
+                return (
+                  <div>
+                    <div style={{ fontFamily: 'var(--font-display)', fontSize: 28, fontWeight: 700, color, lineHeight: 1 }}>
+                      {positionPct.toFixed(0)}<span style={{ fontFamily: 'var(--font-mono)', fontSize: 13, color: 'var(--ink-3)', marginLeft: 2 }}>%</span>
+                    </div>
+                    <div style={{ margin: '8px 0 4px', position: 'relative', height: 5, borderRadius: 3, background: 'var(--surface-2)' }}>
+                      <div style={{
+                        position: 'absolute', top: 0, bottom: 0, left: 0,
+                        width: `${positionPct}%`, background: color, borderRadius: 3,
+                      }} />
+                    </div>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', fontFamily: 'var(--font-mono)', fontSize: 9, color: 'var(--ink-3)' }}>
+                      <span>{low?.toFixed(0) ?? '—'}</span>
+                      <span style={{ fontSize: 11, color }}>{signal}</span>
+                      <span>{high?.toFixed(0) ?? '—'}</span>
+                    </div>
+                    {current != null && (
+                      <div style={{ fontFamily: 'var(--font-mono)', fontSize: 10, color: 'var(--ink-3)', marginTop: 4 }}>현재가 {current.toFixed(2)}</div>
+                    )}
+                  </div>
+                )
+              })() : (
+                <div style={{ fontSize: 13, color: 'var(--ink-3)' }}>데이터 없음</div>
+              )}
+            </div>
+
+            {/* 업/다운그레이드 90일 */}
+            <div>
+              <div style={{ fontFamily: 'var(--font-mono)', fontSize: 10, color: 'var(--ink-3)', marginBottom: 6, letterSpacing: '.04em' }}>등급 변경 90일 · Upgrade/Downgrade</div>
+              {upgradeCount + downgradeCount > 0 ? (
+                <div>
+                  <div style={{ display: 'flex', gap: 16, alignItems: 'baseline' }}>
+                    <div>
+                      <div style={{ fontFamily: 'var(--font-display)', fontSize: 28, fontWeight: 700, color: 'var(--accent)', lineHeight: 1 }}>{upgradeCount}</div>
+                      <div style={{ fontSize: 10, color: 'var(--accent)', marginTop: 3 }}>↑ 업그레이드</div>
+                    </div>
+                    <div>
+                      <div style={{ fontFamily: 'var(--font-display)', fontSize: 28, fontWeight: 700, color: '#dc2626', lineHeight: 1 }}>{downgradeCount}</div>
+                      <div style={{ fontSize: 10, color: '#dc2626', marginTop: 3 }}>↓ 다운그레이드</div>
+                    </div>
+                  </div>
+                  {upgradeCount !== downgradeCount && (
+                    <div style={{ fontSize: 11, color: upgradeCount > downgradeCount ? 'var(--accent)' : '#dc2626', marginTop: 8 }}>
+                      {upgradeCount > downgradeCount
+                        ? `업그레이드 우세 — 모멘텀 상승`
+                        : `다운그레이드 우세 — 목표가 하향 압력`}
+                    </div>
+                  )}
+                  {udHistory.slice(0, 3).map((u, i) => (
+                    <div key={i} style={{ display: 'flex', gap: 6, alignItems: 'center', marginTop: 8, fontSize: 10.5, color: 'var(--ink-2)' }}>
+                      <span style={{ color: u.action === 'up' ? 'var(--accent)' : '#dc2626', fontWeight: 700 }}>
+                        {u.action === 'up' ? '↑' : '↓'}
+                      </span>
+                      <span style={{ color: 'var(--ink-3)', flexShrink: 0 }}>{u.date}</span>
+                      <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{u.firm}</span>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div style={{ fontSize: 13, color: 'var(--ink-3)' }}>데이터 없음</div>
+              )}
+            </div>
+          </div>
+        )}
+      </Card>
 
       {/* Depth 3 — 어닝 서프라이즈 */}
       <Reveal title="어닝 서프라이즈" hint="컨센서스 대비 실제 EPS" depth={2}>

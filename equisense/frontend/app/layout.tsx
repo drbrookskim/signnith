@@ -2,6 +2,7 @@ import type { Metadata } from 'next'
 import { Geist_Mono, Noto_Serif_KR, Space_Grotesk } from 'next/font/google'
 import AuthProvider from '@/components/layout/AuthProvider'
 import SpaRedirectScript from '@/components/layout/SpaRedirectScript'
+import MouseGlow from '@/components/layout/MouseGlow'
 import './globals.css'
 
 const spaceGrotesk = Space_Grotesk({
@@ -35,6 +36,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       </head>
       <body style={{ minHeight: '100vh', background: 'var(--bg)', color: 'var(--ink)' }}>
         <SpaRedirectScript />
+        <MouseGlow />
         <AuthProvider>{children}</AuthProvider>
       </body>
     </html>

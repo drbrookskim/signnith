@@ -23,7 +23,7 @@ const geistMono = Geist_Mono({ variable: '--font-geist-mono', subsets: ['latin']
 const basePath = process.env.NEXT_PUBLIC_BASE_PATH ?? ''
 
 export const metadata: Metadata = {
-  title: 'Equity-Sense (EquiSense) — 4단계 주식 분석',
+  title: 'EquiSense - Equity Sense: 4단계 주식 분석 서비스',
   description: '펀더멘털 · 해자 · 정성적 · 기술적 분석을 한 곳에서',
 }
 

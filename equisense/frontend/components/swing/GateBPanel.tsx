@@ -5,11 +5,23 @@ import type { GateBInput, GateBResult, GateStatus } from '@/types'
 import { checkGateB } from '@/lib/adapters/swingPipeline'
 
 const STATUS_COLOR: Record<GateStatus, string> = {
-  GO:   'text-emerald-600 bg-emerald-50 dark:text-emerald-400 dark:bg-emerald-950/20',
-  WARN: 'text-amber-600 bg-amber-50 dark:text-amber-400 dark:bg-amber-950/20',
-  STOP: 'text-red-600 bg-red-50 dark:text-red-400 dark:bg-red-950/20',
+  GO:   'var(--status-go)',
+  WARN: 'var(--status-warn)',
+  STOP: 'var(--status-stop)',
 }
 const STATUS_ICON: Record<GateStatus, string> = { GO: '🟢', WARN: '⚠️', STOP: '🔴' }
+
+function StatusPill({ status }: { status: GateStatus }) {
+  const color = STATUS_COLOR[status]
+  return (
+    <span style={{
+      marginLeft: 8, fontFamily: 'var(--font-mono)', fontSize: 10, fontWeight: 700, color,
+      border: `1px solid ${color}`, borderRadius: 4, padding: '1px 6px',
+    }}>
+      {STATUS_ICON[status]} {status}
+    </span>
+  )
+}
 
 const MATRIX_LABEL: Record<GateBResult['matrix'], string> = {
   STRONG_BUY:          '최강 진입 신호 ✅',
@@ -229,31 +241,29 @@ function SliderField({
 }) {
   const fillPct = ((value - min) / (max - min)) * 100
   return (
-    <div className="rounded-lg border border-zinc-200 p-3 dark:border-zinc-800">
-      <div className="mb-1.5 text-xs text-zinc-500 dark:text-zinc-400">{label}</div>
-      <div className="flex items-center gap-3">
-        <div className="relative flex flex-1 items-center" style={{ height: 20 }}>
+    <div className="eq-glass" style={{ padding: '12px 14px', borderRadius: 8 }}>
+      <div style={{ fontSize: 12, color: 'var(--ink-3)', marginBottom: 8 }}>{label}</div>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+        <div style={{ position: 'relative', display: 'flex', flex: 1, alignItems: 'center', height: 20 }}>
           {/* Track background */}
-          <div className="absolute inset-x-0 h-1 rounded-full bg-zinc-200 dark:bg-zinc-700">
+          <div style={{ position: 'absolute', left: 0, right: 0, height: 4, borderRadius: 999, background: 'var(--line-2)' }}>
             {/* Filled (left) portion */}
-            <div
-              className="h-full rounded-full bg-emerald-500"
-              style={{ width: `${fillPct}%` }}
-            />
+            <div style={{ height: '100%', borderRadius: 999, width: `${fillPct}%`, background: 'var(--status-go)' }} />
           </div>
           {/* Thumb dot */}
-          <div
-            className="absolute h-4 w-4 rounded-full bg-emerald-500 shadow-sm pointer-events-none"
-            style={{ left: `calc(${fillPct}% - 8px)` }}
-          />
+          <div style={{
+            position: 'absolute', height: 16, width: 16, borderRadius: '50%',
+            background: 'var(--status-go)', boxShadow: '0 1px 3px rgba(0,0,0,.2)', pointerEvents: 'none',
+            left: `calc(${fillPct}% - 8px)`,
+          }} />
           {/* Native input — transparent, handles all interaction */}
           <input
             type="range" min={min} max={max} step={step} value={value}
             onChange={e => onChange(parseFloat(e.target.value))}
-            className="absolute inset-0 w-full cursor-pointer opacity-0"
+            style={{ position: 'absolute', inset: 0, width: '100%', cursor: 'pointer', opacity: 0 }}
           />
         </div>
-        <span className="min-w-[40px] text-right text-sm font-bold">
+        <span style={{ minWidth: 40, textAlign: 'right', fontFamily: 'var(--font-mono)', fontSize: 13, fontWeight: 700, color: 'var(--ink)' }}>
           {display ?? (value > 0 ? `+${value}` : String(value))}
         </span>
       </div>
@@ -271,19 +281,20 @@ function Toggle3Way<T extends string>({
   hint?: Hint; onChange: (v: T) => void
 }) {
   return (
-    <div className="rounded-lg border border-zinc-200 p-3 dark:border-zinc-800">
-      <div className="mb-1.5 text-xs text-zinc-500 dark:text-zinc-400">{label}</div>
-      <div className="flex gap-1">
+    <div className="eq-glass" style={{ padding: '12px 14px', borderRadius: 8 }}>
+      <div style={{ fontSize: 12, color: 'var(--ink-3)', marginBottom: 8 }}>{label}</div>
+      <div style={{ display: 'flex', gap: 4 }}>
         {options.map((opt, i) => (
           <button
             key={opt}
             onClick={() => onChange(opt)}
-            className={[
-              'flex-1 rounded px-2 py-1 text-xs font-medium transition-colors',
-              value === opt
-                ? 'bg-[var(--accent)] text-white'
-                : 'bg-zinc-100 text-zinc-600 hover:bg-zinc-200 dark:bg-zinc-800 dark:text-zinc-400 dark:hover:bg-zinc-700',
-            ].join(' ')}
+            style={{
+              all: 'unset', boxSizing: 'border-box', flex: 1, textAlign: 'center',
+              padding: '5px 8px', borderRadius: 5, cursor: 'pointer',
+              fontSize: 12, fontWeight: 500, transition: 'background-color .15s, color .15s',
+              background: value === opt ? 'var(--accent)' : 'var(--surface-2)',
+              color: value === opt ? 'var(--bg)' : 'var(--ink-2)',
+            }}
           >
             {labels[i]}
           </button>
@@ -312,10 +323,7 @@ export default function GateBPanel({
     setInput(prev => ({ ...prev, [key]: val }))
   }
 
-  const verdictCls =
-    result.verdict === 'PASS'
-      ? 'bg-emerald-50 text-emerald-700 ring-emerald-200 dark:bg-emerald-950/20 dark:text-emerald-400 dark:ring-emerald-800'
-      : 'bg-red-50 text-red-700 ring-red-200 dark:bg-red-950/20 dark:text-red-400 dark:ring-red-800'
+  const verdictColor = result.verdict === 'PASS' ? 'var(--status-go)' : 'var(--status-stop)'
 
   // 힌트 계산 (현재 input 기준 실시간)
   const hints = {
@@ -328,34 +336,39 @@ export default function GateBPanel({
     shortTrend:       hintShortTrend(input.short_trend, input.short_ratio),
   }
 
+  const layerTitle: React.CSSProperties = {
+    display: 'flex', alignItems: 'center', marginBottom: 10,
+    fontFamily: 'var(--font-mono)', fontSize: 10.5, letterSpacing: '.08em',
+    textTransform: 'uppercase', fontWeight: 700, color: 'var(--ink-3)',
+  }
+
   return (
-    <div className="rounded-lg border border-zinc-200 dark:border-zinc-800 overflow-hidden">
+    <div>
       {/* 헤더 */}
-      <div className="flex items-center justify-between bg-zinc-50 px-4 py-3 dark:bg-zinc-900">
-        <div className="flex items-center gap-2">
-          <span className="text-sm font-semibold text-zinc-700 dark:text-zinc-300">
-            Gate B — 수급
-          </span>
-          <span className="text-xs text-amber-500">HTS 확인 후 직접 입력</span>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 14 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+          <span style={{ fontSize: 13, fontWeight: 600, color: 'var(--ink)' }}>Gate B — 수급</span>
+          <span style={{ fontFamily: 'var(--font-mono)', fontSize: 10.5, color: 'var(--status-warn)' }}>HTS 확인 후 직접 입력</span>
         </div>
-        <span className={`rounded-full px-3 py-0.5 text-xs font-bold ring-1 ${verdictCls}`}>
+        <span style={{
+          fontFamily: 'var(--font-mono)', fontSize: 11, fontWeight: 700, color: verdictColor,
+          border: `1px solid ${verdictColor}`, borderRadius: 999, padding: '2px 10px',
+        }}>
           {result.verdict === 'PASS' ? '✅ PASS' : '🚫 BLOCK'}
         </span>
       </div>
 
-      <div className="space-y-4 p-4">
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 18 }}>
         {/* 범례 */}
         <Legend />
 
         {/* Layer 1 */}
         <div>
-          <h4 className="mb-2 text-xs font-bold text-zinc-500 dark:text-zinc-400">
+          <h4 style={layerTitle}>
             Layer 1 — 시장 전체
-            <span className={`ml-2 rounded px-1.5 py-0.5 text-[10px] ${STATUS_COLOR[result.layer1]}`}>
-              {STATUS_ICON[result.layer1]} {result.layer1}
-            </span>
+            <StatusPill status={result.layer1} />
           </h4>
-          <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 10 }}>
             <SliderField
               label="외국인 순매수 연속 (일)"
               value={input.market_foreign_days} min={-10} max={10}
@@ -375,11 +388,9 @@ export default function GateBPanel({
 
         {/* Layer 2 */}
         <div>
-          <h4 className="mb-2 text-xs font-bold text-zinc-500 dark:text-zinc-400">
+          <h4 style={layerTitle}>
             Layer 2 — 섹터
-            <span className={`ml-2 rounded px-1.5 py-0.5 text-[10px] ${STATUS_COLOR[result.layer2]}`}>
-              {STATUS_ICON[result.layer2]} {result.layer2}
-            </span>
+            <StatusPill status={result.layer2} />
           </h4>
           <SliderField
             label="섹터 ETF 순유입 연속 (일)"
@@ -391,13 +402,11 @@ export default function GateBPanel({
 
         {/* Layer 3 */}
         <div>
-          <h4 className="mb-2 text-xs font-bold text-zinc-500 dark:text-zinc-400">
+          <h4 style={layerTitle}>
             Layer 3 — 종목
-            <span className={`ml-2 rounded px-1.5 py-0.5 text-[10px] ${STATUS_COLOR[result.layer3]}`}>
-              {STATUS_ICON[result.layer3]} {result.layer3}
-            </span>
+            <StatusPill status={result.layer3} />
           </h4>
-          <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 10 }}>
             <SliderField
               label="외국인 순매수 연속 (일)"
               value={input.stock_foreign_days} min={0} max={10}
@@ -430,9 +439,9 @@ export default function GateBPanel({
         </div>
 
         {/* 매트릭스 결과 */}
-        <div className="rounded-lg bg-zinc-50 px-4 py-2.5 dark:bg-zinc-900">
-          <span className="text-xs text-zinc-500 dark:text-zinc-400">2×2 매트릭스: </span>
-          <span className="text-sm font-medium">{MATRIX_LABEL[result.matrix]}</span>
+        <div className="eq-glass" style={{ borderRadius: 8, padding: '10px 14px' }}>
+          <span style={{ fontFamily: 'var(--font-mono)', fontSize: 11, color: 'var(--ink-3)' }}>2×2 매트릭스: </span>
+          <span style={{ fontSize: 13, fontWeight: 600, color: 'var(--ink)' }}>{MATRIX_LABEL[result.matrix]}</span>
         </div>
       </div>
     </div>

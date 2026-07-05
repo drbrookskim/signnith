@@ -6,11 +6,10 @@ import { checkGateA, MACRO_CONSTANTS } from '@/lib/adapters/swingPipeline'
 import { fetchGateAData } from '@/lib/api-client'
 
 const STATUS_COLOR: Record<GateStatus, string> = {
-  GO:   'text-emerald-600 bg-emerald-50 dark:text-emerald-400 dark:bg-emerald-950/20',
-  WARN: 'text-amber-600 bg-amber-50 dark:text-amber-400 dark:bg-amber-950/20',
-  STOP: 'text-red-600 bg-red-50 dark:text-red-400 dark:bg-red-950/20',
+  GO:   'var(--status-go)',
+  WARN: 'var(--status-warn)',
+  STOP: 'var(--status-stop)',
 }
-const STATUS_ICON: Record<GateStatus, string> = { GO: '🟢', WARN: '⚠️', STOP: '🔴' }
 
 function fmt(n: number | null, decimals = 1): string {
   return n == null ? '—' : n.toFixed(decimals)
@@ -19,16 +18,20 @@ function fmt(n: number | null, decimals = 1): string {
 function GateACard({
   label, value, status, sub,
 }: { label: string; value: string; status: GateStatus; sub?: string }) {
+  const color = STATUS_COLOR[status]
   return (
-    <div className="rounded-lg border border-zinc-200 p-3 dark:border-zinc-800">
-      <div className="mb-1 text-xs text-zinc-500 dark:text-zinc-400">{label}</div>
-      <div className="flex items-center gap-2">
-        <span className="text-sm font-bold">{value}</span>
-        <span className={`rounded px-1.5 py-0.5 text-[10px] font-bold ${STATUS_COLOR[status]}`}>
-          {STATUS_ICON[status]} {status}
-        </span>
+    <div className="eq-glass" style={{ padding: '12px 14px', borderRadius: 8, border: `1px solid ${color}` }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6, gap: 8 }}>
+        <span style={{ fontSize: 12, fontWeight: 600, color: 'var(--ink)' }}>{label}</span>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexShrink: 0 }}>
+          <span style={{ fontFamily: 'var(--font-mono)', fontSize: 12.5, fontWeight: 700, color }}>{value}</span>
+          <span style={{
+            fontSize: 10, fontFamily: 'var(--font-mono)', color,
+            border: `1px solid ${color}`, borderRadius: 4, padding: '1px 5px',
+          }}>{status}</span>
+        </div>
       </div>
-      {sub && <div className="mt-0.5 text-[10px] text-zinc-400 dark:text-zinc-500">{sub}</div>}
+      {sub && <div style={{ fontFamily: 'var(--font-mono)', fontSize: 10.5, color: 'var(--ink-3)' }}>{sub}</div>}
     </div>
   )
 }
@@ -59,29 +62,31 @@ export default function GateAPanel({
 
   useEffect(() => { void load() }, [])   // eslint-disable-line react-hooks/exhaustive-deps, react-hooks/set-state-in-effect
 
-  const verdictCls = result?.verdict === 'PASS'
-    ? 'bg-emerald-50 text-emerald-700 ring-emerald-200 dark:bg-emerald-950/20 dark:text-emerald-400 dark:ring-emerald-800'
-    : 'bg-red-50 text-red-700 ring-red-200 dark:bg-red-950/20 dark:text-red-400 dark:ring-red-800'
+  const verdictColor = result?.verdict === 'PASS' ? 'var(--status-go)' : 'var(--status-stop)'
 
   return (
-    <div className="rounded-lg border border-zinc-200 dark:border-zinc-800 overflow-hidden">
-      <div className="flex items-center justify-between bg-zinc-50 px-4 py-3 dark:bg-zinc-900">
-        <div className="flex items-center gap-2">
-          <span className="text-sm font-semibold text-zinc-700 dark:text-zinc-300">
-            Gate A — 거시환경
-          </span>
-          <span className="text-xs text-zinc-400 dark:text-zinc-500">자동 조회</span>
+    <div>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 14 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+          <span style={{ fontSize: 13, fontWeight: 600, color: 'var(--ink)' }}>Gate A — 거시환경</span>
+          <span style={{ fontFamily: 'var(--font-mono)', fontSize: 10.5, color: 'var(--ink-3)' }}>자동 조회</span>
         </div>
-        <div className="flex items-center gap-2">
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
           {!loading && result && (
-            <span className={`rounded-full px-3 py-0.5 text-xs font-bold ring-1 ${verdictCls}`}>
+            <span style={{
+              fontFamily: 'var(--font-mono)', fontSize: 11, fontWeight: 700, color: verdictColor,
+              border: `1px solid ${verdictColor}`, borderRadius: 999, padding: '2px 10px',
+            }}>
               {result.verdict === 'PASS' ? '✅ PASS' : '🚫 BLOCK'}
             </span>
           )}
           <button
             onClick={() => void load()}
             disabled={loading}
-            className="rounded px-2 py-1 text-xs text-zinc-400 hover:text-zinc-600 disabled:opacity-40 dark:hover:text-zinc-200"
+            style={{
+              all: 'unset', cursor: loading ? 'default' : 'pointer',
+              fontSize: 12, color: 'var(--ink-3)', opacity: loading ? 0.4 : 1, padding: '2px 4px',
+            }}
           >
             {loading ? '...' : '↻'}
           </button>
@@ -89,13 +94,13 @@ export default function GateAPanel({
       </div>
 
       {loading ? (
-        <div className="animate-pulse grid grid-cols-2 gap-2 p-4 sm:grid-cols-3">
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: 10 }}>
           {[...Array(5)].map((_, i) => (
-            <div key={i} className="h-14 rounded-lg bg-zinc-100 dark:bg-zinc-800" />
+            <div key={i} style={{ height: 56, borderRadius: 8, background: 'var(--surface-2)', animation: 'pulse 1.5s ease-in-out infinite' }} />
           ))}
         </div>
       ) : data && result ? (
-        <div className="grid grid-cols-2 gap-2 p-4 sm:grid-cols-3">
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: 10 }}>
           <GateACard
             label="VIX"
             value={fmt(data.vix)}
@@ -136,7 +141,7 @@ export default function GateAPanel({
           />
         </div>
       ) : (
-        <div className="p-4 text-sm text-zinc-400 dark:text-zinc-500">데이터 조회 실패</div>
+        <div style={{ fontSize: 13, color: 'var(--ink-3)' }}>데이터 조회 실패</div>
       )}
     </div>
   )

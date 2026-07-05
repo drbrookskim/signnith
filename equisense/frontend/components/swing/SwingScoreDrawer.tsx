@@ -140,22 +140,46 @@ export function computeSwingScore(
   return { total, grade, items, comment }
 }
 
-const SCORE_STATUS_CLS: Record<string, string> = {
-  pass: 'text-emerald-600 bg-emerald-50 dark:text-emerald-400 dark:bg-emerald-950/20',
-  warn: 'text-amber-600 bg-amber-50 dark:text-amber-400 dark:bg-amber-950/20',
-  fail: 'text-red-600 bg-red-50 dark:text-red-400 dark:bg-red-950/20',
-  na:   'text-zinc-400 bg-zinc-100 dark:text-zinc-500 dark:bg-zinc-800/40',
+const STATUS_COLOR: Record<SwingScoreItem['status'], string> = {
+  pass: 'var(--accent)',
+  warn: '#b45309',
+  fail: '#dc2626',
+  na:   'var(--ink-3)',
 }
 
-const STATUS_ICON: Record<string, string> = {
-  pass: '🟢', warn: '🟡', fail: '🔴', na: '⚪',
+const STATUS_LABEL: Record<SwingScoreItem['status'], string> = {
+  pass: '통과', warn: '주의', fail: '미달', na: 'N/A',
 }
 
-const GRADE_BAR_COLOR: Record<string, string> = {
-  strong:  'bg-emerald-500',
-  good:    'bg-indigo-500',
-  caution: 'bg-amber-500',
-  weak:    'bg-red-500',
+const GRADE_COLOR: Record<SwingScore['grade'], string> = {
+  strong:  'var(--accent)',
+  good:    'var(--accent)',
+  caution: '#b45309',
+  weak:    '#dc2626',
+}
+
+function ScoreTile({ label, value, status, detail }: {
+  label: string
+  value: string
+  status: SwingScoreItem['status']
+  detail: string
+}) {
+  const color = STATUS_COLOR[status]
+  return (
+    <div className="eq-glass" style={{ padding: '12px 14px', borderRadius: 8, border: `1px solid ${color}` }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 }}>
+        <span style={{ fontSize: 13, fontWeight: 600, color: 'var(--ink)' }}>{label}</span>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+          <span style={{ fontFamily: 'var(--font-mono)', fontSize: 13, fontWeight: 700, color }}>{value}</span>
+          <span style={{
+            fontSize: 10, fontFamily: 'var(--font-mono)', color,
+            border: `1px solid ${color}`, borderRadius: 4, padding: '1px 5px',
+          }}>{STATUS_LABEL[status]}</span>
+        </div>
+      </div>
+      <div style={{ fontFamily: 'var(--font-mono)', fontSize: 10.5, color: 'var(--ink-3)' }}>{detail}</div>
+    </div>
+  )
 }
 
 export default function SwingScoreDrawer({
@@ -175,69 +199,51 @@ export default function SwingScoreDrawer({
 
   return (
     <section>
-      <div className="rounded-lg border border-zinc-200 dark:border-zinc-800">
-        <div className="flex items-center gap-3 px-4 py-3">
-          <span className="text-sm font-semibold text-zinc-700 dark:text-zinc-300">📊 스윙 적합도</span>
-          {score ? (
-            <div className="flex flex-1 items-center gap-2">
-              <div className="h-1.5 flex-1 overflow-hidden rounded-full bg-zinc-200 dark:bg-zinc-700">
-                <div
-                  className={`h-full rounded-full ${GRADE_BAR_COLOR[score.grade]}`}
-                  style={{ width: `${score.total}%` }}
-                />
-              </div>
-              <span className={`text-sm font-bold ${
-                score.grade === 'strong'  ? 'text-emerald-600 dark:text-emerald-400' :
-                score.grade === 'good'    ? 'text-indigo-600 dark:text-indigo-400' :
-                score.grade === 'caution' ? 'text-amber-600 dark:text-amber-400' :
-                'text-red-600 dark:text-red-400'
-              }`}>{score.total}점</span>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 14 }}>
+        <span style={{
+          fontFamily: 'var(--font-mono)', fontSize: 10.5, letterSpacing: '.1em',
+          textTransform: 'uppercase', color: 'var(--ink-3)', flexShrink: 0,
+        }}>스윙 적합도</span>
+        {score ? (
+          <>
+            <div style={{ flex: 1, height: 6, borderRadius: 999, background: 'var(--line-2)', overflow: 'hidden' }}>
+              <div style={{
+                height: '100%', borderRadius: 999, width: `${score.total}%`,
+                background: GRADE_COLOR[score.grade], transition: 'width .4s ease',
+              }} />
             </div>
-          ) : (
-            <div className="h-1.5 flex-1 animate-pulse rounded-full bg-zinc-200 dark:bg-zinc-700" />
-          )}
-        </div>
-
-        {score && (
-          <div className="space-y-3 border-t border-zinc-200 p-3 dark:border-zinc-800">
-            <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
-              {score.items.map(item => (
-                <div key={item.key} className="rounded-lg border border-zinc-200 p-3 dark:border-zinc-800">
-                  <div className="mb-1 flex items-center gap-1.5">
-                    <span>{STATUS_ICON[item.status]}</span>
-                    <span className="text-xs font-semibold text-zinc-500 dark:text-zinc-400">{item.label}</span>
-                  </div>
-                  <div className={`mb-1 inline-block rounded px-2 py-0.5 text-xs font-bold ${SCORE_STATUS_CLS[item.status]}`}>
-                    {item.value}
-                  </div>
-                  <p className="text-xs leading-snug text-zinc-400 dark:text-zinc-500">{item.detail}</p>
-                </div>
-              ))}
-              {market === 'KR' && !score.items.find(i => i.key === 'peg') && (
-                <div className="rounded-lg border border-zinc-200 p-3 dark:border-zinc-800">
-                  <div className="mb-1 flex items-center gap-1.5">
-                    <span>⚪</span>
-                    <span className="text-xs font-semibold text-zinc-500 dark:text-zinc-400">PEG Ratio</span>
-                  </div>
-                  <div className="mb-1 inline-block rounded px-2 py-0.5 text-xs font-bold text-zinc-400 bg-zinc-100 dark:text-zinc-500 dark:bg-zinc-800/40">
-                    데이터 없음
-                  </div>
-                  <p className="text-xs leading-snug text-zinc-400 dark:text-zinc-500">KR 종목 미제공</p>
-                </div>
-              )}
-            </div>
-            <p className="border-t border-zinc-200 pt-2 text-xs leading-relaxed text-zinc-500 dark:border-zinc-800 dark:text-zinc-400">
-              💡 {score.comment}
-            </p>
-          </div>
-        )}
-
-        {!score && (
-          <div className="animate-pulse space-y-2 border-t border-zinc-200 p-3 dark:border-zinc-800">
-            <div className="h-16 rounded bg-zinc-100 dark:bg-zinc-800" />
-          </div>
+            <span style={{
+              fontFamily: 'var(--font-display)', fontSize: 16, fontWeight: 700,
+              color: GRADE_COLOR[score.grade], flexShrink: 0,
+            }}>{score.total}점</span>
+          </>
+        ) : (
+          <div style={{ flex: 1, height: 6, borderRadius: 999, background: 'var(--surface-2)', animation: 'pulse 1.5s ease-in-out infinite' }} />
         )}
       </div>
+
+      {score && (
+        <div>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 12 }}>
+            {score.items.map((item) => (
+              <ScoreTile key={item.key} label={item.label} value={item.value} status={item.status} detail={item.detail} />
+            ))}
+            {market === 'KR' && !score.items.find(i => i.key === 'peg') && (
+              <ScoreTile label="PEG Ratio" value="—" status="na" detail="KR 종목 미제공" />
+            )}
+          </div>
+          <p style={{
+            marginTop: 14, paddingTop: 12, borderTop: '1px solid var(--line)',
+            fontSize: 12, lineHeight: 1.5, color: 'var(--ink-2)',
+          }}>
+            💡 {score.comment}
+          </p>
+        </div>
+      )}
+
+      {!score && (
+        <div style={{ marginTop: 12, height: 90, borderRadius: 8, background: 'var(--surface-2)', animation: 'pulse 1.5s ease-in-out infinite' }} />
+      )}
     </section>
   )
 }

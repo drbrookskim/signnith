@@ -203,19 +203,18 @@ export function Reveal({
   }, [open])
 
   const tag = depth >= 3 ? '원자료 · RAW' : '지표 · METRICS'
-  const bg = depth >= 3 ? 'var(--surface-3)' : 'var(--surface-2)'
   const padX = 18
 
   return (
     <div
-      className="eq-reveal"
+      className="eq-reveal eq-glass"
       style={{
-        background: bg,
-        border: '1px solid var(--line)',
         borderRadius: 8,
         overflow: 'hidden',
         marginTop: 10,
-        boxShadow: open ? 'inset 0 2px 8px -6px rgba(0,0,0,.4)' : 'none',
+        boxShadow: open
+          ? 'inset 0 2px 8px -6px rgba(0,0,0,.4), 0 14px 34px rgba(0, 0, 0, 0.14), inset 0 1px 0 rgba(var(--glow-tone), 0.4)'
+          : undefined,
         transition: 'box-shadow .4s ease',
       }}
     >

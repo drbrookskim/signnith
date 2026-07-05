@@ -73,7 +73,7 @@ export default function Header() {
               fontFamily: 'var(--font-display)', fontSize: 19, fontWeight: 600,
               letterSpacing: '-.01em', color: 'var(--ink)', whiteSpace: 'nowrap',
             }}>
-              Equity<span style={{ color: 'var(--accent)' }}>Sense</span>
+              Equi<span style={{ color: 'var(--accent)' }}>Sense</span>
             </span>
           )}
         </a>

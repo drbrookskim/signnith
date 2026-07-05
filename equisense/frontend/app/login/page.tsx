@@ -74,7 +74,7 @@ export default function LoginPage() {
           fontSize: 20, color: 'var(--ink)', letterSpacing: '-.01em',
           marginBottom: 8,
         }}>
-          Equity<span style={{ color: 'var(--accent)' }}>Sense</span>
+          Equi<span style={{ color: 'var(--accent)' }}>Sense</span>
         </div>
 
         <p style={{

@@ -1,0 +1,16 @@
+{
+  "name": "Equity-Sense (EquiSense)",
+  "short_name": "EquiSense",
+  "description": "펀더멘털 · 해자 · 정성적 · 기술적 분석을 한 곳에서",
+  "start_url": ".",
+  "scope": ".",
+  "display": "standalone",
+  "background_color": "#fbfaf7",
+  "theme_color": "#1b1a15",
+  "lang": "ko",
+  "icons": [
+    { "src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "icons/icon-512-maskable.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}

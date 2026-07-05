@@ -1,4 +1,4 @@
-import type { Metadata } from 'next'
+import type { Metadata, Viewport } from 'next'
 import { Geist_Mono, Noto_Serif_KR, Space_Grotesk } from 'next/font/google'
 import AuthProvider from '@/components/layout/AuthProvider'
 import SpaRedirectScript from '@/components/layout/SpaRedirectScript'
@@ -19,15 +19,27 @@ const notoSerifKR = Noto_Serif_KR({
 })
 const geistMono = Geist_Mono({ variable: '--font-geist-mono', subsets: ['latin'] })
 
+// GitHub Pages 배포 시 NEXT_PUBLIC_BASE_PATH=/equisense 처럼 설정 (next.config.ts와 동일)
+const basePath = process.env.NEXT_PUBLIC_BASE_PATH ?? ''
+
 export const metadata: Metadata = {
-  title: 'EquiSense — 4단계 주식 분석',
+  title: 'Equity-Sense (EquiSense) — 4단계 주식 분석',
   description: '펀더멘털 · 해자 · 정성적 · 기술적 분석을 한 곳에서',
+}
+
+export const viewport: Viewport = {
+  themeColor: '#1b1a15',
 }
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="ko" suppressHydrationWarning className={`${spaceGrotesk.variable} ${notoSerifKR.variable} ${geistMono.variable} h-full`}>
       <head>
+        <link rel="manifest" href={`${basePath}/manifest.webmanifest`} />
+        <link rel="apple-touch-icon" href={`${basePath}/icons/apple-touch-icon.png`} />
+        <meta name="apple-mobile-web-app-capable" content="yes" />
+        <meta name="apple-mobile-web-app-title" content="EquiSense" />
+        <meta name="apple-mobile-web-app-status-bar-style" content="default" />
         {/* no-flash: JSON.parse handles both raw 'dark' and JSON-encoded '"dark"' */}
         <script dangerouslySetInnerHTML={{ __html: `try{var _t=localStorage.getItem('eq-theme');try{_t=JSON.parse(_t)}catch(e){}if(_t==='dark'){var r=document.documentElement;r.setAttribute('data-theme','dark');r.classList.add('dark');}}catch(e){}` }} />
         {/* Google Analytics */}

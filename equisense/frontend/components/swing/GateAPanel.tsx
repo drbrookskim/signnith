@@ -20,7 +20,7 @@ function GateACard({
 }: { label: string; value: string; status: GateStatus; sub?: string }) {
   const color = STATUS_COLOR[status]
   return (
-    <div className="eq-glass" style={{ padding: '12px 14px', borderRadius: 8, border: `1px solid ${color}` }}>
+    <div className="eq-glass" style={{ padding: '12px 14px', borderRadius: 8 }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6, gap: 8 }}>
         <span style={{ fontSize: 12, fontWeight: 600, color: 'var(--ink)' }}>{label}</span>
         <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexShrink: 0 }}>

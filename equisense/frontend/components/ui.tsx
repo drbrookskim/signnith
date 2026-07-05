@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useRef, useState } from 'react'
+import { useRevealState } from '@/contexts/RevealStateContext'
 
 /* ── Eyebrow — small mono uppercase label ── */
 export function Eyebrow({ children, n }: { children: React.ReactNode; n?: number }) {
@@ -186,9 +187,18 @@ export function Reveal({
   children: React.ReactNode
   dense?: boolean
 }) {
-  const [open, setOpen] = useState(defaultOpen)
+  const revealState = useRevealState()
+  const [open, setOpenState] = useState(() => revealState?.getOpen(title, defaultOpen) ?? defaultOpen)
   const ref = useRef<HTMLDivElement>(null)
-  const [h, setH] = useState<number | 'auto'>(defaultOpen ? 'auto' : 0)
+  const [h, setH] = useState<number | 'auto'>(open ? 'auto' : 0)
+
+  function toggleOpen() {
+    setOpenState((prev) => {
+      const next = !prev
+      revealState?.setOpen(title, next)
+      return next
+    })
+  }
 
   useEffect(() => {
     if (!ref.current) return
@@ -219,7 +229,7 @@ export function Reveal({
       }}
     >
       <button
-        onClick={() => setOpen((o) => !o)}
+        onClick={toggleOpen}
         style={{
           all: 'unset', boxSizing: 'border-box',
           display: 'flex', alignItems: 'center', justifyContent: 'space-between',

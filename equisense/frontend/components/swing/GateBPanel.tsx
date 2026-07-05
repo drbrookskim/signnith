@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import type { GateBInput, GateBResult, GateStatus } from '@/types'
 import { checkGateB } from '@/lib/adapters/swingPipeline'
+import { useRevealState } from '@/contexts/RevealStateContext'
 
 const STATUS_COLOR: Record<GateStatus, string> = {
   GO:   'var(--status-go)',
@@ -135,7 +136,11 @@ function hintShortTrend(v: GateBInput['short_trend'], ratio: number): Hint {
 
 // ── 범례 ──────────────────────────────────────────────────────
 
+const LEGEND_KEY = 'gateB-legend'
+
 function Legend() {
+  const revealState = useRevealState()
+  const [open, setOpenState] = useState(() => revealState?.getOpen(LEGEND_KEY, false) ?? false)
   const row: React.CSSProperties = {
     display: 'flex', alignItems: 'flex-start', gap: 8, marginBottom: 6,
   }
@@ -159,9 +164,16 @@ function Legend() {
   }
 
   return (
-    <details className="eq-glass" style={{
-      borderRadius: 9, overflow: 'hidden',
-    }}>
+    <details
+      className="eq-glass"
+      style={{ borderRadius: 9, overflow: 'hidden' }}
+      open={open}
+      onToggle={(e) => {
+        const next = e.currentTarget.open
+        setOpenState(next)
+        revealState?.setOpen(LEGEND_KEY, next)
+      }}
+    >
       <summary style={{
         padding: '9px 13px', cursor: 'pointer', userSelect: 'none',
         display: 'flex', alignItems: 'center', justifyContent: 'space-between',

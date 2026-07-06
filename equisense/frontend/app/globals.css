@@ -148,6 +148,24 @@ body::before {
   }
 }
 
+/* ── Company page ambient background blobs ── */
+.eq-bg-blob {
+  position: fixed;
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: -1;
+}
+.eq-bg-blob-green-1 { top: 4%; left: 4%; width: 340px; height: 340px; background: var(--accent); opacity: 0.25; filter: blur(65px); }
+.eq-bg-blob-gray-1  { top: 10%; right: 6%; width: 300px; height: 300px; background: var(--ink-2); opacity: 0.18; filter: blur(65px); }
+.eq-bg-blob-gray-2  { bottom: 4%; right: 10%; width: 360px; height: 360px; background: var(--ink-3); opacity: 0.22; filter: blur(75px); }
+.eq-bg-blob-green-2 { bottom: 8%; left: 12%; width: 260px; height: 260px; background: var(--accent); opacity: 0.16; filter: blur(70px); }
+
+/* 모바일: 화면이 좁아지면 4개 블롭이 겹쳐 그린+그레이가 뭉개져 어두워지므로 크기·투명도 축소 */
+@media (max-width: 640px) {
+  .eq-bg-blob-green-1, .eq-bg-blob-green-2 { width: 160px; height: 160px; opacity: 0.12; }
+  .eq-bg-blob-gray-1,  .eq-bg-blob-gray-2  { width: 160px; height: 160px; opacity: 0.09; }
+}
+
 /* ── Tab content fade-in ── */
 .eq-tab-body { animation: eq-fadein 0.22s ease; }
 @keyframes eq-fadein {

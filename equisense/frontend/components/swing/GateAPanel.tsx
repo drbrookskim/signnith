@@ -20,17 +20,18 @@ function GateACard({
 }: { label: string; value: string; status: GateStatus; sub?: string }) {
   const color = STATUS_COLOR[status]
   return (
-    <div className="eq-glass" style={{ padding: '12px 14px', borderRadius: 8 }}>
+    <div className="eq-glass" style={{ padding: '12px 14px', borderRadius: 8, minWidth: 0 }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6, gap: 8 }}>
         <span style={{ fontSize: 12, fontWeight: 600, color: 'var(--ink)' }}>{label}</span>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexShrink: 0 }}>
-          <span style={{ fontFamily: 'var(--font-mono)', fontSize: 12.5, fontWeight: 700, color }}>{value}</span>
-          <span style={{
-            fontSize: 10, fontFamily: 'var(--font-mono)', color,
-            border: `1px solid ${color}`, borderRadius: 4, padding: '1px 5px',
-          }}>{status}</span>
-        </div>
+        <span style={{
+          fontSize: 10, fontFamily: 'var(--font-mono)', color, flexShrink: 0,
+          border: `1px solid ${color}`, borderRadius: 4, padding: '1px 5px',
+        }}>{status}</span>
       </div>
+      <div style={{
+        fontFamily: 'var(--font-mono)', fontSize: 12.5, fontWeight: 700, color,
+        wordBreak: 'break-word', marginBottom: sub ? 4 : 0,
+      }}>{value}</div>
       {sub && <div style={{ fontFamily: 'var(--font-mono)', fontSize: 10.5, color: 'var(--ink-3)' }}>{sub}</div>}
     </div>
   )

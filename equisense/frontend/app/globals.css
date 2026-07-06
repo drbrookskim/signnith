@@ -13,9 +13,9 @@
   --surface: #ffffff;
   --surface-2: #f1f0eb;
   --surface-3: #e8e6df;
-  --ink: #1b1a15;
-  --ink-2: #5b564a;
-  --ink-3: #968f7d;
+  --ink: #14130f;
+  --ink-2: #443f34;
+  --ink-3: #726b59;
   --line: rgba(30, 26, 15, 0.10);
   --line-2: rgba(30, 26, 15, 0.18);
   --accent: #1c6e4a;
@@ -63,9 +63,9 @@ body::before {
   --surface: #1e1e1b;
   --surface-2: #272724;
   --surface-3: #2f2f2b;
-  --ink: #f0ece4;
-  --ink-2: #a8a49c;
-  --ink-3: #686460;
+  --ink: #faf8f4;
+  --ink-2: #c2beb5;
+  --ink-3: #928d84;
   --line: rgba(240, 236, 228, 0.08);
   --line-2: rgba(240, 236, 228, 0.15);
   --accent: #1c8a58;

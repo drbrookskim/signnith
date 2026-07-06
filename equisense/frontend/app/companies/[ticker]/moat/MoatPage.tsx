@@ -444,7 +444,6 @@ function MoatContent() {
             return (
               <div key={m.dimension} className="eq-glass" style={{
                 padding: '12px 14px',
-                border: `1px solid ${verdict.color}`,
                 borderRadius: 8,
               }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 }}>

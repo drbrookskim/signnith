@@ -58,10 +58,10 @@ const C2 = '#b45309'  // warm amber
 const C3 = '#2563eb'  // calm blue
 
 function statusStyle(s: 'pass' | 'warn' | 'fail' | 'na'): React.CSSProperties {
-  if (s === 'pass') return { background: 'rgba(28,110,74,0.06)', color: C1 }
+  if (s === 'pass') return { background: 'rgba(28,110,74,0.035)', color: C1 }
   if (s === 'warn') return { background: 'rgba(180,83,9,0.10)',  color: C2 }
   if (s === 'fail') return { background: 'rgba(220,38,38,0.10)', color: '#dc2626' }
-  return { background: 'color-mix(in srgb, var(--ink-3) 10%, transparent)', color: 'var(--ink-3)' }
+  return { background: 'color-mix(in srgb, var(--ink-3) 6%, transparent)', color: 'var(--ink-3)' }
 }
 
 // ── 차트 공통 스타일 ───────────────────────────

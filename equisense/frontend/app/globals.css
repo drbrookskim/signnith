@@ -28,7 +28,7 @@
 
   /* 수급 상태 표시 색상 */
   --status-go:       #16a34a;
-  --status-go-bg:    rgba(22, 163, 74, 0.10);
+  --status-go-bg:    rgba(22, 163, 74, 0.06);
   --status-warn:     #b45309;
   --status-warn-bg:  rgba(180, 83, 9, 0.10);
   --status-stop:     #dc2626;
@@ -74,7 +74,7 @@ body::before {
 
   /* 다크 모드: 더 밝고 선명한 상태 색상 */
   --status-go:       #4ade80;
-  --status-go-bg:    rgba(74, 222, 128, 0.12);
+  --status-go-bg:    rgba(74, 222, 128, 0.08);
   --status-warn:     #fbbf24;
   --status-warn-bg:  rgba(251, 191, 36, 0.12);
   --status-stop:     #f87171;

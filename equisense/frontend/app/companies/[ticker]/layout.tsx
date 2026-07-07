@@ -35,7 +35,7 @@ export default async function CompanyLayout({
           </Suspense>
           <Suspense
             fallback={
-              <div style={{ borderBottom: '1px solid var(--line-2)', height: 72 }} />
+              <div className="eq-tabnav-glass" style={{ height: 72 }} />
             }
           >
             <TabNav ticker={ticker.toUpperCase()} />

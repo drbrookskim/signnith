@@ -79,7 +79,7 @@ export default function TabNav({ ticker: _tickerProp }: { ticker: string }) {
   const isMobile = useIsMobile()
 
   return (
-    <nav style={{ borderBottom: '1px solid var(--line-2)' }}>
+    <nav className="eq-tabnav-glass" style={{ paddingBottom: isMobile ? 10 : 14 }}>
       <div
         className={isMobile ? 'eq-ribbon-scroll' : undefined}
         style={isMobile ? {
@@ -105,14 +105,12 @@ export default function TabNav({ ticker: _tickerProp }: { ticker: string }) {
               style={{
                 textDecoration: 'none',
                 textAlign: 'left',
-                background: isActive ? 'var(--surface)' : 'transparent',
-                border: '1px solid ' + (isActive ? 'var(--line-2)' : 'transparent'),
-                borderBottom: isActive ? '1px solid var(--surface)' : '1px solid transparent',
-                borderRadius: '10px 10px 0 0',
+                background: isActive ? 'rgba(var(--glow-tone), 0.16)' : 'transparent',
+                border: '1px solid ' + (isActive ? 'rgba(var(--glow-tone), 0.3)' : 'transparent'),
+                borderRadius: 10,
                 padding: isMobile ? '10px 14px' : '13px 16px',
                 cursor: 'pointer',
                 position: 'relative',
-                marginBottom: -1,
                 display: 'block',
                 flexShrink: isMobile ? 0 : undefined,
                 minWidth: isMobile ? 110 : undefined,

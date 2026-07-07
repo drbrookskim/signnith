@@ -185,10 +185,24 @@ body::before {
 /* ── 글래스: backdrop-filter 미지원 브라우저 폴백 ── */
 @supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
   .eq-card-glass,
-  .eq-glass {
+  .eq-glass,
+  .eq-tabnav-glass {
     background: var(--surface) !important;
     backdrop-filter: none !important;
     -webkit-backdrop-filter: none !important;
   }
+}
+
+/* ── 탭 내비게이션: 하단 경계선 대신 글래스 배경이 아래로 갈수록 옅어지며
+   상세 페이지의 블러 배경/글래스 카드 톤과 자연스럽게 이어지도록 함 ── */
+.eq-tabnav-glass {
+  background: linear-gradient(
+    to bottom,
+    rgba(var(--surface-rgb), 0.55) 0%,
+    rgba(var(--surface-rgb), 0.26) 70%,
+    rgba(var(--surface-rgb), 0) 100%
+  );
+  backdrop-filter: blur(18px) saturate(160%);
+  -webkit-backdrop-filter: blur(18px) saturate(160%);
 }
 

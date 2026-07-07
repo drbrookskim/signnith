@@ -106,7 +106,7 @@ export default function TabNav({ ticker: _tickerProp }: { ticker: string }) {
                 textDecoration: 'none',
                 textAlign: 'left',
                 background: isActive ? 'rgba(var(--glow-tone), 0.16)' : 'transparent',
-                border: isActive ? '1px solid rgba(var(--glow-tone), 0.3)' : 'none',
+                border: isActive ? '1px solid var(--line-2)' : 'none',
                 borderBottom: isActive ? 'none' : '1px solid var(--line-2)',
                 borderRadius: '10px 10px 0 0',
                 padding: isMobile ? '10px 14px' : '13px 16px',

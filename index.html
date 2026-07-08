@@ -2349,70 +2349,6 @@ async function fetchNewsSentiment(ticker, isKr) {
   return results;
 }
 
-// ── MyMemory 번역 (무료 · 인증 불필요, en→ko) ──
-const _transCache = {};
-async function translateToKo(text) {
-  if (!text) return text;
-  const key = text.slice(0, 80);
-  if (_transCache[key]) return _transCache[key];
-  try {
-    const url = `https://api.mymemory.translated.net/get?q=${encodeURIComponent(text.slice(0,500))}&langpair=en|ko`;
-    const r = await fetch(url);
-    const j = await r.json();
-    const translated = j?.responseData?.translatedText || text;
-    _transCache[key] = translated;
-    return translated;
-  } catch { return text; }
-}
-
-// ── StockTwits 심리 조회 (무료 · 인증 불필요) ──
-async function fetchXSentiment(ticker) {
-  try {
-    // StockTwits는 미국 종목 심볼만 지원 (KS/KQ 제외)
-    const symbol = ticker.replace(/\.(KS|KQ|T|L|HK)$/i, '');
-    if (/\.(KS|KQ)$/i.test(ticker)) return null;
-
-    const url = `https://api.stocktwits.com/api/2/streams/symbol/${symbol}.json?limit=20`;
-    const resp = await fetch(`https://corsproxy.io/?${encodeURIComponent(url)}`);
-    if (!resp.ok) return null;
-    const json = await resp.json();
-    if (!json.messages?.length) return null;
-
-    return json.messages.map(m => ({
-      text:      m.body,
-      author:    m.user?.username || 'unknown',
-      authorName:m.user?.name || '',
-      createdAt: m.created_at,
-      likes:     m.likes?.total || 0,
-      sentiment: m.entities?.sentiment?.basic || null, // 'Bullish' | 'Bearish' | null
-      url:       `https://stocktwits.com/${m.user?.username}/message/${m.id}`,
-      source:    'StockTwits',
-    }));
-  } catch(e) {
-    console.warn('StockTwits fetch failed:', e);
-    return null;
-  }
-}
-
-function scoreSentiment(items) {
-  const POS = ['상승','급등','돌파','강세','매수','신고가','호실적','흑자','성장','개선','기대','낙관','beat','surge','rally','bullish','upgrade','record','growth','buy','strong','soar','jump','rise','profit'];
-  const NEG = ['하락','급락','저조','약세','매도','신저가','부진','적자','우려','위험','경고','실망','miss','drop','fall','bearish','downgrade','loss','weak','sell','concern','risk','crash','plunge','decline'];
-  let pos = 0, neg = 0;
-  for (const n of items) {
-    // StockTwits 명시적 sentiment 우선 사용
-    if (n.sentiment === 'Bullish') { pos += 2; continue; }
-    if (n.sentiment === 'Bearish') { neg += 2; continue; }
-    const t = (n.title||n.text||'').toLowerCase();
-    pos += POS.filter(w => t.includes(w)).length;
-    neg += NEG.filter(w => t.includes(w)).length;
-  }
-  const total = pos + neg || 1;
-  const score = (pos - neg) / total;
-  const label = score > 0.2 ? '긍정적' : score < -0.2 ? '부정적' : '중립';
-  const color = score > 0.2 ? 'var(--up)' : score < -0.2 ? 'var(--down)' : 'var(--yellow)';
-  const icon  = score > 0.2 ? '📈' : score < -0.2 ? '📉' : '—';
-  return { score, label, color, icon, pos, neg };
-}
 
 // ══════════════════════════════════════════════════════
 //  기술적 지표 계산
@@ -3234,73 +3170,6 @@ async function runAnalysis() {
       },
     });
 
-    // StockTwits 심리 비동기 (번역 포함)
-    const _cName = fundInfo.companyName || resolveTickerName(ticker) || ticker;
-    fetchXSentiment(ticker, _cName, isKr).then(async xPosts => {
-      const el = document.getElementById('news-sentiment-panel');
-      if (!el) return;
-
-      const sent = scoreSentiment(xPosts || []);
-
-      // 번역: 최대 10건까지 한글로
-      if (xPosts && xPosts.length) {
-        const toTranslate = xPosts.slice(0, 10);
-        const translated = await Promise.all(toTranslate.map(p => translateToKo(p.text)));
-        toTranslate.forEach((p, i) => { p.textKo = translated[i]; });
-      }
-
-      function renderPost(p) {
-        const engColor = p.likes>50?'var(--up)':p.likes>10?'var(--yellow)':'var(--muted)';
-        const sentBadge = p.sentiment==='Bullish'
-          ? `<span style="font-size:0.65rem;padding:1px 5px;border-radius:4px;background:rgba(34,197,94,.15);color:var(--up);font-weight:600">▲ 강세</span>`
-          : p.sentiment==='Bearish'
-          ? `<span style="font-size:0.65rem;padding:1px 5px;border-radius:4px;background:rgba(239,68,68,.12);color:var(--down);font-weight:600">▼ 약세</span>`
-          : '';
-        const bodyText = (p.textKo || p.text).replace(/</g,'&lt;').replace(/>/g,'&gt;');
-        return `
-          <a href="${p.url}" target="_blank" rel="noopener"
-             style="display:block;padding:8px 10px;background:var(--card2);border-radius:8px;text-decoration:none;border:1px solid var(--border)">
-            <div style="display:flex;align-items:center;gap:6px;margin-bottom:4px;flex-wrap:wrap">
-              <span style="font-size:0.72rem;font-weight:700;color:var(--blue)">@${p.author}</span>
-              ${sentBadge}
-              <span style="margin-left:auto;font-size:0.68rem;color:${engColor}">♥${p.likes}</span>
-            </div>
-            <div style="font-size:0.78rem;color:var(--text);line-height:1.5;word-break:break-word">${bodyText}</div>
-          </a>`;
-      }
-
-      let postsHtml;
-      if (xPosts && xPosts.length) {
-        const visible = xPosts.slice(0, 5);
-        const hidden  = xPosts.slice(5);
-        const hiddenHtml = hidden.length ? `
-          <div id="st-more" style="display:none;display:flex;flex-direction:column;gap:6px;margin-top:0">
-            ${hidden.map(renderPost).join('')}
-          </div>
-          <button onclick="const m=document.getElementById('st-more');const b=this;if(m.style.display==='none'||m.style.display===''){m.style.display='flex';b.textContent='▲ 접기';}else{m.style.display='none';b.textContent='▼ 더보기 (${hidden.length}건 더)'}"
-            style="margin-top:8px;width:100%;padding:7px;border:1px solid var(--border);border-radius:8px;background:none;color:var(--muted);cursor:pointer;font-size:0.78rem">
-            ▼ 더보기 (${hidden.length}건 더)
-          </button>` : '';
-        postsHtml = `
-          <div style="display:flex;flex-direction:column;gap:6px">
-            ${visible.map(renderPost).join('')}
-          </div>
-          ${hiddenHtml}`;
-      } else {
-        postsHtml = `<div style="color:var(--muted);font-size:0.8rem;padding:8px 0">📊 StockTwits 데이터 없음 (미국 종목만 지원)</div>`;
-      }
-
-      el.innerHTML = `
-        <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;padding-bottom:8px;border-bottom:1px solid var(--border)">
-          <span style="font-size:0.88rem;font-weight:700;color:${sent.color}">커뮤니티 심리: ${sent.label}</span>
-          <span style="font-size:0.70rem;color:var(--muted)">긍정 ${sent.pos} · 부정 ${sent.neg} · ${xPosts?xPosts.length:0}건</span>
-        </div>
-        ${postsHtml}`;
-      // 숨겨진 더보기 div 초기화 (inline display 충돌 방지)
-      const moreDiv = el.querySelector('#st-more');
-      if (moreDiv) moreDiv.style.display = 'none';
-    });
-
     // NXT 가격 비동기 업데이트 (한국 종목만)
     if (/\.(KS|KQ)$/i.test(ticker)) {
       const nxtEl = document.getElementById('nxt-price-val');
@@ -3868,19 +3737,6 @@ function renderDashboard({ ticker, bars, ind, tech, fund, decision: d, price, is
       </div>
       <div id="chart-pattern-v2-content" style="display:flex;gap:12px;flex-wrap:wrap;margin-top:8px">
         <div style="color:var(--muted);font-size:0.82rem;padding:16px 0">분석 중…</div>
-      </div>
-    </div>
-  </div>
-
-  <!-- ── 관련 뉴스 행 ── -->
-  <div class="row" style="margin-top:0;grid-template-columns:1fr">
-    <div class="card">
-      <div class="card-header"><span class="dot" style="background:var(--purple)"></span>관련 뉴스
-        <span style="font-size:0.62rem;color:var(--muted);font-weight:400;margin-left:4px">StockTwits 커뮤니티 심리</span>
-        <span style="font-size:0.58rem;color:var(--muted2);font-weight:400;margin-left:6px;padding:1px 6px;border:1px solid var(--border);border-radius:10px;letter-spacing:0.02em">Translated by MyMemory</span>
-      </div>
-      <div id="news-sentiment-panel" style="margin-top:6px">
-        <div style="color:var(--muted);font-size:0.8rem;padding:12px 0;text-align:center">뉴스 조회 중…</div>
       </div>
     </div>
   </div>

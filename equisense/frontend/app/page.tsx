@@ -1,7 +1,6 @@
 import Header from '@/components/layout/Header'
 import SearchBox from '@/components/layout/SearchBox'
-
-const BASE_PATH = process.env.NEXT_PUBLIC_BASE_PATH ?? ''
+import QuickSuggestions from '@/components/layout/QuickSuggestions'
 
 const MODULES = [
   {
@@ -24,12 +23,6 @@ const MODULES = [
     desc: 'SEPA 파이프라인 · 진입 판정',
     glyph: <g><line x1="12" y1="10" x2="12" y2="34"/><rect x="9" y="16" width="6" height="11"/><line x1="26" y1="12" x2="26" y2="34"/><rect x="23" y="20" width="6" height="9"/></g>,
   },
-]
-
-const SUGGESTIONS = [
-  { q: 'AAPL', name: 'Apple', market: 'US' },
-  { q: 'NVDA', name: 'NVIDIA', market: 'US' },
-  { q: '005930', name: '삼성전자', market: 'KR' },
 ]
 
 export default function Home() {
@@ -68,27 +61,8 @@ export default function Home() {
           <div style={{ maxWidth: 580, margin: '30px auto 0' }}>
             <SearchBox variant="hero" autoFocus />
 
-            {/* Quick suggestions */}
-            <div style={{ display: 'flex', gap: 8, justifyContent: 'center', marginTop: 14, flexWrap: 'wrap' }}>
-              {SUGGESTIONS.map((s) => (
-                <a
-                  key={s.q}
-                  href={`${BASE_PATH}/companies/_/analysis?ticker=${s.q}&market=${s.market}`}
-                  style={{
-                    textDecoration: 'none',
-                    background: 'transparent',
-                    border: '1px solid var(--line-2)',
-                    borderRadius: 999, padding: '6px 14px',
-                    display: 'flex', alignItems: 'center', gap: 8,
-                  }}
-                >
-                  <span style={{ fontFamily: 'var(--font-mono)', fontSize: 12, fontWeight: 700, color: 'var(--ink)' }}>
-                    {s.q}
-                  </span>
-                  <span style={{ fontSize: 11.5, color: 'var(--ink-3)' }}>{s.name}</span>
-                </a>
-              ))}
-            </div>
+            {/* Quick suggestions — recent searches, falling back to defaults when empty */}
+            <QuickSuggestions />
           </div>
         </div>
 

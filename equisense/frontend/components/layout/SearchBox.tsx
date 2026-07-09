@@ -175,6 +175,7 @@ export default function SearchBox({ variant, autoFocus, accentSubmit }: SearchBo
           position: 'absolute', left: 0, top: 'calc(100% + 6px)',
           zIndex: 50, width: '100%', maxWidth: isHero ? '100%' : 420,
           overflow: 'hidden', borderRadius: 10,
+          background: 'var(--surface)', backdropFilter: 'none', WebkitBackdropFilter: 'none',
         }}>
           <div style={{
             padding: '7px 14px 5px',

@@ -172,7 +172,9 @@ async function translateMyMemory(text, target) {
     const url = `https://api.mymemory.translated.net/get?q=${encodeURIComponent(chunk)}&langpair=en|${target}`
     const res = await fetch(url)
     const data = await res.json()
-    parts.push(data?.responseData?.translatedText ?? chunk)
+    const translated = data?.responseData?.translatedText
+    const isWarning = typeof translated === 'string' && /MYMEMORY WARNING|QUERY LENGTH LIMIT/i.test(translated)
+    parts.push(!isWarning && data?.responseStatus === 200 && translated ? translated : chunk)
   }
   return parts.join(' ')
 }

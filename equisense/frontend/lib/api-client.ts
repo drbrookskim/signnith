@@ -111,6 +111,18 @@ export async function getFundamentals(ticker: string, market: Market): Promise<F
   return transformYahooToFundamentals(data, ticker, market, tsMap)
 }
 
+export async function translateToKo(text: string): Promise<string> {
+  if (!PROXY || !text) return text
+  try {
+    const res = await fetch(`${PROXY}/translate?text=${encodeURIComponent(text)}&target=ko`)
+    if (!res.ok) return text
+    const data = await res.json() as { translated?: string }
+    return data.translated || text
+  } catch {
+    return text
+  }
+}
+
 export async function getMoatScore(ticker: string, market: Market): Promise<MoatAnalysis> {
   const fundamentals = await getFundamentals(ticker, market)
   return calculateMoat(fundamentals)

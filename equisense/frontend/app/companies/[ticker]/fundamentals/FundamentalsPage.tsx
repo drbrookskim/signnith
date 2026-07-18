@@ -5,7 +5,7 @@ import { useSearchParams } from 'next/navigation'
 import {
   Area, AreaChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis,
 } from 'recharts'
-import { getFundamentals, getQuarterlyInsights, getQuarterlyPrices } from '@/lib/api-client'
+import { getFundamentals, getQuarterlyInsights, getQuarterlyPrices, translateToKo } from '@/lib/api-client'
 import type { FundamentalAnalysis, FundamentalMetrics, Market, QuarterlyInsightMap } from '@/types'
 import FundamentalsCharts from '@/components/charts/FundamentalsCharts'
 import { useCompanyScores } from '@/contexts/CompanyScoresContext'
@@ -265,6 +265,16 @@ function FundamentalsContent() {
   const [quarterlyInsights, setQuarterlyInsights] = useState<QuarterlyInsightMap | null>(null)
   const [quarterlyLoading, setQuarterlyLoading] = useState(false)
   const [qPrices, setQPrices] = useState<{ quarter: string; close: number }[]>([])
+  const [translatedDescription, setTranslatedDescription] = useState<string | null>(null)
+
+  useEffect(() => {
+    const description = data?.profile?.description
+    if (!description) { setTranslatedDescription(null); return }
+    let cancelled = false
+    setTranslatedDescription(null) // eslint-disable-line react-hooks/set-state-in-effect
+    translateToKo(description).then((ko) => { if (!cancelled) setTranslatedDescription(ko) })
+    return () => { cancelled = true }
+  }, [data?.profile?.description])
 
   useEffect(() => {
     let cancelled = false
@@ -356,7 +366,7 @@ function FundamentalsContent() {
             기업 개요
           </div>
           <p style={{ fontSize: 13, color: 'var(--ink-2)', marginTop: 8, lineHeight: 1.65 }}>
-            {data.profile.description}
+            {translatedDescription ?? data.profile.description}
           </p>
           <div style={{ display: 'flex', flexWrap: 'wrap', gap: 16, marginTop: 12, fontSize: 12.5, color: 'var(--ink-2)' }}>
             {data.profile.ceo && <span><strong style={{ color: 'var(--ink-3)' }}>CEO</strong> &nbsp;{data.profile.ceo}</span>}

@@ -6,6 +6,7 @@
  *   GET /yahoo/chart?symbol=AAPL&range=1y&interval=1d
  *   GET /dart/corp?stock_code=005930   → { corp_code: "00126380" }
  *   GET /dart/fs?corp_code=00126380&year=2024
+ *   GET /translate?text=...&target=ko   (Google 비공식 → 실패 시 MyMemory 폴백)
  */
 
 const CORS = {
@@ -140,6 +141,50 @@ async function yahooTimeseriesFetch(symbol) {
   return body
 }
 
+// ── 번역 (Google 비공식 우선, 실패 시 MyMemory 폴백) ────────────────────────────
+
+function splitIntoChunks(text, maxLen) {
+  const sentences = text.match(/[^.!?]+[.!?]*\s*/g) ?? [text]
+  const chunks = []
+  let cur = ''
+  for (const s of sentences) {
+    if (cur && (cur + s).length > maxLen) { chunks.push(cur); cur = s }
+    else cur += s
+  }
+  if (cur) chunks.push(cur)
+  return chunks
+}
+
+async function translateGoogle(text, target) {
+  const url = `https://translate.googleapis.com/translate_a/single?client=gtx&sl=en&tl=${target}&dt=t&q=${encodeURIComponent(text)}`
+  const res = await fetch(url, { headers: { 'User-Agent': YAHOO_UA } })
+  if (!res.ok) throw new Error(`Google Translate ${res.status}`)
+  const data = await res.json()
+  const segments = data?.[0]
+  if (!Array.isArray(segments)) throw new Error('Google Translate: 예상치 못한 응답')
+  return segments.map((seg) => seg[0]).join('')
+}
+
+async function translateMyMemory(text, target) {
+  const chunks = splitIntoChunks(text, 480)
+  const parts = []
+  for (const chunk of chunks) {
+    const url = `https://api.mymemory.translated.net/get?q=${encodeURIComponent(chunk)}&langpair=en|${target}`
+    const res = await fetch(url)
+    const data = await res.json()
+    parts.push(data?.responseData?.translatedText ?? chunk)
+  }
+  return parts.join(' ')
+}
+
+async function translateText(text, target) {
+  try {
+    return await translateGoogle(text, target)
+  } catch {
+    return await translateMyMemory(text, target)
+  }
+}
+
 // ── Main handler ─────────────────────────────────────────────────────────────
 
 export default {
@@ -236,6 +281,23 @@ export default {
         return new Response(await res.text(), {
           status: res.status,
           headers: { ...CORS, 'Content-Type': 'application/json; charset=utf-8', 'Cache-Control': 'public, max-age=3600' },
+        })
+      }
+
+      // ── 번역 ───────────────────────────────────────────────────────────────
+      if (url.pathname === '/translate') {
+        const text = (p.get('text') ?? '').slice(0, 3000)
+        const target = p.get('target') ?? 'ko'
+        if (!text) {
+          return new Response(JSON.stringify({ translated: '' }), {
+            status: 200,
+            headers: { ...CORS, 'Content-Type': 'application/json; charset=utf-8' },
+          })
+        }
+        const translated = await translateText(text, target)
+        return new Response(JSON.stringify({ translated }), {
+          status: 200,
+          headers: { ...CORS, 'Content-Type': 'application/json; charset=utf-8', 'Cache-Control': 'public, max-age=86400' },
         })
       }
 

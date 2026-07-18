@@ -37,6 +37,7 @@ export interface CompanyProfile {
   sector: string | null
   industry: string | null
   website: string | null
+  employees: number | null
 }
 
 export interface FundamentalAnalysis {
@@ -46,6 +47,8 @@ export interface FundamentalAnalysis {
   metrics_by_year: FundamentalMetrics[]
   trends: Record<string, MetricTrend>
   profile?: CompanyProfile | null
+  insider_net_purchase_pct?: number | null   // 최근 6개월 내부자 순매수 비율(%)
+  institution_ownership_pct?: number | null  // 기관 보유 비율(%)
 }
 
 // ──────────────────────────────────────────────
@@ -76,6 +79,19 @@ export interface DimensionScore {
   rationale: string | null
 }
 
+export interface PeerMargin {
+  symbol: string
+  name: string
+  operating_margin: number | null
+}
+
+export interface PeerComparison {
+  peers: PeerMargin[]
+  peer_avg_margin: number | null
+  company_margin: number | null
+  delta_pct: number | null // company_margin - peer_avg_margin
+}
+
 export interface MoatAnalysis {
   ticker: string
   market: Market
@@ -86,6 +102,7 @@ export interface MoatAnalysis {
   grade: MoatGrade
   analyst_note: string | null
   scored_at: string
+  peer_comparison?: PeerComparison | null
 }
 
 // ──────────────────────────────────────────────
@@ -290,6 +307,8 @@ export interface SentimentData {
   upgrade_downgrade: UpgradeDowngrade[]
   short_data: ShortData
   fifty_two_week: FiftyTwoWeek
+  insider_net_purchase_pct: number | null   // 최근 6개월 내부자 순매수 비율(%)
+  institution_ownership_pct: number | null  // 기관 보유 비율(%)
 }
 
 // ──────────────────────────────────────────────

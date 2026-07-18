@@ -7,6 +7,7 @@
  *   GET /dart/corp?stock_code=005930   → { corp_code: "00126380" }
  *   GET /dart/fs?corp_code=00126380&year=2024
  *   GET /translate?text=...&target=ko   (Google 비공식 → 실패 시 MyMemory 폴백)
+ *   GET /fmp/peer-comparison?symbol=AAPL   (동종업계 마진 비교, FMP 무료 티어)
  */
 
 const CORS = {
@@ -187,6 +188,36 @@ async function translateText(text, target) {
   }
 }
 
+// ── FMP: 동종업계 피어 비교 ──────────────────────────────────────────────────
+
+async function fmpJson(path, apikey) {
+  const sep = path.includes('?') ? '&' : '?'
+  const res = await fetch(`https://financialmodelingprep.com${path}${sep}apikey=${apikey}`)
+  if (!res.ok) throw new Error(`FMP ${res.status}`)
+  return res.json()
+}
+
+async function fetchPeerComparison(symbol, apikey) {
+  const peersData = await fmpJson(`/stable/stock-peers?symbol=${encodeURIComponent(symbol)}`, apikey)
+  const top = (Array.isArray(peersData) ? peersData : [])
+    .sort((a, b) => (b.mktCap ?? 0) - (a.mktCap ?? 0))
+    .slice(0, 4)
+
+  return Promise.all(top.map(async (peer) => {
+    try {
+      const ratios = await fmpJson(`/stable/ratios-ttm?symbol=${encodeURIComponent(peer.symbol)}`, apikey)
+      const margin = ratios?.[0]?.operatingProfitMarginTTM
+      return {
+        symbol: peer.symbol,
+        name: peer.companyName ?? peer.symbol,
+        operating_margin: typeof margin === 'number' ? margin * 100 : null,
+      }
+    } catch {
+      return { symbol: peer.symbol, name: peer.companyName ?? peer.symbol, operating_margin: null }
+    }
+  }))
+}
+
 // ── Main handler ─────────────────────────────────────────────────────────────
 
 export default {
@@ -301,6 +332,30 @@ export default {
           status: 200,
           headers: { ...CORS, 'Content-Type': 'application/json; charset=utf-8', 'Cache-Control': 'public, max-age=86400' },
         })
+      }
+
+      // ── FMP: 동종업계 피어 비교 ────────────────────────────────────────────
+      if (url.pathname === '/fmp/peer-comparison') {
+        const symbol = p.get('symbol') ?? ''
+        if (!symbol || !env.FMP_API_KEY) {
+          return new Response(JSON.stringify({ peers: [] }), {
+            status: 200,
+            headers: { ...CORS, 'Content-Type': 'application/json; charset=utf-8' },
+          })
+        }
+        try {
+          const peers = await fetchPeerComparison(symbol, env.FMP_API_KEY)
+          return new Response(JSON.stringify({ peers }), {
+            status: 200,
+            headers: { ...CORS, 'Content-Type': 'application/json; charset=utf-8', 'Cache-Control': 'public, max-age=86400' },
+          })
+        } catch {
+          // FMP 무료 티어 쿼터 소진 등 — 조회 실패 시 조용히 빈 배열 반환 (페이지 정상 동작 유지)
+          return new Response(JSON.stringify({ peers: [] }), {
+            status: 200,
+            headers: { ...CORS, 'Content-Type': 'application/json; charset=utf-8' },
+          })
+        }
       }
 
       return new Response('Not found', { status: 404, headers: CORS })

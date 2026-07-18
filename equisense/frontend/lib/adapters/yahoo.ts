@@ -24,7 +24,25 @@ export function extractProfile(assetProfile: any, fallbackName?: string | null):
     sector: typeof assetProfile.sector === 'string' ? assetProfile.sector : null,
     industry: typeof assetProfile.industry === 'string' ? assetProfile.industry : null,
     website: typeof assetProfile.website === 'string' ? assetProfile.website : null,
+    employees: r(assetProfile.fullTimeEmployees),
   }
+}
+
+/** netSharePurchaseActivity(내부자 순매수) + majorHoldersBreakdown(기관 보유율) → 해자/센티멘트 공용 신호 */
+export function extractOwnershipSignals(
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  result: any,
+): { insider_net_purchase_pct: number | null; institution_ownership_pct: number | null } {
+  const nsp = result?.netSharePurchaseActivity
+  const buyPct = r(nsp?.buyPercentInsiderShares)
+  const sellPct = r(nsp?.sellPercentInsiderShares)
+  const insider_net_purchase_pct = buyPct != null && sellPct != null ? (buyPct - sellPct) * 100 : null
+
+  const institution_ownership_pct = r(result?.majorHoldersBreakdown?.institutionsPercentHeld) != null
+    ? r(result.majorHoldersBreakdown.institutionsPercentHeld)! * 100
+    : null
+
+  return { insider_net_purchase_pct, institution_ownership_pct }
 }
 
 /** Yahoo Finance 숫자 필드: {raw: number} 또는 number 모두 처리 */
@@ -302,6 +320,7 @@ export function transformYahooToFundamentals(data: any, ticker: string, market: 
       net_income: makeTrend('net_income', netPairs),
     },
     profile: extractProfile(result.assetProfile, name),
+    ...extractOwnershipSignals(result),
   }
 }
 

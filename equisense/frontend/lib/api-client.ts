@@ -13,13 +13,15 @@ import type {
   GateAData,
   Market,
   MoatAnalysis,
+  PeerComparison,
+  PeerMargin,
   QuarterlyInsightMap,
   SentimentData,
   TechnicalAnalysis,
   TechnicalPeriod,
 } from '@/types'
 import { transformDartToFundamentals } from '@/lib/adapters/dart'
-import { extractProfile, transformYahooToFundamentals, transformYahooToTechnical, parseTimeseries } from '@/lib/adapters/yahoo'
+import { extractOwnershipSignals, extractProfile, transformYahooToFundamentals, transformYahooToTechnical, parseTimeseries } from '@/lib/adapters/yahoo'
 import { computeQuarterlyInsights } from '@/lib/adapters/quarterly'
 import { calculateMoat } from '@/lib/adapters/moat'
 import { calculateQualitative, lookupJob } from '@/lib/adapters/qualitative'
@@ -38,6 +40,8 @@ const SUMMARY_MODULES = [
   'quoteType',
   'summaryDetail',
   'assetProfile',
+  'netSharePurchaseActivity',
+  'majorHoldersBreakdown',
 ].join(',')
 
 async function proxyFetch<T>(path: string): Promise<T> {
@@ -83,7 +87,7 @@ export async function getFundamentals(ticker: string, market: Market): Promise<F
       proxyFetch<unknown>(`/dart/fs?corp_code=${corpCode}&year=${year}`),
       proxyFetch<unknown>(`/dart/fs?corp_code=${corpCode}&year=${year - 2}`).catch(() => null),
       proxyFetch<unknown>(
-        `/yahoo/summary?symbol=${ticker}&market=KR&modules=defaultKeyStatistics,financialData,summaryDetail,assetProfile`,
+        `/yahoo/summary?symbol=${ticker}&market=KR&modules=defaultKeyStatistics,financialData,summaryDetail,assetProfile,netSharePurchaseActivity,majorHoldersBreakdown`,
       ).catch(() => null),
     ])
 
@@ -99,6 +103,7 @@ export async function getFundamentals(ticker: string, market: Market): Promise<F
 
     const fundamentals = transformDartToFundamentals(dartDataRecent, dartDataOld, keyStats, ticker, corpName)
     fundamentals.profile = extractProfile(yahooResult.assetProfile, corpName ?? fundamentals.name)
+    Object.assign(fundamentals, extractOwnershipSignals(yahooResult))
     return fundamentals
   }
 
@@ -123,9 +128,30 @@ export async function translateToKo(text: string): Promise<string> {
   }
 }
 
+async function getPeerComparison(ticker: string, companyMargin: number | null): Promise<PeerComparison | null> {
+  if (!PROXY) return null
+  try {
+    const res = await fetch(`${PROXY}/fmp/peer-comparison?symbol=${ticker}`)
+    if (!res.ok) return null
+    const data = await res.json() as { peers?: PeerMargin[] }
+    const peers = data.peers ?? []
+    const margins = peers.map((p) => p.operating_margin).filter((m): m is number => m != null)
+    const peer_avg_margin = margins.length > 0 ? margins.reduce((a, b) => a + b, 0) / margins.length : null
+    const delta_pct = companyMargin != null && peer_avg_margin != null ? companyMargin - peer_avg_margin : null
+    return { peers, peer_avg_margin, company_margin: companyMargin, delta_pct }
+  } catch {
+    return null
+  }
+}
+
 export async function getMoatScore(ticker: string, market: Market): Promise<MoatAnalysis> {
   const fundamentals = await getFundamentals(ticker, market)
-  return calculateMoat(fundamentals)
+  const moat = calculateMoat(fundamentals)
+  if (market === 'US') {
+    const companyMargin = fundamentals.metrics_by_year.at(-1)?.operating_margin ?? null
+    moat.peer_comparison = await getPeerComparison(ticker, companyMargin)
+  }
+  return moat
 }
 
 export async function getTechnicalData(
@@ -230,6 +256,8 @@ export async function fetchSentimentData(
     'upgradeDowngradeHistory',
     'defaultKeyStatistics',
     'summaryDetail',
+    'netSharePurchaseActivity',
+    'majorHoldersBreakdown',
   ].join(',')
 
   const [yahooRes, dartRes] = await Promise.allSettled([

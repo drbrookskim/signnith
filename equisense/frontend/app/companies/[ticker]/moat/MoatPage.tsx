@@ -427,6 +427,47 @@ function MoatContent() {
         </Reveal>
       )}
 
+      {/* Depth 2 — peer comparison (FMP) */}
+      {data.peer_comparison && data.peer_comparison.peers.length > 0 && (
+        <Reveal
+          title="동종업계 마진 비교"
+          hint="영업이익률 기준, FMP 데이터"
+          depth={2}
+          defaultOpen={false}
+        >
+          <div style={{ paddingTop: 4 }}>
+            {data.peer_comparison.delta_pct != null && (
+              <p style={{
+                fontSize: 13.5, lineHeight: 1.6, marginBottom: 14,
+                color: data.peer_comparison.delta_pct >= 0 ? 'var(--accent)' : '#dc2626',
+              }}>
+                동종업계 평균 대비 영업이익률 {data.peer_comparison.delta_pct >= 0 ? '+' : ''}{data.peer_comparison.delta_pct.toFixed(1)}%p
+                {data.peer_comparison.delta_pct >= 5 ? ' — 뚜렷한 원가 우위' : data.peer_comparison.delta_pct <= -5 ? ' — 업종 평균 하회' : ' — 업종 평균 수준'}
+              </p>
+            )}
+            <div style={{ display: 'flex', flexDirection: 'column' }}>
+              {[
+                { symbol: data.ticker, name: name ?? data.ticker, operating_margin: data.peer_comparison.company_margin, isSelf: true },
+                ...data.peer_comparison.peers.map((p) => ({ ...p, isSelf: false })),
+              ].map((p) => (
+                <div key={p.symbol} style={{
+                  display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+                  padding: '8px 0', borderBottom: '1px solid var(--line)',
+                  fontWeight: p.isSelf ? 700 : 400,
+                }}>
+                  <span style={{ fontSize: 13, color: p.isSelf ? 'var(--accent)' : 'var(--ink-2)' }}>
+                    {p.isSelf ? '★ ' : ''}{p.name} ({p.symbol})
+                  </span>
+                  <span style={{ fontFamily: 'var(--font-mono)', fontSize: 13, color: p.isSelf ? 'var(--accent)' : 'var(--ink-2)' }}>
+                    {p.operating_margin != null ? `${p.operating_margin.toFixed(1)}%` : '—'}
+                  </span>
+                </div>
+              ))}
+            </div>
+          </div>
+        </Reveal>
+      )}
+
       {/* Depth 3 — methodology */}
       <Reveal
         title="측정 방법론 · 임계값 기준"

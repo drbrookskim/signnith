@@ -40,6 +40,24 @@ const COMPOUND_MOAT_DEFS: Record<
   },
 }
 
+// 업종별 영업이익률 임계값 [t1,t2,t3,t4] — Yahoo sector 문자열 기준
+// 업종마다 "정상 마진" 수준이 달라, 고정 임계값은 소매업을 과소평가하고
+// 금융/부동산을 과대평가하는 왜곡이 생김
+const SECTOR_MARGIN_THRESHOLDS: Record<string, [number, number, number, number]> = {
+  Technology: [10, 20, 30, 40],
+  'Communication Services': [8, 15, 25, 35],
+  'Consumer Cyclical': [3, 6, 10, 15],
+  'Consumer Defensive': [3, 6, 10, 15],
+  'Financial Services': [15, 25, 35, 45],
+  Healthcare: [8, 15, 25, 35],
+  Industrials: [5, 8, 12, 18],
+  Energy: [5, 10, 15, 25],
+  Utilities: [10, 15, 20, 25],
+  'Real Estate': [10, 20, 30, 40],
+  'Basic Materials': [5, 8, 12, 18],
+}
+const DEFAULT_MARGIN_THRESHOLDS: [number, number, number, number] = [5, 10, 20, 30]
+
 const GRADE_TEXT: Record<MoatGrade, string> = {
   wide: '강력한 경제적 해자를 보유합니다',
   narrow: '일부 구조적 우위가 확인됩니다',
@@ -173,24 +191,31 @@ export function calculateMoat(fundamentals: FundamentalAnalysis): MoatAnalysis {
   const latest = years.at(-1)
   const fiscal_year = latest?.fiscal_year ?? new Date().getFullYear() - 1
 
-  // Cost advantage: operating margin + low debt
+  const sector = fundamentals.profile?.sector ?? null
+  const marginThresholds = (sector && SECTOR_MARGIN_THRESHOLDS[sector]) || DEFAULT_MARGIN_THRESHOLDS
+
+  // Cost advantage: operating margin(업종별 임계값) + low debt
   const opMargin = latest?.operating_margin ?? null
   const debtRatio = latest?.debt_ratio ?? null
-  const opMarginScore = score(opMargin, [5, 10, 20, 30])
+  const opMarginScore = score(opMargin, marginThresholds)
   const debtScore = debtRatio != null ? score(100 - debtRatio, [20, 40, 55, 70]) : 0
   const costAdvantage = (opMarginScore + debtScore) / 2
 
-  // Intangible assets: ROE as proxy for brand/IP value
+  // Intangible assets: ROE as proxy for brand/IP value + 경영진 자사주 순매수 신호
   const roe = latest?.roe ?? null
-  const intangibleScore = score(roe, [5, 10, 15, 25])
+  const insiderNetPct = fundamentals.insider_net_purchase_pct ?? null
+  const insiderBonus = insiderNetPct == null ? 0 : insiderNetPct >= 5 ? 1 : insiderNetPct <= -5 ? -1 : 0
+  const intangibleScore = Math.min(10, Math.max(0, score(roe, [5, 10, 15, 25]) + insiderBonus))
 
-  // Switching costs: revenue CAGR + trend direction
+  // Switching costs: revenue CAGR + trend direction + 기관 보유 비율(안정적 지배구조 신호)
   const revTrend = fundamentals.trends.revenue ?? null
   const revCagr = revTrend?.cagr ?? null
   const revDirection = revTrend?.direction ?? 'stable'
   const cagrScore = score(revCagr, [0, 3, 7, 12])
   const directionBonus = revDirection === 'improving' ? 1 : revDirection === 'deteriorating' ? -1 : 0
-  const switchingCosts = Math.min(10, Math.max(0, cagrScore + directionBonus))
+  const institutionPct = fundamentals.institution_ownership_pct ?? null
+  const institutionBonus = institutionPct != null && institutionPct >= 70 ? 0.5 : 0
+  const switchingCosts = Math.min(10, Math.max(0, cagrScore + directionBonus + institutionBonus))
 
   // Network effects: FCF margin as proxy
   const fcf = latest?.fcf ?? null
@@ -204,13 +229,17 @@ export function calculateMoat(fundamentals: FundamentalAnalysis): MoatAnalysis {
   const roaScore = score(roa, [3, 6, 10, 15])
   const icrScore = score(icr, [2, 5, 10, 20])
   const efficientScale = (roaScore + icrScore) / 2
+  const employees = fundamentals.profile?.employees ?? null
 
   // 비용 우위 rationale
-  const caRationaleBase = opMargin != null ? `영업이익률 ${opMargin.toFixed(1)}%` : null
+  const caRationaleBase = opMargin != null
+    ? `영업이익률 ${opMargin.toFixed(1)}%${sector ? ` (${sector} 업종 기준)` : ''}`
+    : null
+  const [, caT2, caT3, caT4] = marginThresholds
   const caInterpret = opMargin == null ? null
-    : opMargin >= 30 ? '업종 최상위 마진 — 독점적 가격 결정력 또는 구조적 원가 우위 확인'
-    : opMargin >= 20 ? '평균 상회 마진 — 공정 효율 또는 규모의 경제 작동'
-    : opMargin >= 10 ? '업종 평균 수준의 마진'
+    : opMargin >= caT4 ? '업종 최상위 마진 — 독점적 가격 결정력 또는 구조적 원가 우위 확인'
+    : opMargin >= caT3 ? '평균 상회 마진 — 공정 효율 또는 규모의 경제 작동'
+    : opMargin >= caT2 ? '업종 평균 수준의 마진'
     : '원가 우위 미확인'
   const caRationale = caRationaleBase && caInterpret ? `${caRationaleBase} — ${caInterpret}` : caRationaleBase
 
@@ -221,7 +250,14 @@ export function calculateMoat(fundamentals: FundamentalAnalysis): MoatAnalysis {
     : roe >= 15 ? '무형 자산이 수익성에 기여하는 신호'
     : roe >= 10 ? '무형 자산 효과 제한적'
     : '무형 자산 우위 미확인'
-  const iaRationale = iaRationaleBase && iaInterpret ? `${iaRationaleBase} — ${iaInterpret}` : iaRationaleBase
+  const iaInsiderNote = insiderNetPct == null ? null
+    : insiderNetPct >= 5 ? `경영진 순매수 ${insiderNetPct.toFixed(1)}%p — 내부자 확신 신호`
+    : insiderNetPct <= -5 ? `경영진 순매도 ${insiderNetPct.toFixed(1)}%p — 내부자 신뢰 약화 신호`
+    : null
+  const iaRationale = [
+    iaRationaleBase && iaInterpret ? `${iaRationaleBase} — ${iaInterpret}` : iaRationaleBase,
+    iaInsiderNote,
+  ].filter(Boolean).join(' · ') || null
 
   // 전환 비용 rationale
   const scRationaleBase = revCagr != null ? `매출 CAGR ${revCagr.toFixed(1)}%` : null
@@ -230,7 +266,13 @@ export function calculateMoat(fundamentals: FundamentalAnalysis): MoatAnalysis {
     : revCagr >= 7  ? '고객 유지력 양호 — 부분적 전환 비용 존재'
     : revCagr >= 3  ? '전환 비용 제한적 — 고객 선택지 충분'
     : '고객 이탈 위험 — 전환 비용 낮음'
-  const scRationale = scRationaleBase && scInterpret ? `${scRationaleBase} — ${scInterpret}` : scRationaleBase
+  const scInstitutionNote = institutionPct != null && institutionPct >= 70
+    ? `기관 보유율 ${institutionPct.toFixed(1)}% — 안정적 지배구조`
+    : null
+  const scRationale = [
+    scRationaleBase && scInterpret ? `${scRationaleBase} — ${scInterpret}` : scRationaleBase,
+    scInstitutionNote,
+  ].filter(Boolean).join(' · ') || null
 
   // 네트워크 효과 rationale
   const neRationaleBase = fcfMargin != null ? `FCF 마진 ${fcfMargin.toFixed(1)}%` : null
@@ -250,7 +292,11 @@ export function calculateMoat(fundamentals: FundamentalAnalysis): MoatAnalysis {
     : roa >= 10 ? '효율적 자본 운용 — 규모 경제 작동'
     : roa >= 6  ? '자본 효율 보통'
     : '자본 효율 개선 여지'
-  const esRationale = esRationaleBase && esInterpret ? `${esRationaleBase} — ${esInterpret}` : esRationaleBase
+  const esEmployeeNote = employees != null ? `직원 수 ${employees.toLocaleString()}명` : null
+  const esRationale = [
+    esRationaleBase && esInterpret ? `${esRationaleBase} — ${esInterpret}` : esRationaleBase,
+    esEmployeeNote,
+  ].filter(Boolean).join(' · ') || null
 
   const dimension_scores: DimensionScore[] = [
     {

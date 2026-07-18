@@ -569,6 +569,14 @@ function QualitativeContent() {
         <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr', gap: isMobile ? 16 : 28, marginTop: 8 }}>
           <div>
             <Eyebrow>내부자 거래 · Insider</Eyebrow>
+            {sentiment?.insider_net_purchase_pct != null && (
+              <div style={{
+                fontFamily: 'var(--font-mono)', fontSize: 12, marginTop: 8,
+                color: sentiment.insider_net_purchase_pct >= 0 ? 'var(--accent)' : '#dc2626',
+              }}>
+                최근 6개월 순매수 {sentiment.insider_net_purchase_pct >= 0 ? '+' : ''}{sentiment.insider_net_purchase_pct.toFixed(1)}%p
+              </div>
+            )}
             <div style={{ marginTop: 10 }}>
               {sentimentLoading ? (
                 <div style={{ height: 80, borderRadius: 6, background: 'var(--surface-2)', animation: 'pulse 1.5s ease-in-out infinite' }} />
@@ -599,6 +607,11 @@ function QualitativeContent() {
 
           <div>
             <Eyebrow>기관 보유 · Institution</Eyebrow>
+            {sentiment?.institution_ownership_pct != null && (
+              <div style={{ fontFamily: 'var(--font-mono)', fontSize: 12, marginTop: 8, color: 'var(--ink-2)' }}>
+                전체 기관 보유율 {sentiment.institution_ownership_pct.toFixed(1)}%
+              </div>
+            )}
             <div style={{ marginTop: 10 }}>
               {sentimentLoading ? (
                 <div style={{ height: 80, borderRadius: 6, background: 'var(--surface-2)', animation: 'pulse 1.5s ease-in-out infinite' }} />

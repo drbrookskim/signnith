@@ -138,6 +138,50 @@ class TestSuccessfulFetch:
 # ---------------------------------------------------------------------------
 
 
+class TestCompanyProfile:
+    _SAMPLE_PROFILE = {
+        "companyName": "Apple Inc.",
+        "description": "Apple designs, manufactures, and markets smartphones.",
+        "ceo": "Timothy Cook",
+        "sector": "Technology",
+        "industry": "Consumer Electronics",
+        "website": "https://www.apple.com",
+    }
+
+    @patch("lambdas.get_fundamentals.handler.cache_set")
+    @patch("lambdas.get_fundamentals.handler.cache_get", return_value=None)
+    @patch("lambdas.get_fundamentals.handler.fetch_company_profile", return_value=_SAMPLE_PROFILE)
+    @patch("lambdas.get_fundamentals.handler.fetch_cash_flow_statements", return_value=_SAMPLE_CF)
+    @patch("lambdas.get_fundamentals.handler.fetch_balance_sheets", return_value=_SAMPLE_BALANCE)
+    @patch("lambdas.get_fundamentals.handler.fetch_income_statements", return_value=_SAMPLE_INCOME)
+    def test_profile_included_in_response(
+        self, mock_is, mock_bs, mock_cf, mock_profile, mock_get, mock_set
+    ):
+        response = lambda_handler(_event("AAPL", "US"), MockContext())
+        body = json.loads(response["body"])
+
+        assert body["profile"]["name"] == "Apple Inc."
+        assert body["profile"]["ceo"] == "Timothy Cook"
+
+    @patch("lambdas.get_fundamentals.handler.cache_set")
+    @patch("lambdas.get_fundamentals.handler.cache_get", return_value=None)
+    @patch(
+        "lambdas.get_fundamentals.handler.fetch_company_profile",
+        side_effect=Exception("boom"),
+    )
+    @patch("lambdas.get_fundamentals.handler.fetch_cash_flow_statements", return_value=_SAMPLE_CF)
+    @patch("lambdas.get_fundamentals.handler.fetch_balance_sheets", return_value=_SAMPLE_BALANCE)
+    @patch("lambdas.get_fundamentals.handler.fetch_income_statements", return_value=_SAMPLE_INCOME)
+    def test_profile_fetch_failure_does_not_break_response(
+        self, mock_is, mock_bs, mock_cf, mock_profile, mock_get, mock_set
+    ):
+        response = lambda_handler(_event("AAPL", "US"), MockContext())
+        body = json.loads(response["body"])
+
+        assert response["statusCode"] == 200
+        assert body["profile"] is None
+
+
 class TestCacheHit:
     _cached_payload = {"ticker": "AAPL", "market": "US", "metrics_by_year": [], "trends": {}}
 

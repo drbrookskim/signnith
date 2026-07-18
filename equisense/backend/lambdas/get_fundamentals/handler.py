@@ -18,6 +18,7 @@ from core.external.fmp import (
     ExternalAPIError,
     fetch_balance_sheets,
     fetch_cash_flow_statements,
+    fetch_company_profile,
     fetch_income_statements,
 )
 from core.external.normalizer import normalize_all
@@ -116,5 +117,25 @@ def lambda_handler(event: dict, context: Any) -> dict:
     )
 
     payload = analysis.model_dump()
+    payload["profile"] = _fetch_profile(params.ticker, params.market)
     cache_set(cache_key, payload, FINANCIAL_DATA_TTL)
     return ok(payload)
+
+
+def _fetch_profile(ticker: str, market: str) -> dict | None:
+    """기업 개요를 조회합니다. 실패해도 재무 분석 응답 자체는 막지 않습니다."""
+    try:
+        raw = fetch_company_profile(ticker, market)
+    except Exception as e:  # noqa: BLE001 — 개요 조회 실패는 재무 응답 자체를 막지 않음
+        logger.warning("FMP profile API error for %s: %s", ticker, e)
+        return None
+    if not raw:
+        return None
+    return {
+        "name": raw.get("companyName"),
+        "description": raw.get("description"),
+        "ceo": raw.get("ceo"),
+        "sector": raw.get("sector"),
+        "industry": raw.get("industry"),
+        "website": raw.get("website"),
+    }

@@ -349,6 +349,23 @@ function FundamentalsContent() {
         />
       </Card>
 
+      {/* 기업 개요 */}
+      {data.profile?.description && (
+        <Card style={{ marginTop: 16 }}>
+          <div style={{ fontFamily: 'var(--font-mono)', fontSize: 10, letterSpacing: '.12em', textTransform: 'uppercase', color: 'var(--ink-3)' }}>
+            기업 개요
+          </div>
+          <p style={{ fontSize: 13, color: 'var(--ink-2)', marginTop: 8, lineHeight: 1.65 }}>
+            {data.profile.description}
+          </p>
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 16, marginTop: 12, fontSize: 12.5, color: 'var(--ink-2)' }}>
+            {data.profile.ceo && <span><strong style={{ color: 'var(--ink-3)' }}>CEO</strong> &nbsp;{data.profile.ceo}</span>}
+            {data.profile.sector && <span><strong style={{ color: 'var(--ink-3)' }}>섹터</strong> &nbsp;{data.profile.sector}</span>}
+            {data.profile.industry && <span><strong style={{ color: 'var(--ink-3)' }}>산업</strong> &nbsp;{data.profile.industry}</span>}
+          </div>
+        </Card>
+      )}
+
       {/* 핵심 지표 카드 — KEY RATIOS */}
       {keyRatios.length > 0 && (
         <div style={{ marginTop: 22 }}>

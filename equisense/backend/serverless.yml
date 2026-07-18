@@ -78,7 +78,7 @@ provider:
 # ---------------------------------------------------------------------------
 plugins:
   - serverless-python-requirements
-  # - serverless-dotenv-plugin   # 로컬 개발 시 .env 주입 (선택)
+  - serverless-dotenv-plugin
 
 # ---------------------------------------------------------------------------
 # 커스텀 설정

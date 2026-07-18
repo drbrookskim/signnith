@@ -1,4 +1,5 @@
 import type {
+  CompanyProfile,
   FundamentalAnalysis,
   FundamentalMetrics,
   Market,
@@ -9,6 +10,22 @@ import type {
   TechnicalSummary,
   TrendDirection,
 } from '@/types'
+
+/** Yahoo Finance assetProfile 모듈 → CompanyProfile */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export function extractProfile(assetProfile: any, fallbackName?: string | null): CompanyProfile | null {
+  if (!assetProfile) return null
+  const officers: { name?: string; title?: string }[] = assetProfile.companyOfficers ?? []
+  const ceo = officers.find((o) => /\bCEO\b|Chief Executive/i.test(o.title ?? ''))?.name ?? null
+  return {
+    name: fallbackName ?? null,
+    description: typeof assetProfile.longBusinessSummary === 'string' ? assetProfile.longBusinessSummary : null,
+    ceo,
+    sector: typeof assetProfile.sector === 'string' ? assetProfile.sector : null,
+    industry: typeof assetProfile.industry === 'string' ? assetProfile.industry : null,
+    website: typeof assetProfile.website === 'string' ? assetProfile.website : null,
+  }
+}
 
 /** Yahoo Finance 숫자 필드: {raw: number} 또는 number 모두 처리 */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -284,6 +301,7 @@ export function transformYahooToFundamentals(data: any, ticker: string, market: 
       operating_income: makeTrend('operating_income', opPairs),
       net_income: makeTrend('net_income', netPairs),
     },
+    profile: extractProfile(result.assetProfile, name),
   }
 }
 

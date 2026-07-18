@@ -83,6 +83,17 @@ def fetch_cash_flow_statements(ticker: str, market: str, limit: int = 5) -> list
     return _fetch_json(url)
 
 
+def fetch_company_profile(ticker: str, market: str) -> dict:
+    """FMP에서 기업 개요(회사명, 사업 설명, CEO, 산업군)를 조회합니다."""
+    fmp_ticker = _to_fmp_ticker(ticker, market)
+    api_key = os.environ["FMP_API_KEY"]
+    url = f"{FMP_BASE_URL}/profile/{fmp_ticker}?apikey={api_key}"
+    result = _fetch_json(url)
+    if isinstance(result, list) and result:
+        return result[0]
+    return {}
+
+
 def fetch_historical_prices(
     ticker: str,
     market: str,

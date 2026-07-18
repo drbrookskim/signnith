@@ -30,12 +30,22 @@ export interface MetricTrend {
   yoy_changes: [number, number | null][]
 }
 
+export interface CompanyProfile {
+  name: string | null
+  description: string | null
+  ceo: string | null
+  sector: string | null
+  industry: string | null
+  website: string | null
+}
+
 export interface FundamentalAnalysis {
   ticker: string
   name: string | null
   market: Market
   metrics_by_year: FundamentalMetrics[]
   trends: Record<string, MetricTrend>
+  profile?: CompanyProfile | null
 }
 
 // ──────────────────────────────────────────────

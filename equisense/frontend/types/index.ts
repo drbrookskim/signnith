@@ -40,6 +40,20 @@ export interface CompanyProfile {
   employees: number | null
 }
 
+export interface OutlookPeriod {
+  period: string   // '0q' | '+1q' | '0y' | '+1y' | '+5y'
+  label: string
+  eps_estimate: number | null
+  eps_growth_pct: number | null
+  revenue_estimate: number | null
+  revenue_growth_pct: number | null
+}
+
+export interface BusinessOutlook {
+  periods: OutlookPeriod[]
+  long_term_growth_pct: number | null  // 향후 5년 연평균 성장률 전망(%)
+}
+
 export interface FundamentalAnalysis {
   ticker: string
   name: string | null
@@ -49,6 +63,7 @@ export interface FundamentalAnalysis {
   profile?: CompanyProfile | null
   insider_net_purchase_pct?: number | null   // 최근 6개월 내부자 순매수 비율(%)
   institution_ownership_pct?: number | null  // 기관 보유 비율(%)
+  outlook?: BusinessOutlook | null
 }
 
 // ──────────────────────────────────────────────
@@ -309,6 +324,7 @@ export interface SentimentData {
   fifty_two_week: FiftyTwoWeek
   insider_net_purchase_pct: number | null   // 최근 6개월 내부자 순매수 비율(%)
   institution_ownership_pct: number | null  // 기관 보유 비율(%)
+  outlook: BusinessOutlook | null
 }
 
 // ──────────────────────────────────────────────

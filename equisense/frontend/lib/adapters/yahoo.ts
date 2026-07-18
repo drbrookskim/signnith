@@ -1,9 +1,11 @@
 import type {
+  BusinessOutlook,
   CompanyProfile,
   FundamentalAnalysis,
   FundamentalMetrics,
   Market,
   MetricTrend,
+  OutlookPeriod,
   TechnicalAnalysis,
   TechnicalDataPoint,
   TechnicalPeriod,
@@ -43,6 +45,47 @@ export function extractOwnershipSignals(
     : null
 
   return { insider_net_purchase_pct, institution_ownership_pct }
+}
+
+const OUTLOOK_PERIOD_LABEL: Record<string, string> = {
+  '0q': '이번 분기',
+  '+1q': '다음 분기',
+  '0y': '올해',
+  '+1y': '내년',
+  '+5y': '향후 5년(연평균)',
+}
+
+/** earningsTrend 모듈 → 매출·EPS 컨센서스 전망(사업 전망) */
+export function extractOutlook(
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  result: any,
+): BusinessOutlook | null {
+  const trend: unknown[] = result?.earningsTrend?.trend ?? []
+  if (!Array.isArray(trend) || trend.length === 0) return null
+
+  const periods: OutlookPeriod[] = trend
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    .filter((t: any) => OUTLOOK_PERIOD_LABEL[t.period])
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    .map((t: any) => {
+      const epsGrowth = r(t.earningsEstimate?.growth)
+      const revGrowth = r(t.revenueEstimate?.growth)
+      return {
+        period: t.period,
+        label: OUTLOOK_PERIOD_LABEL[t.period],
+        eps_estimate: r(t.earningsEstimate?.avg),
+        eps_growth_pct: epsGrowth != null ? epsGrowth * 100 : null,
+        revenue_estimate: r(t.revenueEstimate?.avg),
+        revenue_growth_pct: revGrowth != null ? revGrowth * 100 : null,
+      }
+    })
+  if (periods.length === 0) return null
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const longTerm = (trend as any[]).find((t) => t.period === '+5y')
+  const longTermGrowth = r(longTerm?.growth)
+
+  return { periods, long_term_growth_pct: longTermGrowth != null ? longTermGrowth * 100 : null }
 }
 
 /** Yahoo Finance 숫자 필드: {raw: number} 또는 number 모두 처리 */
@@ -321,6 +364,7 @@ export function transformYahooToFundamentals(data: any, ticker: string, market: 
     },
     profile: extractProfile(result.assetProfile, name),
     ...extractOwnershipSignals(result),
+    outlook: extractOutlook(result),
   }
 }
 

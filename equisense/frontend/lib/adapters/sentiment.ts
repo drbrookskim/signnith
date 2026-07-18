@@ -11,7 +11,7 @@ import type {
   ShortData,
   UpgradeDowngrade,
 } from '@/types'
-import { extractOwnershipSignals } from '@/lib/adapters/yahoo'
+import { extractOutlook, extractOwnershipSignals } from '@/lib/adapters/yahoo'
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type Raw = any
@@ -215,8 +215,10 @@ export function parseFiftyTwoWeek(raw: Raw): FiftyTwoWeek {
 // ── 통합 파서 ──────────────────────────────────────
 
 export function parseSentimentData(yahooRaw: Raw, dartRaw: Raw | null): SentimentData {
-  const ownership = extractOwnershipSignals(yahooRaw?.quoteSummary?.result?.[0])
+  const result = yahooRaw?.quoteSummary?.result?.[0]
+  const ownership = extractOwnershipSignals(result)
   return {
+    outlook: extractOutlook(result),
     consensus:            parseAnalystConsensus(yahooRaw),
     earnings_surprises:   parseEarningsSurprises(yahooRaw),
     disclosures:          dartRaw ? parseDartDisclosures(dartRaw) : [],

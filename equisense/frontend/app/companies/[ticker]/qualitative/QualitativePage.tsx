@@ -418,6 +418,33 @@ function QualitativeContent() {
         </Card>
       </div>
 
+      {/* Depth 2 — 사업 전망 */}
+      {sentiment?.outlook && sentiment.outlook.periods.length > 0 && (
+        <Card style={{ marginTop: 22 }}>
+          <Eyebrow n={2}>사업 전망 · 애널리스트 컨센서스</Eyebrow>
+          {sentiment.outlook.long_term_growth_pct != null && (
+            <p style={{ fontSize: 13, color: 'var(--ink-2)', marginTop: 8 }}>
+              향후 5년 연평균 성장률 전망 <strong style={{ color: 'var(--accent)' }}>{sentiment.outlook.long_term_growth_pct.toFixed(1)}%</strong>
+            </p>
+          )}
+          <div style={{ display: 'flex', gap: 20, marginTop: 12, flexWrap: 'wrap' }}>
+            {sentiment.outlook.periods.map((p) => (
+              <div key={p.period}>
+                <div style={{ fontFamily: 'var(--font-mono)', fontSize: 10, color: 'var(--ink-3)' }}>{p.label}</div>
+                <div style={{ fontSize: 13, marginTop: 4 }}>
+                  매출 <span style={{ fontFamily: 'var(--font-mono)', color: (p.revenue_growth_pct ?? 0) >= 0 ? 'var(--ink)' : '#dc2626' }}>
+                    {p.revenue_growth_pct != null ? `${p.revenue_growth_pct >= 0 ? '+' : ''}${p.revenue_growth_pct.toFixed(1)}%` : '—'}
+                  </span>
+                  {' · '}EPS <span style={{ fontFamily: 'var(--font-mono)', color: (p.eps_growth_pct ?? 0) >= 0 ? 'var(--ink)' : '#dc2626' }}>
+                    {p.eps_growth_pct != null ? `${p.eps_growth_pct >= 0 ? '+' : ''}${p.eps_growth_pct.toFixed(1)}%` : '—'}
+                  </span>
+                </div>
+              </div>
+            ))}
+          </div>
+        </Card>
+      )}
+
       {/* Depth 2 — 포지셔닝 신호 */}
       <Card style={{ marginTop: 22 }}>
         <Eyebrow n={2}>포지셔닝 신호 · Positioning</Eyebrow>

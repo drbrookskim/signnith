@@ -21,7 +21,7 @@ import type {
   TechnicalPeriod,
 } from '@/types'
 import { transformDartToFundamentals } from '@/lib/adapters/dart'
-import { extractOwnershipSignals, extractProfile, transformYahooToFundamentals, transformYahooToTechnical, parseTimeseries } from '@/lib/adapters/yahoo'
+import { extractOutlook, extractOwnershipSignals, extractProfile, transformYahooToFundamentals, transformYahooToTechnical, parseTimeseries } from '@/lib/adapters/yahoo'
 import { computeQuarterlyInsights } from '@/lib/adapters/quarterly'
 import { calculateMoat } from '@/lib/adapters/moat'
 import { calculateQualitative, lookupJob } from '@/lib/adapters/qualitative'
@@ -42,6 +42,7 @@ const SUMMARY_MODULES = [
   'assetProfile',
   'netSharePurchaseActivity',
   'majorHoldersBreakdown',
+  'earningsTrend',
 ].join(',')
 
 async function proxyFetch<T>(path: string): Promise<T> {
@@ -87,7 +88,7 @@ export async function getFundamentals(ticker: string, market: Market): Promise<F
       proxyFetch<unknown>(`/dart/fs?corp_code=${corpCode}&year=${year}`),
       proxyFetch<unknown>(`/dart/fs?corp_code=${corpCode}&year=${year - 2}`).catch(() => null),
       proxyFetch<unknown>(
-        `/yahoo/summary?symbol=${ticker}&market=KR&modules=defaultKeyStatistics,financialData,summaryDetail,assetProfile,netSharePurchaseActivity,majorHoldersBreakdown`,
+        `/yahoo/summary?symbol=${ticker}&market=KR&modules=defaultKeyStatistics,financialData,summaryDetail,assetProfile,netSharePurchaseActivity,majorHoldersBreakdown,earningsTrend`,
       ).catch(() => null),
     ])
 
@@ -104,6 +105,7 @@ export async function getFundamentals(ticker: string, market: Market): Promise<F
     const fundamentals = transformDartToFundamentals(dartDataRecent, dartDataOld, keyStats, ticker, corpName)
     fundamentals.profile = extractProfile(yahooResult.assetProfile, corpName ?? fundamentals.name)
     Object.assign(fundamentals, extractOwnershipSignals(yahooResult))
+    fundamentals.outlook = extractOutlook(yahooResult)
     return fundamentals
   }
 
@@ -258,6 +260,7 @@ export async function fetchSentimentData(
     'summaryDetail',
     'netSharePurchaseActivity',
     'majorHoldersBreakdown',
+    'earningsTrend',
   ].join(',')
 
   const [yahooRes, dartRes] = await Promise.allSettled([

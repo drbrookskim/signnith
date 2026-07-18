@@ -376,6 +376,44 @@ function FundamentalsContent() {
         </Card>
       )}
 
+      {/* 사업 전망 — 애널리스트 컨센서스 */}
+      {data.outlook && data.outlook.periods.length > 0 && (
+        <Card style={{ marginTop: 16 }}>
+          <div style={{ fontFamily: 'var(--font-mono)', fontSize: 10, letterSpacing: '.12em', textTransform: 'uppercase', color: 'var(--ink-3)' }}>
+            사업 전망 · 애널리스트 컨센서스
+          </div>
+          {data.outlook.long_term_growth_pct != null && (
+            <p style={{ fontSize: 13, color: 'var(--ink-2)', marginTop: 8, lineHeight: 1.6 }}>
+              향후 5년 연평균 성장률 전망 <strong style={{ color: 'var(--accent)' }}>{data.outlook.long_term_growth_pct.toFixed(1)}%</strong>
+            </p>
+          )}
+          <div style={{ overflowX: 'auto', marginTop: 12 }}>
+            <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 12.5 }}>
+              <thead>
+                <tr style={{ borderBottom: '1px solid var(--line)' }}>
+                  <th style={{ textAlign: 'left', padding: '6px 8px', color: 'var(--ink-3)', fontWeight: 500 }}>구간</th>
+                  <th style={{ textAlign: 'right', padding: '6px 8px', color: 'var(--ink-3)', fontWeight: 500 }}>매출 성장률</th>
+                  <th style={{ textAlign: 'right', padding: '6px 8px', color: 'var(--ink-3)', fontWeight: 500 }}>EPS 성장률</th>
+                </tr>
+              </thead>
+              <tbody>
+                {data.outlook.periods.map((p) => (
+                  <tr key={p.period} style={{ borderBottom: '1px solid var(--line)' }}>
+                    <td style={{ padding: '7px 8px', color: 'var(--ink)' }}>{p.label}</td>
+                    <td style={{ padding: '7px 8px', textAlign: 'right', fontFamily: 'var(--font-mono)', color: (p.revenue_growth_pct ?? 0) >= 0 ? 'var(--ink-2)' : '#dc2626' }}>
+                      {p.revenue_growth_pct != null ? `${p.revenue_growth_pct >= 0 ? '+' : ''}${p.revenue_growth_pct.toFixed(1)}%` : '—'}
+                    </td>
+                    <td style={{ padding: '7px 8px', textAlign: 'right', fontFamily: 'var(--font-mono)', color: (p.eps_growth_pct ?? 0) >= 0 ? 'var(--ink-2)' : '#dc2626' }}>
+                      {p.eps_growth_pct != null ? `${p.eps_growth_pct >= 0 ? '+' : ''}${p.eps_growth_pct.toFixed(1)}%` : '—'}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </Card>
+      )}
+
       {/* 핵심 지표 카드 — KEY RATIOS */}
       {keyRatios.length > 0 && (
         <div style={{ marginTop: 22 }}>

@@ -204,6 +204,82 @@ let lastResults = null;
 const LC_LABELS = ['문제', '솔루션', '핵심지표', '고유가치제안', '경쟁우위', '채널', '고객군', '비용구조', '수익원'];
 const BMC_LABELS = ['핵심파트너', '핵심활동', '핵심자원', '가치제안', '고객관계', '채널', '고객세그먼트', '비용구조', '수익원'];
 
+function applyPrefill(data) {
+  if (!data) return;
+  if (data.common) {
+    if (data.common.idea) document.getElementById('c-idea').value = data.common.idea;
+    if (data.common.customer) document.getElementById('c-customer').value = data.common.customer;
+    if (data.common.competitor) document.getElementById('c-competitor').value = data.common.competitor;
+    if (data.common.growth) document.getElementById('c-growth').value = data.common.growth;
+  }
+  if (data.threeC) {
+    document.querySelectorAll('.threeC').forEach((el) => { el.checked = data.threeC.includes(el.value); });
+  }
+  if (data.swot) {
+    const fill = (prefix, arr) => (arr || []).slice(0, 2).forEach((v, i) => {
+      const el = document.getElementById(`${prefix}${i + 1}`);
+      if (el) el.value = v;
+    });
+    fill('swot-s', data.swot.s);
+    fill('swot-w', data.swot.w);
+    fill('swot-o', data.swot.o);
+    fill('swot-t', data.swot.t);
+  }
+  if (data.stp) {
+    if (data.stp.size) document.getElementById('stp-size').value = data.stp.size;
+    if (data.stp.targeting) document.getElementById('stp-targeting').value = data.stp.targeting;
+  }
+  if (data.fiveForces) {
+    document.querySelectorAll('.ff').forEach((el) => {
+      if (data.fiveForces[el.dataset.key]) el.value = data.fiveForces[el.dataset.key];
+    });
+  }
+  if (data.vrio) {
+    document.querySelectorAll('.vrio').forEach((el) => { el.checked = !!data.vrio[el.dataset.key]; });
+  }
+  if (data.kano) {
+    const names = document.querySelectorAll('.kano-name');
+    const cats = document.querySelectorAll('.kano-cat');
+    data.kano.slice(0, names.length).forEach((f, i) => {
+      names[i].value = f.name || '';
+      if (f.category) cats[i].value = f.category;
+    });
+  }
+  if (data.positioningMap) {
+    if (data.positioningMap.self) {
+      document.getElementById('pm-self-x').value = data.positioningMap.self.x;
+      document.getElementById('pm-self-y').value = data.positioningMap.self.y;
+    }
+    const pmNames = document.querySelectorAll('.pm-name');
+    const pmXs = document.querySelectorAll('.pm-x');
+    const pmYs = document.querySelectorAll('.pm-y');
+    (data.positioningMap.competitors || []).slice(0, pmNames.length).forEach((c, i) => {
+      pmNames[i].value = c.name || '';
+      if (c.x !== undefined) pmXs[i].value = c.x;
+      if (c.y !== undefined) pmYs[i].value = c.y;
+    });
+  }
+  if (data.ansoff) {
+    if (data.ansoff.market) document.getElementById('ansoff-market').value = data.ansoff.market;
+    if (data.ansoff.product) document.getElementById('ansoff-product').value = data.ansoff.product;
+  }
+  if (data.blueOcean) {
+    document.querySelectorAll('.bo').forEach((el) => {
+      const match = data.blueOcean.find((f) => f.name === el.dataset.key);
+      if (match) el.value = match.action;
+    });
+  }
+  if (data.leanCanvas) {
+    document.querySelectorAll('.lc').forEach((el, i) => { if (data.leanCanvas[i]) el.value = data.leanCanvas[i]; });
+  }
+  if (data.bmc) {
+    document.querySelectorAll('.bmc').forEach((el, i) => { if (data.bmc[i]) el.value = data.bmc[i]; });
+  }
+  if (data.aarrr) {
+    document.getElementById('aarrr-weak').value = data.aarrr;
+  }
+}
+
 function calculateAll() {
   const common = {
     idea: document.getElementById('c-idea').value,
@@ -292,6 +368,10 @@ function exportMarkdown() {
 
 document.getElementById('calc-btn').addEventListener('click', calculateAll);
 document.getElementById('export-btn').addEventListener('click', exportMarkdown);
+
+/* PREFILL: Claude가 대화·검색으로 미리 판단한 값이 있으면 이 자리에
+   window.PREFILL = {...}; 형태로 주입한다 (SKILL.md Phase 0 참고). */
+if (typeof window.PREFILL !== 'undefined') applyPrefill(window.PREFILL);
 </script>
 </body>
 </html>

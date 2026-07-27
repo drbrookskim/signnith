@@ -12,13 +12,23 @@ description: >
 
 주식 기술적 분석처럼, 정해진 규칙으로 아이디어의 시장 위치를 판정하고 정형화된 1차 전략을 매칭하는 계산기를 만든다. 판정 로직과 문구는 전부 `assets/engine.js`에 고정되어 있으며, 이 스킬의 역할은 그 로직을 담은 자기완결형 HTML을 만들어 Artifact로 발행하는 것뿐이다.
 
+## Phase 0: 값 미리 채우기 (선택)
+
+사용자가 아이디어를 설명했다면, 폼을 빈 채로 주는 대신 아는 만큼 미리 채워서 발행한다. 이 단계는 판단(추론)이 들어가므로 AI가 필요하지만, 계산 자체(Phase 1 이후)는 여전히 규칙기반이라 발행 후엔 AI 없이 재계산 가능하다.
+
+- **시장/경쟁 관련 값**(Five Forces 5요인, STP, 포지셔닝맵 경쟁사 위치, 시장성장세, SWOT 기회/위협, 블루오션 5요인) — 외부 데이터로 근거를 댈 수 있는 값이니 WebSearch로 조사한 뒤 판단해 채운다.
+- **자사 내부역량 관련 값**(3C 자사강점, VRIO 4항목, SWOT 강점/약점, 린 캔버스 9블록, BMC 9블록) — 창업자만 아는 정보라 외부 데이터로 확인 불가능하다. 대화에서 이미 나온 내용은 재질문하지 않고, 부족한 부분만 사용자에게 짧게 물어본다.
+- 그래도 채우지 못한 값은 비워둔다 — 사용자가 발행된 폼에서 직접 채우거나 고쳐서 계산하면 된다.
+- 모은 값을 `assets/template.html`의 `data.common`/`data.threeC`/`data.swot`/`data.stp`/`data.fiveForces`/`data.vrio`/`data.kano`/`data.positioningMap`/`data.ansoff`/`data.blueOcean`/`data.leanCanvas`/`data.bmc`/`data.aarrr` 키 구조에 맞는 `PREFILL` 객체로 만든다(각 키의 정확한 형태는 `assets/template.html`의 `applyPrefill(data)` 함수 정의를 읽고 그대로 맞춘다).
+
 ## 실행 절차
 
 1. `assets/engine.js` 파일 내용을 읽는다.
 2. `assets/template.html` 파일 내용을 읽는다.
 3. `template.html`의 `/* ENGINE_JS: 이 자리에 engine.js 파일 내용을 그대로 붙여넣는다. */` 주석을, 1번에서 읽은 `engine.js` 전체 내용으로 치환한다.
-4. Artifact 도구는 `<!doctype>`/`<html>`/`<head>`/`<body>` 태그를 직접 받지 않고 발행 시 자동으로 스켈레톤을 씌운다. 치환된 HTML에서 `<!DOCTYPE html>`, `<html lang="ko">`, `<head>...</head>`, `<body>`, `</body>`, `</html>` 태그를 제거해 `<style>` 태그와 본문 내용만 남긴 뒤 Artifact 도구에 넘긴다(`<title>` 안의 텍스트는 Artifact 도구의 title 파라미터로 전달, title: `idea_position_lab`, favicon 지정). `template.html` 파일 자체는 단독으로 브라우저에서 열어도 동작해야 하므로 원본 구조를 그대로 둔다.
-5. 사용자에게: 폼을 채우고 "전체 계산하기"를 누르면 결과가 나오며, "마크다운으로 내보내기"로 리포트를 저장할 수 있다고 안내한다.
+4. Phase 0에서 만든 `PREFILL` 객체가 있다면, `template.html`의 `/* PREFILL: ... */` 주석 다음 줄(`if (typeof window.PREFILL !== 'undefined') applyPrefill(window.PREFILL);` 바로 앞)에 `window.PREFILL = { ...만든 객체... };`를 삽입한다. 없으면 이 단계는 건너뛴다.
+5. Artifact 도구는 `<!doctype>`/`<html>`/`<head>`/`<body>` 태그를 직접 받지 않고 발행 시 자동으로 스켈레톤을 씌운다. 치환된 HTML에서 `<!DOCTYPE html>`, `<html lang="ko">`, `<head>...</head>`, `<body>`, `</body>`, `</html>` 태그를 제거해 `<style>` 태그와 본문 내용만 남긴 뒤 Artifact 도구에 넘긴다(`<title>` 안의 텍스트는 Artifact 도구의 title 파라미터로 전달, title: `idea_position_lab`, favicon 지정). `template.html` 파일 자체는 단독으로 브라우저에서 열어도 동작해야 하므로 원본 구조를 그대로 둔다.
+6. 사용자에게: 값이 미리 채워져 있으면 그대로 계산하거나 고쳐서 계산할 수 있다고 안내하고, "전체 계산하기"를 누르면 결과가 나오며 "마크다운으로 내보내기"로 리포트를 저장할 수 있다고 안내한다.
 
 ## 규칙 변경 시
 

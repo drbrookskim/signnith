@@ -81,6 +81,8 @@
     <div class="row"><input type="text" class="kano-name" placeholder="기능명 1"><select class="kano-cat"><option value="must-be">필수</option><option value="performance">성과</option><option value="attractive">매력적</option><option value="indifferent">무관심</option></select></div>
     <div class="row"><input type="text" class="kano-name" placeholder="기능명 2"><select class="kano-cat"><option value="must-be">필수</option><option value="performance">성과</option><option value="attractive">매력적</option><option value="indifferent">무관심</option></select></div>
     <div class="row"><input type="text" class="kano-name" placeholder="기능명 3"><select class="kano-cat"><option value="must-be">필수</option><option value="performance">성과</option><option value="attractive">매력적</option><option value="indifferent">무관심</option></select></div>
+    <div class="row"><input type="text" class="kano-name" placeholder="기능명 4"><select class="kano-cat"><option value="must-be">필수</option><option value="performance">성과</option><option value="attractive">매력적</option><option value="indifferent">무관심</option></select></div>
+    <div class="row"><input type="text" class="kano-name" placeholder="기능명 5"><select class="kano-cat"><option value="must-be">필수</option><option value="performance">성과</option><option value="attractive">매력적</option><option value="indifferent">무관심</option></select></div>
   </div>
 </section>
 
@@ -199,7 +201,18 @@ function readTextGroup(selector) {
 
 let lastResults = null;
 
+const LC_LABELS = ['문제', '솔루션', '핵심지표', '고유가치제안', '경쟁우위', '채널', '고객군', '비용구조', '수익원'];
+const BMC_LABELS = ['핵심파트너', '핵심활동', '핵심자원', '가치제안', '고객관계', '채널', '고객세그먼트', '비용구조', '수익원'];
+
 function calculateAll() {
+  const common = {
+    idea: document.getElementById('c-idea').value,
+    customer: document.getElementById('c-customer').value,
+    competitor: document.getElementById('c-competitor').value,
+    growth: document.getElementById('c-growth').value,
+  };
+  const leanCanvas = readTextGroup('.lc').map((text, i) => ({ label: LC_LABELS[i], text }));
+  const bmc = readTextGroup('.bmc').map((text, i) => ({ label: BMC_LABELS[i], text }));
   const threeC = window.Engine.scoreThreeC(readChecklist('.threeC'));
   const swot = window.Engine.judgeSWOT(
     [document.getElementById('swot-s1').value, document.getElementById('swot-s2').value].filter(Boolean),
@@ -218,12 +231,14 @@ function calculateAll() {
   const blueOcean = window.Engine.judgeBlueOcean(readBlueOcean());
   const aarrr = window.Engine.summarizeAARRR(document.getElementById('aarrr-weak').value);
 
-  lastResults = { threeC, swot, stp, fiveForces, vrio, kano, positioningMap, fourP, ansoff, blueOcean, aarrr };
+  lastResults = { common, leanCanvas, bmc, threeC, swot, stp, fiveForces, vrio, kano, positioningMap, fourP, ansoff, blueOcean, aarrr };
   renderResults(lastResults);
 }
 
 function renderResults(r) {
   const lines = [
+    `아이디어: ${r.common.idea}, 타겟고객: ${r.common.customer}, 경쟁사: ${r.common.competitor}, 시장성장세: ${r.common.growth}`,
+    ``,
     `[분석군]`,
     `3C: ${r.threeC.band} — ${r.threeC.text}`,
     `SWOT: ${r.swot.quadrant} — ${r.swot.text}`,
@@ -232,6 +247,8 @@ function renderResults(r) {
     `VRIO: ${r.vrio.level} — ${r.vrio.text}`,
     `Kano: ${r.kano.map((k) => `${k.name}(${k.label})`).join(', ')}`,
     `포지셔닝맵: ${r.positioningMap.text}`,
+    `린 캔버스: ${r.leanCanvas.map((b) => `${b.label}: ${b.text}`).join(' / ')}`,
+    `BMC: ${r.bmc.map((b) => `${b.label}: ${b.text}`).join(' / ')}`,
     ``,
     `[전략군]`,
     `4P: 제품-${r.fourP.product} / 가격-${r.fourP.price} / 유통-${r.fourP.place} / 프로모션-${r.fourP.promotion}`,
@@ -247,6 +264,8 @@ function exportMarkdown() {
   const r = lastResults;
   const md = `# Idea Position Lab 결과
 
+아이디어: ${r.common.idea}, 타겟고객: ${r.common.customer}, 경쟁사: ${r.common.competitor}, 시장성장세: ${r.common.growth}
+
 ## 분석군
 - 3C: ${r.threeC.band} — ${r.threeC.text}
 - SWOT: ${r.swot.quadrant} — ${r.swot.text}
@@ -255,6 +274,8 @@ function exportMarkdown() {
 - VRIO: ${r.vrio.level} — ${r.vrio.text}
 - Kano: ${r.kano.map((k) => `${k.name}(${k.label})`).join(', ')}
 - 포지셔닝맵: ${r.positioningMap.text}
+- 린 캔버스: ${r.leanCanvas.map((b) => `${b.label}: ${b.text}`).join(' / ')}
+- BMC: ${r.bmc.map((b) => `${b.label}: ${b.text}`).join(' / ')}
 
 ## 전략군
 - 4P: 제품-${r.fourP.product} / 가격-${r.fourP.price} / 유통-${r.fourP.place} / 프로모션-${r.fourP.promotion}

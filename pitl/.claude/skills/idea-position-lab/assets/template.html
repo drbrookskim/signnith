@@ -2,7 +2,7 @@
 <html lang="ko">
 <head>
 <meta charset="UTF-8">
-<title>Idea Position Lab — 나침반</title>
+<title>Idea Campus > Lab Template</title>
 <style>
   body { font-family: -apple-system, sans-serif; max-width: 900px; margin: 2rem auto; padding: 0 1rem; }
   section { border: 1px solid #ddd; border-radius: 8px; padding: 1rem; margin-bottom: 1rem; }
@@ -78,7 +78,7 @@
 </style>
 </head>
 <body>
-<h1>Idea Position Lab — 나침반</h1>
+<h1>Idea Campus &gt; Lab Template</h1>
 
 <section>
   <h2>공통 입력</h2>
@@ -543,7 +543,7 @@ function renderResults(r) {
 function exportMarkdown() {
   if (!lastResults) { alert('먼저 "전체 계산하기"를 눌러라.'); return; }
   const r = lastResults;
-  const md = `# Idea Position Lab 결과
+  const md = `# Idea Campus > Lab Report
 
 아이디어: ${r.common.idea}, 타겟고객: ${r.common.customer}, 경쟁사: ${r.common.competitor}, 시장성장세: ${r.common.growth}
 
@@ -567,7 +567,7 @@ function exportMarkdown() {
   const blob = new Blob([md], { type: 'text/markdown' });
   const a = document.createElement('a');
   a.href = URL.createObjectURL(blob);
-  a.download = 'idea-position-lab-result.md';
+  a.download = 'idea-campus-lab-report.md';
   a.click();
 }
 

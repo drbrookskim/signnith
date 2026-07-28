@@ -2,7 +2,7 @@
 <html lang="ko">
 <head>
 <meta charset="UTF-8">
-<title>Idea Position Lab</title>
+<title>Idea Position Lab — 나침반</title>
 <style>
   body { font-family: -apple-system, sans-serif; max-width: 900px; margin: 2rem auto; padding: 0 1rem; }
   section { border: 1px solid #ddd; border-radius: 8px; padding: 1rem; margin-bottom: 1rem; }
@@ -11,15 +11,74 @@
   input[type=text], textarea, select { width: 100%; margin: 0.25rem 0 0.75rem; box-sizing: border-box; }
   .row { display: flex; gap: 0.5rem; }
   .row > * { flex: 1; }
-  #results { white-space: pre-wrap; background: #f7f7f7; padding: 1rem; border-radius: 8px; }
+  #results { background: #f7f7f7; padding: 1rem; border-radius: 8px; }
   button { padding: 0.6rem 1.2rem; font-size: 1rem; cursor: pointer; }
   .badge { font-size: 0.7rem; font-weight: normal; padding: 0.1rem 0.4rem; border-radius: 4px; margin-left: 0.5rem; vertical-align: middle; }
   .badge-search { background: #e3f2fd; color: #1565c0; }
   .badge-infer { background: #fff3e0; color: #e65100; }
+
+  /* 결과 도식화 */
+  .r-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1rem; }
+  .r-card { background: #fff; border: 1px solid #ddd; border-radius: 8px; padding: 1rem 1.1rem; }
+  .r-card h4 { margin: 0 0 0.7rem; font-size: 0.9rem; }
+  .r-card p.r-desc { font-size: 0.82rem; color: #555; margin: 0.6rem 0 0; }
+  .r-wide { grid-column: 1 / -1; }
+  .r-summary { font-size: 0.85rem; color: #333; margin: 0 0 1rem; }
+
+  .quad2 { display: grid; grid-template-columns: 1fr 1fr; grid-template-rows: 1fr 1fr; gap: 3px; border-radius: 6px; overflow: hidden; border: 1px solid #ddd; }
+  .quad2 .cell { padding: 0.6rem 0.7rem; font-size: 0.78rem; min-height: 70px; background: #fafafa; }
+  .quad2 .cell b { display: block; font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.03em; color: #888; margin-bottom: 0.25rem; }
+  .quad2 .cell.hit { background: #e3f2fd; }
+  .quad2 .cell.hit b { color: #1565c0; }
+
+  .ff-row { display: grid; grid-template-columns: 100px 1fr 34px; align-items: center; gap: 0.5rem; margin-bottom: 0.5rem; font-size: 0.76rem; }
+  .ff-track { background: #e0e0e0; border-radius: 999px; height: 7px; overflow: hidden; }
+  .ff-fill { height: 100%; border-radius: 999px; }
+  .ff-fill.high { background: #b23b3b; }
+  .ff-fill.mid { background: #b8791a; }
+  .ff-fill.low { background: #2f7a4f; }
+
+  .vrio-step { display: flex; align-items: center; gap: 0.55rem; padding: 0.4rem 0; font-size: 0.8rem; border-bottom: 1px dashed #e0e0e0; }
+  .vrio-step:last-child { border-bottom: none; }
+  .vrio-dot { width: 10px; height: 10px; border-radius: 50%; border: 2px solid #ddd; flex-shrink: 0; }
+  .vrio-step.pass .vrio-dot { background: #2f7a4f; border-color: #2f7a4f; }
+  .vrio-step.stop .vrio-dot { background: #b23b3b; border-color: #b23b3b; }
+  .vrio-step.reached b { color: #1565c0; }
+
+  .kano-row { display: flex; justify-content: space-between; align-items: center; padding: 0.35rem 0; font-size: 0.8rem; border-bottom: 1px solid #eee; }
+  .kano-row:last-child { border-bottom: none; }
+  .kano-chip { font-size: 0.62rem; font-weight: 600; padding: 0.1rem 0.5rem; border-radius: 999px; }
+  .kano-chip.must-be { background: #f8dede; color: #b23b3b; }
+  .kano-chip.performance { background: #e3f2fd; color: #1565c0; }
+  .kano-chip.attractive { background: #e2f2e6; color: #2f7a4f; }
+  .kano-chip.indifferent { background: #eee; color: #888; }
+
+  .errc-table { width: 100%; border-collapse: collapse; font-size: 0.78rem; }
+  .errc-table th { text-align: left; font-size: 0.65rem; text-transform: uppercase; color: #888; font-weight: 600; padding: 0.25rem 0.35rem; border-bottom: 1px solid #ddd; }
+  .errc-table td { padding: 0.35rem; border-bottom: 1px solid #eee; }
+  .errc-mark { display: inline-block; width: 20px; text-align: center; font-weight: 700; color: #ddd; }
+  .errc-mark.on.create { color: #2f7a4f; }
+  .errc-mark.on.raise { color: #1565c0; }
+  .errc-mark.on.reduce { color: #b8791a; }
+  .errc-mark.on.eliminate { color: #b23b3b; }
+
+  .canvas9 { display: grid; grid-template-columns: repeat(5, 1fr); gap: 3px; font-size: 0.7rem; }
+  .canvas9 .block { background: #fafafa; border: 1px solid #eee; border-radius: 5px; padding: 0.45rem 0.5rem; min-height: 68px; }
+  .canvas9 .block b { display: block; font-size: 0.6rem; text-transform: uppercase; color: #888; margin-bottom: 0.2rem; }
+
+  .pm-axis { stroke: #ddd; stroke-width: 1; }
+  .pm-dot-self { fill: #1565c0; }
+  .pm-dot-comp { fill: #888; }
+  .pm-label { font-size: 9px; fill: #333; }
+
+  .r-stat-line { display: flex; justify-content: space-between; font-size: 0.8rem; padding: 0.35rem 0; border-bottom: 1px solid #eee; }
+  .r-stat-line:last-child { border-bottom: none; }
+  .r-pill { font-size: 0.7rem; font-weight: 600; padding: 0.1rem 0.5rem; border-radius: 999px; background: #e3f2fd; color: #1565c0; }
+  .r-pill.warn { background: #f8dede; color: #b23b3b; }
 </style>
 </head>
 <body>
-<h1>Idea Position Lab</h1>
+<h1>Idea Position Lab — 나침반</h1>
 
 <section>
   <h2>공통 입력</h2>
@@ -292,50 +351,193 @@ function calculateAll() {
   };
   const leanCanvas = readTextGroup('.lc').map((text, i) => ({ label: LC_LABELS[i], text }));
   const bmc = readTextGroup('.bmc').map((text, i) => ({ label: BMC_LABELS[i], text }));
-  const threeC = window.Engine.scoreThreeC(readChecklist('.threeC'));
-  const swot = window.Engine.judgeSWOT(
-    [document.getElementById('swot-s1').value, document.getElementById('swot-s2').value].filter(Boolean),
-    [document.getElementById('swot-w1').value, document.getElementById('swot-w2').value].filter(Boolean),
-    [document.getElementById('swot-o1').value, document.getElementById('swot-o2').value].filter(Boolean),
-    [document.getElementById('swot-t1').value, document.getElementById('swot-t2').value].filter(Boolean)
-  );
+  const threeCStrengths = readChecklist('.threeC');
+  const threeC = window.Engine.scoreThreeC(threeCStrengths);
+  const swotRaw = {
+    s: [document.getElementById('swot-s1').value, document.getElementById('swot-s2').value].filter(Boolean),
+    w: [document.getElementById('swot-w1').value, document.getElementById('swot-w2').value].filter(Boolean),
+    o: [document.getElementById('swot-o1').value, document.getElementById('swot-o2').value].filter(Boolean),
+    t: [document.getElementById('swot-t1').value, document.getElementById('swot-t2').value].filter(Boolean),
+  };
+  const swot = window.Engine.judgeSWOT(swotRaw.s, swotRaw.w, swotRaw.o, swotRaw.t);
   const stp = window.Engine.judgeSTP(document.getElementById('stp-size').value, document.getElementById('stp-targeting').value);
-  const fiveForces = window.Engine.scoreFiveForces(readFiveForces());
-  const vrio = window.Engine.scoreVRIO(readVRIO());
+  const rawFiveForces = readFiveForces();
+  const fiveForces = window.Engine.scoreFiveForces(rawFiveForces);
+  const rawVrio = readVRIO();
+  const vrio = window.Engine.scoreVRIO(rawVrio);
   const kano = window.Engine.classifyKano(readKano());
   const pm = readPositioningMap();
   const positioningMap = window.Engine.analyzePositioningMap(pm.self, pm.competitors);
   const fourP = window.Engine.deriveFourP(swot.quadrant);
-  const ansoff = window.Engine.judgeAnsoff(document.getElementById('ansoff-market').value, document.getElementById('ansoff-product').value);
-  const blueOcean = window.Engine.judgeBlueOcean(readBlueOcean());
+  const rawAnsoff = { market: document.getElementById('ansoff-market').value, product: document.getElementById('ansoff-product').value };
+  const ansoff = window.Engine.judgeAnsoff(rawAnsoff.market, rawAnsoff.product);
+  const rawBlueOcean = readBlueOcean();
+  const blueOcean = window.Engine.judgeBlueOcean(rawBlueOcean);
   const aarrr = window.Engine.summarizeAARRR(document.getElementById('aarrr-weak').value);
+  const aarrrWeak = document.getElementById('aarrr-weak').value;
 
-  lastResults = { common, leanCanvas, bmc, threeC, swot, stp, fiveForces, vrio, kano, positioningMap, fourP, ansoff, blueOcean, aarrr };
+  lastResults = {
+    common, leanCanvas, bmc, threeC, threeCStrengths, swot, swotRaw, stp,
+    fiveForces, rawFiveForces, vrio, rawVrio, kano, positioningMap, pm,
+    fourP, ansoff, rawAnsoff, blueOcean, rawBlueOcean, aarrr, aarrrWeak,
+  };
   renderResults(lastResults);
 }
 
-function renderResults(r) {
-  const lines = [
-    `아이디어: ${r.common.idea}, 타겟고객: ${r.common.customer}, 경쟁사: ${r.common.competitor}, 시장성장세: ${r.common.growth}`,
-    ``,
-    `[분석군]`,
-    `3C: ${r.threeC.band} — ${r.threeC.text}`,
-    `SWOT: ${r.swot.quadrant} — ${r.swot.text}`,
-    `STP: ${r.stp.text}`,
-    `Five Forces: ${r.fiveForces.band} — ${r.fiveForces.text}`,
-    `VRIO: ${r.vrio.level} — ${r.vrio.text}`,
-    `Kano: ${r.kano.map((k) => `${k.name}(${k.label})`).join(', ')}`,
-    `포지셔닝맵: ${r.positioningMap.text}`,
-    `린 캔버스: ${r.leanCanvas.map((b) => `${b.label}: ${b.text}`).join(' / ')}`,
-    `BMC: ${r.bmc.map((b) => `${b.label}: ${b.text}`).join(' / ')}`,
-    ``,
-    `[전략군]`,
-    `4P: 제품-${r.fourP.product} / 가격-${r.fourP.price} / 유통-${r.fourP.place} / 프로모션-${r.fourP.promotion}`,
-    `Ansoff: ${r.ansoff.text}`,
-    `블루오션: ${r.blueOcean.profile} — ${r.blueOcean.text}`,
-    `AARRR: ${r.aarrr.text}`,
+function esc(s) {
+  return String(s == null ? '' : s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+}
+
+function quad2(cells) {
+  return `<div class="quad2">${cells.map((c) => `<div class="cell${c.hit ? ' hit' : ''}"><b>${esc(c.label)}</b>${esc(c.text)}</div>`).join('')}</div>`;
+}
+
+const THREE_C_ALL = ['브랜드력', '원가우위', '기술력', '유통망', '자본력'];
+function renderThreeC(r) {
+  return `<div class="r-stat-line"><span>선택된 강점</span><b>${esc(r.threeCStrengths.join(', ') || '없음')} (${r.threeCStrengths.length}/5)</b></div>
+    <div class="r-stat-line"><span>판정</span><span class="r-pill">${esc(r.threeC.band)}</span></div>
+    <p class="r-desc">${esc(r.threeC.text)}</p>`;
+}
+
+function renderSwot(r) {
+  const q = r.swot.quadrant;
+  const cells = [
+    { label: 'Strength', text: r.swotRaw.s.join(', ') || '-', hit: q[0] === 'S' },
+    { label: 'Weakness', text: r.swotRaw.w.join(', ') || '-', hit: q[0] === 'W' },
+    { label: 'Opportunity', text: r.swotRaw.o.join(', ') || '-', hit: q[1] === 'O' },
+    { label: 'Threat', text: r.swotRaw.t.join(', ') || '-', hit: q[1] === 'T' },
   ];
-  document.getElementById('results').textContent = lines.join('\n');
+  return `${quad2(cells)}<p class="r-desc">판정: <b>${esc(q)}</b> — ${esc(r.swot.text)}</p>`;
+}
+
+function renderStp(r) {
+  return `<div class="r-stat-line"><span>세그먼트 크기</span><span class="r-pill">${esc(document.getElementById('stp-size').value)}</span></div>
+    <div class="r-stat-line"><span>타겟팅 유형</span><span class="r-pill">${esc(document.getElementById('stp-targeting').value)}</span></div>
+    <p class="r-desc">${esc(r.stp.text)}</p>`;
+}
+
+const FF_LABELS = { entrants: '신규진입위협', supplier: '공급자교섭력', buyer: '구매자교섭력', substitutes: '대체재위협', rivalry: '경쟁강도' };
+const FF_WIDTH = { low: 33, mid: 66, high: 100 };
+function renderFiveForces(r) {
+  const rows = Object.keys(FF_LABELS).map((key) => {
+    const level = r.rawFiveForces[key];
+    return `<div class="ff-row"><span>${FF_LABELS[key]}</span><div class="ff-track"><div class="ff-fill ${level}" style="width:${FF_WIDTH[level]}%"></div></div><span>${esc(level)}</span></div>`;
+  }).join('');
+  return `${rows}<p class="r-desc">평균 판정: <b>${esc(r.fiveForces.band)}</b> — ${esc(r.fiveForces.text)}</p>`;
+}
+
+const VRIO_STEPS = [
+  { key: 'value', label: '가치(Value)' },
+  { key: 'rarity', label: '희소성(Rarity)' },
+  { key: 'imitability', label: '모방불가(Imitability)' },
+  { key: 'organization', label: '조직화(Organization)' },
+];
+function renderVrio(r) {
+  const stopIndex = VRIO_STEPS.findIndex((s) => !r.rawVrio[s.key]);
+  const rows = VRIO_STEPS.map((s, i) => {
+    const passed = stopIndex === -1 || i < stopIndex;
+    const isStop = i === stopIndex;
+    const cls = isStop ? 'stop reached' : passed ? 'pass' : '';
+    const text = isStop ? `<b>${esc(s.label)} — 없음 (여기서 정지)</b>` : `${esc(s.label)}${passed ? ' — 있음' : ''}`;
+    return `<div class="vrio-step ${cls}"><div class="vrio-dot"></div>${text}</div>`;
+  }).join('');
+  return `${rows}<p class="r-desc">판정: <b>${esc(r.vrio.level)}</b> — ${esc(r.vrio.text)}</p>`;
+}
+
+function renderKano(r) {
+  if (r.kano.length === 0) return `<p class="r-desc">입력된 기능 없음</p>`;
+  return r.kano.map((k) => `<div class="kano-row"><span>${esc(k.name)}</span><span class="kano-chip ${k.category}">${esc(k.label.split('(')[0].trim())}</span></div>`).join('');
+}
+
+function renderPositioningMap(r) {
+  const toSvg = (x, y) => ({ x: 20 + (x / 100) * 360, y: 200 - (y / 100) * 180 });
+  const self = toSvg(r.pm.self.x, r.pm.self.y);
+  const dots = r.pm.competitors.map((c) => {
+    const p = toSvg(c.x, c.y);
+    return `<circle class="pm-dot-comp" cx="${p.x}" cy="${p.y}" r="6"></circle><text class="pm-label" x="${p.x + 8}" y="${p.y}">${esc(c.name)}</text>`;
+  }).join('');
+  return `<svg viewBox="0 0 400 220" width="100%" height="200">
+    <line class="pm-axis" x1="200" y1="10" x2="200" y2="210"></line>
+    <line class="pm-axis" x1="10" y1="110" x2="390" y2="110"></line>
+    <text class="pm-label" x="360" y="105">Q1</text>
+    <text class="pm-label" x="20" y="105">Q2</text>
+    <text class="pm-label" x="20" y="205">Q3</text>
+    <text class="pm-label" x="360" y="205">Q4</text>
+    ${dots}
+    <circle class="pm-dot-self" cx="${self.x}" cy="${self.y}" r="8"></circle>
+    <text class="pm-label" x="${self.x + 10}" y="${self.y}" font-weight="700">자사</text>
+  </svg><p class="r-desc">${esc(r.positioningMap.text)}</p>`;
+}
+
+function renderFourP(r) {
+  const cells = [
+    { label: 'Product', text: r.fourP.product, hit: true },
+    { label: 'Price', text: r.fourP.price, hit: true },
+    { label: 'Place', text: r.fourP.place, hit: true },
+    { label: 'Promotion', text: r.fourP.promotion, hit: true },
+  ];
+  return quad2(cells);
+}
+
+function renderAnsoff(r) {
+  const cells = [
+    { label: '기존×기존', text: '시장침투', hit: r.rawAnsoff.market === 'existing' && r.rawAnsoff.product === 'existing' },
+    { label: '기존×신규', text: '제품개발', hit: r.rawAnsoff.market === 'existing' && r.rawAnsoff.product === 'new' },
+    { label: '신규×기존', text: '시장개발', hit: r.rawAnsoff.market === 'new' && r.rawAnsoff.product === 'existing' },
+    { label: '신규×신규', text: '다각화', hit: r.rawAnsoff.market === 'new' && r.rawAnsoff.product === 'new' },
+  ];
+  return `${quad2(cells)}<p class="r-desc">${esc(r.ansoff.text)}</p>`;
+}
+
+const BO_NAMES = ['가격', '품질', '서비스범위', '브랜드이미지', '유통채널'];
+const BO_ACTIONS = ['eliminate', 'reduce', 'raise', 'create'];
+function renderBlueOcean(r) {
+  const rows = BO_NAMES.map((name) => {
+    const found = r.rawBlueOcean.find((f) => f.name === name);
+    const cells = BO_ACTIONS.map((a) => `<td><span class="errc-mark ${found && found.action === a ? 'on ' + a : ''}">${found && found.action === a ? '●' : '·'}</span></td>`).join('');
+    return `<tr><td>${esc(name)}</td>${cells}</tr>`;
+  }).join('');
+  return `<table class="errc-table"><tr><th>요인</th><th>제거</th><th>감소</th><th>증가</th><th>창조</th></tr>${rows}</table>
+    <p class="r-desc">판정: <b>${esc(r.blueOcean.profile)}</b> — ${esc(r.blueOcean.text)}</p>`;
+}
+
+function renderCanvas9(blocks) {
+  return `<div class="canvas9">${blocks.map((b) => `<div class="block"><b>${esc(b.label)}</b>${esc(b.text)}</div>`).join('')}</div>`;
+}
+
+const AARRR_LABELS = { acquisition: '획득', activation: '활성화', retention: '유지', referral: '추천', revenue: '수익화' };
+function renderAarrr(r) {
+  const rows = Object.keys(AARRR_LABELS).map((key) => {
+    const isWeak = key === r.aarrrWeak;
+    return `<div class="r-stat-line"><span${isWeak ? ' style="color:#b23b3b;font-weight:600;"' : ''}>${AARRR_LABELS[key]}</span>${isWeak ? '<span class="r-pill warn">약점</span>' : '<span>–</span>'}</div>`;
+  }).join('');
+  return `${rows}<p class="r-desc">${esc(r.aarrr.text)}</p>`;
+}
+
+function renderResults(r) {
+  const html = `
+    <p class="r-summary">아이디어: ${esc(r.common.idea)} · 타겟고객: ${esc(r.common.customer)} · 경쟁사: ${esc(r.common.competitor)} · 시장성장세: ${esc(r.common.growth)}</p>
+    <h3>분석군</h3>
+    <div class="r-grid">
+      <div class="r-card"><h4>3C</h4>${renderThreeC(r)}</div>
+      <div class="r-card"><h4>SWOT</h4>${renderSwot(r)}</div>
+      <div class="r-card"><h4>STP</h4>${renderStp(r)}</div>
+      <div class="r-card r-wide"><h4>Five Forces</h4>${renderFiveForces(r)}</div>
+      <div class="r-card"><h4>VRIO</h4>${renderVrio(r)}</div>
+      <div class="r-card"><h4>Kano</h4>${renderKano(r)}</div>
+      <div class="r-card r-wide"><h4>포지셔닝맵</h4>${renderPositioningMap(r)}</div>
+    </div>
+    <h3>전략군</h3>
+    <div class="r-grid">
+      <div class="r-card r-wide"><h4>4P</h4>${renderFourP(r)}</div>
+      <div class="r-card"><h4>Ansoff</h4>${renderAnsoff(r)}</div>
+      <div class="r-card"><h4>블루오션 전략캔버스</h4>${renderBlueOcean(r)}</div>
+      <div class="r-card"><h4>AARRR</h4>${renderAarrr(r)}</div>
+      <div class="r-card r-wide"><h4>린 캔버스</h4>${renderCanvas9(r.leanCanvas)}</div>
+      <div class="r-card r-wide"><h4>BMC</h4>${renderCanvas9(r.bmc)}</div>
+    </div>
+  `;
+  document.getElementById('results').innerHTML = html;
 }
 
 function exportMarkdown() {

@@ -99,6 +99,12 @@
   .r-stat-line:last-child { border-bottom: none; }
   .r-pill { font-size: 0.7rem; font-weight: 600; padding: 0.1rem 0.5rem; border-radius: 999px; background: #e3f2fd; color: #1565c0; }
   .r-pill.warn { background: #f8dede; color: #b23b3b; }
+
+  .diagnosis-box { background: #fff3e0; border: 1px solid #f0d9b5; border-radius: 8px; padding: 1rem 1.25rem; margin: -0.5rem 0 1.25rem; }
+  .diagnosis-box button { background: #e65100; color: #fff; border-color: #e65100; }
+  .diagnosis-box button:hover { background: #c74500; }
+  .diagnosis-desc { font-size: 0.8rem; color: #7a4a12; margin: 0.6rem 0 0; }
+  .diagnosis-status { font-size: 0.8rem; color: #2f7a4f; font-weight: 600; margin: 0.5rem 0 0; white-space: pre-wrap; }
 </style>
 </head>
 <body>
@@ -112,6 +118,12 @@
   <label>시장성장세 <span class="badge badge-search">🔍 조사 기반</span></label>
   <select id="c-growth"><option value="growth">성장</option><option value="stable">정체</option><option value="decline">축소</option></select>
 </section>
+
+<div class="diagnosis-box">
+  <button id="diagnosis-btn">Diagnosis</button>
+  <p class="diagnosis-desc">위 공통 입력을 근거로 아래 13개 프레임워크 값을 클로드가 채워준다. 이 페이지 안에서는 못 하는 일이라(발행된 페이지는 AI를 직접 부르지 못함), 누르면 공통 입력값이 복사된다 — 그걸 채팅에 붙여넣고 "진단해줘"라고 말하면 클로드가 나머지를 채운 페이지를 다시 발행해준다.</p>
+  <p id="diagnosis-status" class="diagnosis-status"></p>
+</div>
 
 <section>
   <h2>3C — 자사 강점 <span class="badge badge-infer">🤖 Claude 추론 — 확인 필요</span></h2>
@@ -597,6 +609,32 @@ function exportMarkdown() {
   a.click();
 }
 
+function requestDiagnosis() {
+  const idea = document.getElementById('c-idea').value;
+  const customer = document.getElementById('c-customer').value;
+  const competitor = document.getElementById('c-competitor').value;
+  const growth = document.getElementById('c-growth').value;
+  const text = `[Idea Campus 진단 요청]
+아이디어: ${idea}
+타겟고객: ${customer}
+경쟁사: ${competitor}
+시장성장세: ${growth}
+
+위 공통 입력을 근거로 이 Lab Template의 나머지 13개 프레임워크 값을 진단해서 채운 뒤 다시 발행해줘.`;
+
+  const status = document.getElementById('diagnosis-status');
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(text).then(() => {
+      status.textContent = '복사됨 — 채팅에 붙여넣고 보내면 클로드가 진단해서 다시 발행해준다.';
+    }).catch(() => {
+      status.textContent = '클립보드 복사 실패 — 아래 내용을 직접 복사해서 채팅에 붙여넣어라:\n\n' + text;
+    });
+  } else {
+    status.textContent = '이 브라우저는 클립보드 복사를 지원 안 함 — 아래 내용을 직접 복사해서 채팅에 붙여넣어라:\n\n' + text;
+  }
+}
+
+document.getElementById('diagnosis-btn').addEventListener('click', requestDiagnosis);
 document.getElementById('calc-btn').addEventListener('click', calculateAll);
 document.getElementById('export-btn').addEventListener('click', exportMarkdown);
 

@@ -29,7 +29,7 @@ description: >
 4. `template.html`의 `/* ENGINE_JS: 이 자리에 engine.js 파일 내용을 그대로 붙여넣는다. */` 주석을, 1번에서 읽은 `engine.js` 전체 내용으로 치환한다.
 5. 2번에서 추정한 값이 있다면, `template.html`의 `/* PREFILL: ... */` 주석 다음 줄(`if (typeof window.PREFILL !== 'undefined') applyPrefill(window.PREFILL);` 바로 앞)에 `window.PREFILL = { ...만든 객체... };`를 삽입한다. `PREFILL` 객체는 `data.common`/`data.threeC`/`data.swot`/`data.stp`/`data.fiveForces`/`data.vrio`/`data.kano`/`data.positioningMap`/`data.ansoff`/`data.blueOcean`/`data.leanCanvas`/`data.bmc`/`data.aarrr` 키 구조를 따른다(각 키의 정확한 형태는 `assets/template.html`의 `applyPrefill(data)` 함수 정의를 읽고 그대로 맞춘다). 값이 없으면 이 단계는 건너뛴다.
 6. Artifact 도구는 `<!doctype>`/`<html>`/`<head>`/`<body>` 태그를 직접 받지 않고 발행 시 자동으로 스켈레톤을 씌운다. 치환된 HTML에서 `<!DOCTYPE html>`, `<html lang="ko">`, `<head>...</head>`, `<body>`, `</body>`, `</html>` 태그를 제거해 `<style>` 태그와 본문 내용만 남긴 뒤 Artifact 도구에 넘긴다(`<title>` 안의 텍스트는 Artifact 도구의 title 파라미터로 전달, title: `idea_campus_lab_template`, favicon 지정). `template.html` 파일 자체는 단독으로 브라우저에서 열어도 동작해야 하므로 원본 구조를 그대로 둔다.
-7. 사용자에게: 채워진 값은 클로드의 추정값이라 확인·수정이 필요하다고 안내하고, "Digging"을 누르면 결과가 나오며, 값을 확정한 뒤 "마크다운으로 내보내기"로 저장하거나 채팅에서 "Lab Report로 만들어줘"라고 하면 그 확정값 기준으로 서술형 리포트를 발행해준다고 안내한다.
+7. 사용자에게: 채워진 값은 클로드의 추정값이라 확인·수정이 필요하다고 안내하고, "Digging"을 누르면 결과가 나오며, 값을 확정한 뒤 "마크다운으로 내보내기"로 저장하거나 채팅에서 "Lab Report로 만들어줘"라고 하면 그 확정값 기준으로 서술형 리포트를 발행해준다고 안내한다. 폼의 "공통 입력" 섹션 바로 아래엔 "Diagnosis" 버튼이 있는데, 발행된 정적 페이지는 클로드를 직접 호출할 수 없어서(Artifact 런타임 capability는 downloads/mcp뿐) 누르면 공통입력값을 진단 요청 문구로 클립보드에 복사해준다 — 사용자가 그걸 채팅에 붙여넣으면 이 스킬의 1~2번 절차를 다시 타면서 새 PREFILL로 재발행하면 된다.
 
 ## Mode B: Lab Report
 

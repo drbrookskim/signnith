@@ -242,12 +242,12 @@
 </section>
 
 <div class="actions">
-  <button id="calc-btn">전체 계산하기</button>
+  <button id="calc-btn">Digging</button>
   <button id="export-btn">마크다운으로 내보내기</button>
 </div>
 
 <h2 class="results-title">결과</h2>
-<div id="results"><p class="results-empty">아직 계산 전이다. "전체 계산하기"를 눌러라.</p></div>
+<div id="results"><p class="results-empty">아직 계산 전이다. "Digging"을 눌러라.</p></div>
 
 <script>
 /* ENGINE_JS: 이 자리에 engine.js 파일 내용을 그대로 붙여넣는다. */
@@ -567,7 +567,7 @@ function renderResults(r) {
 }
 
 function exportMarkdown() {
-  if (!lastResults) { alert('먼저 "전체 계산하기"를 눌러라.'); return; }
+  if (!lastResults) { alert('먼저 "Digging"을 눌러라.'); return; }
   const r = lastResults;
   const md = `# Idea Campus > Lab Report
 

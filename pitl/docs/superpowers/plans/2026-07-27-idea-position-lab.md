@@ -2,7 +2,7 @@
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
-**Goal:** 생성형 AI 없이 재사용 가능한 규칙기반 상품기획 위치진단 도구(`idea-position-lab` 스킬)를 만든다. 13개 마케팅 프레임워크를 분석군/전략군으로 나눠 자기완결형 HTML 아티팩트로 제공한다.
+**Goal:** 규칙기반 상품기획 위치진단 도구(`idea-position-lab` 스킬)를 만든다. 13개 마케팅 프레임워크를 분석군/전략군으로 나눠 HTML 아티팩트로 제공한다. (2026-07-30: "생성형 AI 없이"를 목표로 뒀던 초기 원칙은 이후 폐기됨 — 최신 동작은 SKILL.md 참고.)
 
 **Architecture:** 판정 로직은 순수 JS 함수(`engine.js`, DOM 의존 없음, Node로 유닛테스트)로 분리한다. `template.html`은 이 엔진을 인라인으로 품고 폼 입력→계산→결과 표시를 담당하는 자기완결형 UI다. `SKILL.md`는 두 파일을 읽어 하나의 HTML로 합친 뒤 Artifact로 발행하는 절차를 정의한다. `methodology.md`는 모든 판정규칙과 문구의 SSOT 문서다.
 

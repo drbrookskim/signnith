@@ -2,6 +2,14 @@
   "version": "0.0.1",
   "configurations": [
     {
+      "name": "index-v2",
+      "runtimeExecutable": "python3",
+      "runtimeArgs": ["-m", "http.server", "8765"],
+      "cwd": "/Users/nelcome/Codes/Claude_code_repository",
+      "port": 8765,
+      "url": "http://localhost:8765/signnith/index-v2.html"
+    },
+    {
       "name": "Stock Analyzer",
       "runtimeExecutable": "npx",
       "runtimeArgs": ["serve", "-l", "3000", "/Users/nelcome/Documents/Claude_code_repository"],
@@ -20,6 +28,20 @@
       "runtimeArgs": ["-m", "streamlit", "run", "dashboard.py", "--server.port", "8501", "--server.headless", "true"],
       "cwd": "/Users/nelcome/Documents/Claude_code_repository/stock_analyzer",
       "port": 8501
+    },
+    {
+      "name": "chart-deep-dive",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": ["run", "dev"],
+      "cwd": "/Users/nelcome/Codes/Claude_code_repository/chart-deep-dive",
+      "port": 3000
+    },
+    {
+      "name": "brunch-web-server",
+      "runtimeExecutable": "python3",
+      "runtimeArgs": ["brunch_web_server.py"],
+      "cwd": "/Users/nelcome/Codes/Claude_code_repository/thoughts",
+      "port": 5050
     }
   ]
 }

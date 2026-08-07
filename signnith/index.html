@@ -870,6 +870,17 @@
   }
   .kg-wrap:active { cursor: grabbing; }
   .kg-wrap svg { width: 100%; height: 100%; }
+  .kg-fullscreen-btn {
+    background: var(--card2); border: 1px solid var(--border); border-radius: 8px;
+    color: var(--text); font-size: 1rem; line-height: 1; cursor: pointer;
+    padding: 5px 9px; flex-shrink: 0;
+  }
+  .kg-fullscreen-btn:hover { background: var(--card3, var(--border)); }
+  .kg-card.kg-fullscreen {
+    position: fixed; inset: 0; z-index: 9999; margin: 0; border-radius: 0;
+    height: 100vh; overflow-y: auto; background: var(--bg);
+  }
+  .kg-card.kg-fullscreen .kg-wrap { height: calc(100vh - 150px); }
   .kg-node circle { stroke: none; transition: r .15s; }
   .kg-node:hover circle { r: 22; }
   .kg-node text {
@@ -3762,7 +3773,10 @@ function renderDashboard({ ticker, bars, ind, tech, fund, decision: d, price, is
 
   <!-- ── Knowledge Graph ── -->
   <div class="card kg-card" style="padding:20px 20px 14px">
-    <div class="card-header"><span class="dot" style="background:var(--purple)"></span>Knowledge Graph</div>
+    <div class="card-header" style="justify-content:space-between">
+      <span><span class="dot" style="background:var(--purple)"></span>Knowledge Graph</span>
+      <button class="kg-fullscreen-btn" id="kgFullscreenBtn" onclick="toggleKgFullscreen()" title="전체화면">⛶</button>
+    </div>
     <div class="kg-tabs">
       <button class="kg-tab active" id="kgTabAnalysis" onclick="switchKgTab('analysis')">분석 그래프</button>
       <button class="kg-tab" id="kgTabValuechain" onclick="switchKgTab('valuechain')">밸류체인</button>
@@ -4217,7 +4231,10 @@ function renderDashboard({ ticker, bars, ind, tech, fund, decision: d, price, is
 // ══════════════════════════════════════════════════════
 //  Knowledge Graph
 // ══════════════════════════════════════════════════════
-function renderKnowledgeGraph({ ticker, d, I, M, cs, ew, ichi, smc, quant, price, currency, isKr, changeAmt, companyName }) {
+let _kgLastArgs = null;
+function renderKnowledgeGraph(args) {
+  _kgLastArgs = args;
+  const { ticker, d, I, M, cs, ew, ichi, smc, quant, price, currency, isKr, changeAmt, companyName } = args;
   const wrap = document.getElementById('kgWrap');
   if (!wrap || typeof d3 === 'undefined') return;
 
@@ -4321,7 +4338,7 @@ function renderKnowledgeGraph({ ticker, d, I, M, cs, ew, ichi, smc, quant, price
   ];
 
   // ── SVG 초기화 ──
-  const W = wrap.clientWidth || 780, H = 650;
+  const W = wrap.clientWidth || 780, H = wrap.clientHeight || 650;
   d3.select(wrap).select('svg').remove();
   const svg = d3.select(wrap).append('svg')
     .attr('width', W).attr('height', H);
@@ -4454,6 +4471,21 @@ function switchKgTab(tab) {
     tabV?.classList.add('active');
   }
 }
+
+function toggleKgFullscreen() {
+  const card = document.querySelector('.kg-card');
+  const btn  = document.getElementById('kgFullscreenBtn');
+  if (!card) return;
+  const on = card.classList.toggle('kg-fullscreen');
+  if (btn) { btn.textContent = on ? '✕' : '⛶'; btn.title = on ? '전체화면 종료' : '전체화면'; }
+  // 레이아웃 변경 후 실제 표시 중인 그래프만 다시 그려 크기 반영
+  const vcVisible = document.getElementById('vcWrap')?.style.display !== 'none';
+  if (vcVisible && _vcLastArgs) renderValueChain(_vcLastArgs);
+  else if (_kgLastArgs) renderKnowledgeGraph(_kgLastArgs);
+}
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape' && document.querySelector('.kg-card.kg-fullscreen')) toggleKgFullscreen();
+});
 
 // ══════════════════════════════════════════════════════
 //  Value Chain 데이터 (valuechain.md 기준)
@@ -4708,7 +4740,10 @@ function getUsEtfData(ticker) {
 // ──────────────────────────────────────────────────────
 //  Value Chain 그래프 렌더링
 // ──────────────────────────────────────────────────────
-function renderValueChain({ ticker, companyName, isKr }) {
+let _vcLastArgs = null;
+function renderValueChain(args) {
+  _vcLastArgs = args;
+  const { ticker, companyName, isKr } = args;
   const wrap = document.getElementById('vcWrap');
   if (!wrap || typeof d3 === 'undefined') return;
 
@@ -4741,7 +4776,7 @@ function renderValueChain({ ticker, companyName, isKr }) {
 
   // ── SVG 초기화 ──
   wrap.querySelectorAll('.vc-info,.vc-nodata').forEach(el => el.remove());
-  const W = wrap.clientWidth || 780, H = 650;
+  const W = wrap.clientWidth || 780, H = wrap.clientHeight || 650;
   d3.select(wrap).select('svg').remove();
   const svg = d3.select(wrap).append('svg').attr('width', W).attr('height', H);
   const g   = svg.append('g');

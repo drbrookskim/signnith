@@ -28,53 +28,55 @@
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/d3@7/dist/d3.min.js"></script>
 <style>
-  /* ── 다크 모드 (기본) ── */
+  /* ── 다크 모드 (기본 · Uniswap × Contra Fusion) ── */
   :root {
-    --bg:        transparent;
-    --card:      #111827;
-    --card2:     #0f1320;
-    --border:    #1e2a40;
-    --border2:   #2d3f5a;
-    --text:      #f1f5f9;        /* 거의 흰색 — 주요 텍스트 */
-    --text2:     #e2e8f0;        /* 밝은 회색 — 보조 텍스트 */
-    --muted:     #94a3b8;        /* 중간 회색 — 레이블 (기존 #64748b보다 밝게) */
-    --muted2:    #64748b;        /* 어두운 회색 — 힌트·구분선 */
-    --topbar:    rgba(10,8,30,0.82);
-    --metric-bd: #1a2235;
+    --bg:        #080a0f;
+    --card:      #11141d;
+    --card2:     #171b26;
+    --border:    rgba(255,255,255,0.08);
+    --border2:   rgba(255,255,255,0.15);
+    --text:      #f8fafc;
+    --text2:     #cbd5e1;
+    --muted:     #8b95a7;
+    --muted2:    #64748b;
+    --topbar:    rgba(8,10,15,0.84);
+    --metric-bd: rgba(255,255,255,0.06);
     --green:     #00d4aa;
     --red:       #ff4b6e;
     --yellow:    #fbbf24;
     --blue:      #3b82f6;
-    --up:        #ff4b6e;  /* 상승 = 빨간 (한국 증시 관례) */
-    --down:      #3b82f6;  /* 하락 = 파란 (한국 증시 관례) */
+    --up:        #ff4b6e;
+    --down:      #3b82f6;
     --purple:    #a78bfa;
     --orange:    #f97316;
-    --shadow:    rgba(0,0,0,.4);
+    --accent:    #fc72ff;
+    --shadow:    rgba(0,0,0,.45);
   }
   /* ── 라이트 모드 ── */
   html.light {
-    --bg:        transparent;
-    --card:      rgba(255,255,255,0.72);
-    --card2:     rgba(241,245,249,0.65);
-    --border:    #cbd5e1;
-    --border2:   #94a3b8;
-    --text:      #0f172a;        /* 거의 검정 — 주요 텍스트 */
-    --text2:     #1e293b;        /* 짙은 네이비 — 보조 텍스트 */
-    --muted:     #334155;        /* 짙은 회색 — 레이블 (기존 #64748b보다 어둡게) */
-    --muted2:    #64748b;        /* 중간 회색 — 힌트·구분선 */
-    --topbar:    rgba(255,255,255,0.75);
-    --metric-bd: #e2eaf4;
-    --green:     #047857;
-    --red:       #be123c;
-    --yellow:    #b45309;
-    --blue:      #1d4ed8;
-    --up:        #be123c;  /* 상승 = 빨간 */
-    --down:      #1d4ed8;  /* 하락 = 파란 */
-    --purple:    #6d28d9;
-    --orange:    #c2410c;
-    --shadow:    rgba(0,0,0,.12);
+    --bg:        #f6f7fb;
+    --card:      #ffffff;
+    --card2:     #f1f4f9;
+    --border:    rgba(15,23,42,0.08);
+    --border2:   rgba(15,23,42,0.16);
+    --text:      #0f172a;
+    --text2:     #334155;
+    --muted:     #64748b;
+    --muted2:    #94a3b8;
+    --topbar:    rgba(246,247,251,0.88);
+    --metric-bd: rgba(15,23,42,0.06);
+    --green:     #059669;
+    --red:       #e11d48;
+    --yellow:    #d97706;
+    --blue:      #2563eb;
+    --up:        #e11d48;
+    --down:      #1d4ed8;
+    --purple:    #7c3aed;
+    --orange:    #ea580c;
+    --accent:    #d946ef;
+    --shadow:    rgba(15,23,42,.08);
   }
-  html { font-size: 18.5px; } /* 기본 폰트 크기 10% 확대 */
+  html { font-size: 16.5px; scroll-behavior: smooth; }
   * { box-sizing: border-box; margin: 0; padding: 0; }
   body {
     background: var(--bg);
@@ -84,25 +86,14 @@
     min-height: 100vh;
     transition: background .25s, color .25s;
   }
-  /* ── Aurora Blob Background ── */
-  #aurora-canvas {
+  .ambient-glow {
     position: fixed;
     inset: 0;
-    width: 100%;
-    height: 100%;
-    z-index: -2;
     pointer-events: none;
-    display: block;
-  }
-  /* ── Particle Network Overlay ── */
-  #particle-canvas {
-    position: fixed;
-    inset: 0;
-    width: 100%;
-    height: 100%;
     z-index: -1;
-    pointer-events: none;
-    display: block;
+    background:
+      radial-gradient(circle at 16% 0%, rgba(252, 114, 255, 0.08), transparent 36%),
+      radial-gradient(circle at 84% 6%, rgba(0, 212, 170, 0.07), transparent 34%);
   }
   #main-wrap {
     position: relative;
@@ -111,16 +102,73 @@
   }
   .topbar {
     background: var(--topbar);
-    border-bottom: 1px solid rgba(255,255,255,0.08);
-    box-shadow: 0 1px 0 rgba(255,255,255,0.04), 0 4px 24px rgba(0,0,0,0.35);
-    padding: 0 32px;
-    height: 56px;
+    border-bottom: 1px solid var(--border);
+    padding: 0 28px;
+    height: 62px;
     display: flex;
     align-items: center;
     justify-content: space-between;
+    gap: 16px;
     position: sticky; top: 0; z-index: 100;
-    backdrop-filter: blur(20px) saturate(1.4);
-    -webkit-backdrop-filter: blur(20px) saturate(1.4);
+    backdrop-filter: blur(18px);
+    -webkit-backdrop-filter: blur(18px);
+  }
+  /* ── Explore Layout (Uniswap × Contra) ── */
+  .top-search { flex: 1; max-width: 420px; position: relative; }
+  .top-search .search-input {
+    width: 100%; height: 38px; border-radius: 999px;
+    border: 1px solid var(--border2); background: var(--card);
+    color: var(--text); padding: 0 42px 0 36px; font-size: 0.86rem;
+  }
+  .top-search .s-ico { position: absolute; left: 13px; top: 50%; transform: translateY(-50%); color: var(--muted); font-size: 0.85rem; pointer-events: none; }
+  .top-search .kbd {
+    position: absolute; right: 11px; top: 50%; transform: translateY(-50%);
+    font-size: 0.7rem; color: var(--muted); background: var(--card2);
+    border: 1px solid var(--border); border-radius: 6px; padding: 2px 6px; pointer-events: none;
+  }
+  .explore-wrap { max-width: 1280px; margin: 0 auto; padding: 24px 24px 0; }
+  .page-head {
+    display: flex; align-items: flex-end; justify-content: space-between; gap: 16px;
+    margin-bottom: 18px; flex-wrap: wrap;
+  }
+  .page-head h1 { font-size: 1.7rem; font-weight: 800; letter-spacing: -0.02em; }
+  .page-head p { font-size: 0.86rem; color: var(--muted); margin-top: 4px; }
+  .cmd-controls { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+  .stats-grid {
+    display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 18px;
+  }
+  .stat-card {
+    background: var(--card); border: 1px solid var(--border); border-radius: 16px;
+    padding: 15px 18px; display: flex; align-items: center; justify-content: space-between; gap: 10px;
+  }
+  .stat-lbl { font-size: 0.74rem; color: var(--muted); font-weight: 600; }
+  .stat-val { font-size: 1.32rem; font-weight: 800; margin: 3px 0 2px; }
+  .stat-delta { font-size: 0.74rem; font-weight: 700; }
+  .stat-spark {
+    width: 96px; height: 42px; border-radius: 10px; padding: 4px; flex-shrink: 0;
+    background-image: radial-gradient(circle, rgba(148,163,184,0.2) 1px, transparent 1px);
+    background-size: 10px 10px;
+  }
+  .explore-toolbar {
+    display: flex; align-items: center; justify-content: space-between; gap: 10px;
+    margin-bottom: 14px; flex-wrap: wrap;
+  }
+  .filter-pills { display: flex; align-items: center; gap: 7px; overflow-x: auto; padding-bottom: 2px; }
+  .f-pill {
+    padding: 7px 14px; border-radius: 999px; border: 1px solid var(--border);
+    background: var(--card); color: var(--muted); font-family: inherit;
+    font-size: 0.8rem; font-weight: 600; cursor: pointer; white-space: nowrap; transition: all .15s;
+  }
+  .f-pill:hover { color: var(--text); border-color: var(--border2); }
+  .f-pill.active { background: var(--text); color: var(--bg); border-color: var(--text); }
+  @media (max-width: 900px) { .stats-grid { grid-template-columns: 1fr; } }
+  @media (max-width: 720px) {
+    .explore-wrap { padding: 18px 14px 0; }
+    .top-search { max-width: none; }
+    .fav-tiles {
+      display: flex !important; overflow-x: auto; scroll-snap-type: x mandatory; gap: 10px; padding-bottom: 6px;
+    }
+    .fav-tile { min-width: 220px; scroll-snap-align: start; flex-shrink: 0; }
   }
   /* ══════════════════════════════════════════════════════
      라이트 모드 최적화 오버라이드
@@ -1039,8 +1087,7 @@
 </style>
 </head>
 <body>
-<canvas id="aurora-canvas"></canvas>
-<canvas id="particle-canvas"></canvas>
+<div class="ambient-glow"></div>
 
 <!-- 설명 모달 -->
 <div class="tip-modal-overlay" id="tipModalOverlay" onclick="closeTipModal(event)">
@@ -1063,8 +1110,17 @@
       <button class="topbar-nav-btn" onclick="location.href='compare.html'">종목 비교</button>
     </nav>
   </div>
+
+  <div class="top-search search-outer">
+    <span class="s-ico">🔍</span>
+    <input id="ticker-input" class="search-input" type="text"
+           placeholder="종목명(SK하이닉스) 또는 티커(NVDA) 검색..."
+           autocomplete="off"/>
+    <span class="kbd">/</span>
+    <div id="ac-list" class="autocomplete-list" style="display:none"></div>
+  </div>
+
   <div class="topbar-right">
-    <span class="pill">Serverless Stock Analysis</span>
     <!-- 로그인 상태: 유저 칩 -->
     <span id="topbar-user-chip" style="display:none;align-items:center;gap:7px;font-size:0.72rem;color:var(--muted);background:rgba(255,255,255,0.06);border:1px solid var(--border2);border-radius:20px;padding:3px 10px 3px 4px;letter-spacing:.02em;cursor:pointer" onclick="openLogoutConfirm()" title="로그아웃">
       <img id="topbar-user-avatar" src="" alt="" width="22" height="22" style="border-radius:50%;object-fit:cover;display:none;flex-shrink:0">
@@ -1073,37 +1129,83 @@
     </span>
     <!-- 비로그인 상태: 로그인 버튼 -->
     <button id="topbar-login-btn" onclick="openAuthModal()"
-      style="display:none;height:30px;padding:0 14px;border-radius:20px;border:1px solid var(--border2);background:rgba(255,255,255,0.06);color:var(--text2);font-size:0.74rem;font-weight:600;cursor:pointer;transition:background .2s"
-      onmouseover="this.style.background='rgba(59,130,246,0.15)'" onmouseout="this.style.background='rgba(255,255,255,0.06)'">로그인</button>
+      style="display:none;height:32px;padding:0 14px;border-radius:20px;border:1px solid var(--border2);background:var(--card);color:var(--text2);font-size:0.76rem;font-weight:600;cursor:pointer;transition:background .2s">로그인</button>
     <button id="theme-toggle-btn" onclick="toggleTheme()" class="theme-toggle-switch" title="테마 변경">
       <span class="theme-toggle-knob">🌙</span>
     </button>
   </div>
 </header>
 
-<div class="search-wrap">
-  <div class="search-outer">
-    <input id="ticker-input" class="search-input" type="text"
-           placeholder="종목명(SK하이닉스) 또는 티커(TSLA)를 입력하세요."
-           autocomplete="off"/>
-    <div id="ac-list" class="autocomplete-list" style="display:none"></div>
-  </div>
-  <select id="period-select" class="select-box">
-    <option value="1mo">1개월</option>
-    <option value="3mo">3개월</option>
-    <option value="6mo" selected>6개월</option>
-    <option value="1y">1년</option>
-    <option value="2y">2년</option>
-  </select>
-  <select id="style-select" class="select-box">
-    <option value="balanced" selected>균형</option>
-    <option value="short_term">단기</option>
-    <option value="long_term">장기</option>
-  </select>
-  <button class="btn-run" id="run-btn" onclick="runAnalysis()">🔍 분석 시작</button>
-  <button class="btn-report" id="report-btn" onclick="openReport()" title="상세 리포트 보기">📄<span class="btn-label"> 리포트</span></button>
-  <button class="btn-report" id="archive-btn" onclick="openArchive()" title="분석 리포트 아카이브">🗂️<span class="btn-label"> 아카이브</span></button>
-  <button class="btn-report" id="newsfinder-btn" onclick="openNewsFinder()" title="이 종목 관련 뉴스를 확인하세요">📰<span class="btn-label"> 이 종목 이 뉴스는?</span></button>
+<div class="explore-wrap">
+  <section class="page-head">
+    <div>
+      <h1>Explore Signals &amp; Cases</h1>
+      <p>종목을 선택하면 피드가 컴팩트하게 정리되고, 바로 아래에 실시간 퀀트 분석이 펼쳐집니다.</p>
+    </div>
+    <div class="cmd-controls">
+      <select id="period-select" class="select-box" style="height:38px;border-radius:999px;font-size:0.82rem">
+        <option value="1mo">1개월</option>
+        <option value="3mo">3개월</option>
+        <option value="6mo" selected>6개월</option>
+        <option value="1y">1년</option>
+        <option value="2y">2년</option>
+      </select>
+      <select id="style-select" class="select-box" style="height:38px;border-radius:999px;font-size:0.82rem">
+        <option value="balanced" selected>균형</option>
+        <option value="short_term">단기</option>
+        <option value="long_term">장기</option>
+      </select>
+      <button class="btn-run" id="run-btn" onclick="runAnalysis()" style="height:38px;border-radius:999px;padding:0 20px;font-size:0.84rem">분석 시작</button>
+      <button class="btn-report" id="report-btn" onclick="openReport()" title="상세 리포트 보기" style="height:38px;border-radius:999px;padding:0 14px;font-size:0.8rem">📄<span class="btn-label"> 리포트</span></button>
+      <button class="btn-report" id="newsfinder-btn" onclick="openNewsFinder()" title="이 종목 관련 뉴스를 확인하세요" style="height:38px;border-radius:999px;padding:0 14px;font-size:0.8rem">📰<span class="btn-label"> 뉴스</span></button>
+    </div>
+  </section>
+
+  <section class="stats-grid" id="explore-stats">
+    <div class="stat-card">
+      <div>
+        <div class="stat-lbl">즐겨찾기 관심 종목</div>
+        <div class="stat-val" id="stat-fav-count">-</div>
+        <div class="stat-delta" id="stat-fav-sub" style="color:var(--green)">US · KR 실시간 워치리스트</div>
+      </div>
+      <div class="stat-spark" id="stat-spark-1"></div>
+    </div>
+    <div class="stat-card">
+      <div>
+        <div class="stat-lbl">최근 분석 히스토리</div>
+        <div class="stat-val" id="stat-hist-count">-</div>
+        <div class="stat-delta" id="stat-hist-sub" style="color:var(--blue)">원클릭 즉시 재분석</div>
+      </div>
+      <div class="stat-spark" id="stat-spark-2"></div>
+    </div>
+    <div class="stat-card">
+      <div>
+        <div class="stat-lbl">7-Layer 퀀트 엔진</div>
+        <div class="stat-val">Live</div>
+        <div class="stat-delta" style="color:var(--purple)">파동 · 일목 · SMC · WACC · IPP</div>
+      </div>
+      <div class="stat-spark" id="stat-spark-3"></div>
+    </div>
+  </section>
+
+  <section class="explore-toolbar">
+    <div class="filter-pills">
+      <button class="f-pill active" onclick="setFavFilter('all', this)">전체</button>
+      <button class="f-pill" onclick="setFavFilter('us', this)">🇺🇸 미국 · ETF</button>
+      <button class="f-pill" onclick="setFavFilter('kr', this)">🇰🇷 한국 KRX</button>
+      <button class="f-pill" onclick="setFavFilter('history', this)">🕐 최근 분석</button>
+    </div>
+    <div class="fav-controls">
+      <button class="fav-toggle" onclick="toggleFav()" style="display:inline-flex;align-items:center;gap:4px;font-size:0.78rem">
+        <svg width="12" height="12" viewBox="0 0 16 16" fill="none"><path d="M4 10L8 6L12 10" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        접기
+      </button>
+      <div class="view-sw" role="group" aria-label="보기 전환">
+        <button class="view-sw-btn active" id="fav-sw-cards" onclick="setFavView('cards')">Cards</button>
+        <button class="view-sw-btn" id="fav-sw-table" onclick="setFavView('table')">Table</button>
+      </div>
+    </div>
+  </section>
 </div>
 
 <!-- ── 로그인 모달 ── -->
@@ -1163,22 +1265,9 @@
 <!-- 검색 기록 -->
 <div class="history-wrap" id="history-wrap" style="display:none"></div>
 
-<!-- 즐겨찾기 -->
-<div class="fav-section">
-  <div class="fav-card" id="fav-card">
-    <div class="fav-header">
-      <span class="fav-title">⭐ 즐겨찾기 · 탐색 피드</span>
-      <div class="fav-controls">
-        <div class="view-sw" role="group" aria-label="보기 전환">
-          <button class="view-sw-btn active" id="fav-sw-cards" onclick="setFavView('cards')">Cards</button>
-          <button class="view-sw-btn" id="fav-sw-table" onclick="setFavView('table')">Table</button>
-        </div>
-        <button class="fav-toggle" onclick="toggleFav()" style="display:inline-flex;align-items:center;gap:4px">
-          <svg width="12" height="12" viewBox="0 0 16 16" fill="none"><path d="M4 10L8 6L12 10" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
-          접기
-        </button>
-      </div>
-    </div>
+<!-- 즐겨찾기 / 탐색 피드 -->
+<div class="fav-section" style="max-width:1280px;padding:0 24px">
+  <div class="fav-card" id="fav-card" style="background:transparent;border:none;padding:0">
     <div id="fav-body">
       <!-- JS로 렌더링 -->
     </div>
@@ -1916,7 +2005,15 @@ const _CHEV_UP = '<svg width="12" height="12" viewBox="0 0 16 16" fill="none"><p
 
 let favCollapsed = false;
 let favViewMode = 'cards';
+let favFilterMode = 'all';
 let _favSparkUid = 0;
+
+function setFavFilter(mode, btn) {
+  favFilterMode = mode;
+  document.querySelectorAll('.f-pill').forEach(b => b.classList.remove('active'));
+  if (btn) btn.classList.add('active');
+  renderFavs();
+}
 
 function setFavView(mode) {
   favViewMode = mode;
@@ -1961,7 +2058,27 @@ function toggleFav() {
   document.querySelector('.fav-toggle').innerHTML = favCollapsed ? (_CHEV_DN + '펼치기') : (_CHEV_UP + '접기');
 }
 
+function renderExploreStats() {
+  const f = loadFavs();
+  const h = loadHistory();
+  const fc = document.getElementById('stat-fav-count');
+  const fs = document.getElementById('stat-fav-sub');
+  const hc = document.getElementById('stat-hist-count');
+  const hs = document.getElementById('stat-hist-sub');
+  if (fc) fc.textContent = `${f.us.length + f.kr.length} 종목`;
+  if (fs) fs.textContent = `🇺🇸 ${f.us.length} · 🇰🇷 ${f.kr.length} 등록`;
+  if (hc) hc.textContent = `${h.length} 건`;
+  if (hs) hs.textContent = h.length ? `최근: ${h[0].name || h[0].ticker}` : '분석 기록 없음';
+  const s1 = document.getElementById('stat-spark-1');
+  const s2 = document.getElementById('stat-spark-2');
+  const s3 = document.getElementById('stat-spark-3');
+  if (s1 && !s1.innerHTML) s1.innerHTML = _favSparkSvg('EXPLORE_1', 34);
+  if (s2 && !s2.innerHTML) s2.innerHTML = _favSparkSvg('EXPLORE_2', 34);
+  if (s3 && !s3.innerHTML) s3.innerHTML = _favSparkSvg('EXPLORE_3', 34);
+}
+
 function renderFavs() {
+  renderExploreStats();
   const f = loadFavs();
   const body = document.getElementById('fav-body');
   if (!body) return;
@@ -1982,61 +2099,79 @@ function renderFavs() {
     return { displayName, subLine };
   };
 
+  let items = [];
+  if (favFilterMode === 'history') {
+    items = loadHistory().map(h => {
+      const isKr = /\.(KS|KQ)$/i.test(h.ticker);
+      return { item: { ticker: h.ticker, name: h.name || h.ticker, market: isKr ? 'KRX' : 'US' }, isUs: !isKr, flag: isKr ? '🇰🇷' : '🇺🇸', isHist: true };
+    });
+  } else {
+    if (favFilterMode === 'all' || favFilterMode === 'us') {
+      items.push(...f.us.map(item => ({ item, isUs: true, flag: '🇺🇸' })));
+    }
+    if (favFilterMode === 'all' || favFilterMode === 'kr') {
+      items.push(...f.kr.map(item => ({ item, isUs: false, flag: '🇰🇷' })));
+    }
+  }
+
+  if (!items.length) {
+    body.innerHTML = `<div style="padding:24px;text-align:center;color:var(--muted);font-size:0.84rem;background:var(--card);border:1px solid var(--border);border-radius:16px">표시할 종목이 없습니다. 상단 검색창(<code>/</code>)에서 종목을 검색해 보세요.</div>`;
+    return;
+  }
+
   if (favViewMode === 'table') {
-    const all = [
-      ...f.us.map(item => ({ item, isUs: true, flag: '🇺🇸' })),
-      ...f.kr.map(item => ({ item, isUs: false, flag: '🇰🇷' }))
-    ];
-    body.innerHTML = `<div class="fav-table-wrap"><table class="fav-table">
+    body.innerHTML = `<div class="fav-table-wrap" style="background:var(--card);border:1px solid var(--border);border-radius:16px;overflow-x:auto"><table class="fav-table">
       <thead><tr><th>#</th><th>종목</th><th>시장</th><th>미니 추세</th><th></th></tr></thead>
-      <tbody>${all.map(({ item, isUs, flag }, idx) => {
+      <tbody>${items.map(({ item, isUs, flag, isHist }, idx) => {
         const { displayName, subLine } = resolveInfo(item, isUs);
+        const delFn = isHist ? `removeHistory('${item.ticker}')` : `removeFav('${item.ticker}')`;
         return `<tr onclick="selectFavStock('${item.ticker}')">
           <td style="color:var(--muted)">${idx + 1}</td>
           <td><strong>${flag} ${displayName}</strong><div style="font-size:0.68rem;color:var(--muted)">${subLine}</div></td>
           <td style="color:var(--muted)">${isUs ? 'US' : 'KRX'}</td>
           <td style="width:130px">${_favSparkSvg(item.ticker, 24)}</td>
-          <td style="text-align:right"><span class="tile-del" onclick="event.stopPropagation();removeFav('${item.ticker}')">✕</span></td>
+          <td style="text-align:right"><span class="tile-del" onclick="event.stopPropagation();${delFn}">✕</span></td>
         </tr>`;
       }).join('')}</tbody>
     </table></div>`;
     return;
   }
 
-  const tileHtml = (item, isUs) => {
+  const tileHtml = ({ item, isUs, flag, isHist }) => {
     const { displayName, subLine } = resolveInfo(item, isUs);
+    const delFn = isHist ? `removeHistory('${item.ticker}')` : `removeFav('${item.ticker}')`;
     return `
     <div class="fav-tile" onclick="selectFavStock('${item.ticker}')">
       <div class="fav-tile-top">
         <span class="fav-tile-label" style="white-space:normal;line-height:1.35">
-          <span style="display:block;font-size:0.8rem;font-weight:700">${displayName}</span>
-          <span style="display:block;font-size:0.65rem;color:var(--muted);margin-top:1px">${subLine}</span>
+          <span style="display:block;font-size:0.82rem;font-weight:700">${flag} ${displayName}</span>
+          <span style="display:block;font-size:0.66rem;color:var(--muted);margin-top:2px">${subLine}</span>
         </span>
-        <span class="tile-del" onclick="event.stopPropagation();removeFav('${item.ticker}')">✕</span>
+        <span class="tile-del" onclick="event.stopPropagation();${delFn}">✕</span>
       </div>
       <div class="fav-spark-wrap">${_favSparkSvg(item.ticker, 28)}</div>
     </div>`;
   };
 
-  body.innerHTML = `
-    <div class="fav-group">
-      <div class="fav-group-label">🇺🇸 미국 · ETF</div>
-      <div class="fav-tiles">${f.us.map(item => tileHtml(item, true)).join('')}</div>
-    </div>
-    <div class="fav-group">
-      <div class="fav-group-label">🇰🇷 한국</div>
-      <div class="fav-tiles">${f.kr.map(item => tileHtml(item, false)).join('')}</div>
-    </div>
-  `;
+  body.innerHTML = `<div class="fav-tiles">${items.map(tileHtml).join('')}</div>`;
 }
 
 function selectFavStock(ticker) {
   document.getElementById('fav-card')?.classList.add('compact');
+  const stats = document.getElementById('explore-stats');
+  if (stats) stats.style.display = 'none';
   setTickerAndRun(ticker);
   setTimeout(() => {
     document.getElementById('dashboard')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
   }, 120);
 }
+
+document.addEventListener('keydown', e => {
+  if (e.key === '/' && !['INPUT', 'TEXTAREA', 'SELECT'].includes(document.activeElement?.tagName)) {
+    e.preventDefault();
+    document.getElementById('ticker-input')?.focus();
+  }
+});
 
 // 분석 결과의 즐겨찾기 버튼 상태 업데이트
 function updateFavBtn(ticker) {

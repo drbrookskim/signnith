@@ -4328,6 +4328,9 @@ function renderDashboard({ ticker, bars, ind, tech, fund, decision: d, price, is
     document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
     document.getElementById('panel-' + id)?.classList.add('active');
     if (id === 'charts') [priceChart, rsiChart, macdChart].forEach(c => c?.resize());
+    if (id === 'graph' && typeof _kgLastArgs !== 'undefined' && _kgLastArgs) {
+      requestAnimationFrame(() => renderKnowledgeGraph(_kgLastArgs));
+    }
   };
   window.toggleDashShowAll = function() {
     const wrap = document.getElementById('panels-wrap');
@@ -4335,7 +4338,12 @@ function renderDashboard({ ticker, bars, ind, tech, fund, decision: d, price, is
     const on = wrap.classList.toggle('show-all');
     const eb = document.getElementById('dash-expand-btn');
     if (eb) eb.textContent = on ? '탭으로 보기' : '전체 펼치기';
-    if (on) [priceChart, rsiChart, macdChart].forEach(c => c?.resize());
+    if (on) {
+      [priceChart, rsiChart, macdChart].forEach(c => c?.resize());
+      if (typeof _kgLastArgs !== 'undefined' && _kgLastArgs) {
+        requestAnimationFrame(() => renderKnowledgeGraph(_kgLastArgs));
+      }
+    }
   };
   window.closeDetailDash = function() {
     document.getElementById('dashboard').innerHTML = '';

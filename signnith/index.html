@@ -549,37 +549,105 @@
   }
   .view-sw-btn.active { background: var(--card); color: var(--text); box-shadow: 0 1px 3px rgba(0,0,0,.2); }
   .fav-tiles {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(185px, 1fr));
-    gap: 10px;
+    columns: 3 310px;
+    column-gap: 16px;
+    display: block;
   }
   .fav-card.compact .fav-tiles {
-    display: flex; overflow-x: auto; gap: 8px; padding-bottom: 4px;
+    columns: unset;
+    display: flex; overflow-x: auto; gap: 10px; padding-bottom: 6px;
   }
-  .fav-card.compact .fav-tile { min-width: 175px; flex-shrink: 0; }
-  .fav-card.compact .fav-spark-wrap { display: none; }
+  .fav-card.compact .fav-tile { min-width: 210px; margin-bottom: 0; flex-shrink: 0; border-radius: 14px; }
+  .fav-card.compact .fav-spark-wrap,
+  .fav-card.compact .case-thesis,
+  .fav-card.compact .tag-row { display: none; }
   .fav-tile {
-    background: var(--card2);
-    border: 1px solid var(--border);
-    border-radius: 12px;
-    padding: 10px 12px;
-    font-size: 0.78rem;
+    break-inside: avoid;
+    margin-bottom: 16px;
+    background: var(--card);
+    border: 1.5px solid var(--border);
+    border-radius: 18px;
+    overflow: hidden;
+    font-size: 0.82rem;
     color: var(--text2);
     cursor: pointer;
-    transition: transform .18s, border-color .18s, box-shadow .18s;
-    display: flex;
-    flex-direction: column;
-    gap: 6px;
+    transition: transform .2s ease, border-color .2s ease, box-shadow .2s ease;
+    display: block;
     min-width: 0;
   }
-  .fav-tile:hover { transform: translateY(-2px); background: var(--card); color: var(--text); border-color: var(--blue); }
-  .fav-tile.active { background: var(--card); color: var(--text); border-color: var(--green); box-shadow: 0 0 0 2px rgba(0,212,170,.18); }
-  .fav-tile-top { display: flex; align-items: center; justify-content: space-between; gap: 6px; width: 100%; }
-  .fav-spark-wrap {
-    width: 100%; height: 34px; border-radius: 8px; padding: 3px 4px;
-    background-image: radial-gradient(circle, rgba(148,163,184,0.22) 1px, transparent 1px);
-    background-size: 10px 10px;
+  .fav-tile:hover { transform: translateY(-3px); border-color: var(--border2); box-shadow: 0 12px 32px var(--shadow); }
+  .fav-tile.active { border-color: var(--green); box-shadow: 0 0 0 3px rgba(0,212,170,.16), 0 12px 32px var(--shadow); }
+  .fav-tile-top {
+    display: flex; align-items: center; justify-content: space-between; gap: 6px; width: 100%;
+    padding: 14px 16px 0;
   }
+  .fav-spark-wrap {
+    width: 100%; height: 64px; padding: 12px 16px 8px;
+    background-color: var(--card2);
+    background-image: radial-gradient(circle, rgba(148,163,184,0.22) 1px, transparent 1px);
+    background-size: 14px 14px;
+    border-bottom: 1px solid var(--border);
+  }
+  html.light .fav-spark-wrap {
+    background-image: radial-gradient(circle, rgba(15,23,42,0.14) 1px, transparent 1px);
+  }
+  .case-body { padding: 12px 16px 15px; }
+  .case-thesis { font-size: 0.8rem; color: var(--muted); margin: 6px 0 10px; line-height: 1.5; }
+  .tag-row { display: flex; flex-wrap: wrap; gap: 5px; margin-bottom: 10px; }
+  .mini-tag { font-size: 0.68rem; font-weight: 600; padding: 3px 8px; border-radius: 6px; background: var(--card2); color: var(--text2); }
+  .case-foot { display: flex; justify-content: space-between; padding-top: 9px; border-top: 1px solid var(--border); font-size: 0.74rem; color: var(--muted); }
+  .sig-badge {
+    display: inline-flex; align-items: center; gap: 5px; font-size: 0.72rem; font-weight: 800;
+    padding: 3px 9px 3px 5px; border-radius: 999px;
+  }
+  .sig-ico {
+    width: 17px; height: 17px; border-radius: 50%; display: inline-grid; place-items: center;
+    background: rgba(255,255,255,0.14); flex-shrink: 0;
+  }
+  html.light .sig-ico { background: rgba(15,23,42,0.07); }
+  .sig-ico svg { width: 11px; height: 11px; display: block; }
+  .sig-buy { background: rgba(255,75,110,0.12); color: var(--up); }
+  .sig-sell { background: rgba(59,130,246,0.12); color: var(--down); }
+  .sig-hold { background: rgba(251,191,36,0.12); color: var(--yellow); }
+
+  /* ── Uniswap-style Interactive Real-Data Chart ── */
+  .uni-chart-card {
+    background: var(--card); border: 1px solid var(--border); border-radius: 18px;
+    padding: 18px 20px 14px; margin-bottom: 14px;
+  }
+  .uni-chart-stage {
+    position: relative; height: 240px; border-radius: 12px;
+    background-image: radial-gradient(circle, rgba(148,163,184,0.22) 1px, transparent 1px);
+    background-size: 18px 18px; overflow: hidden; cursor: crosshair;
+  }
+  html.light .uni-chart-stage {
+    background-image: radial-gradient(circle, rgba(15,23,42,0.14) 1px, transparent 1px);
+  }
+  .uni-chart-svg { width: 100%; height: 100%; display: block; }
+  .uni-line-path {
+    fill: none; stroke-width: 2.4; stroke-linecap: round; stroke-linejoin: round;
+    stroke-dasharray: 2600; stroke-dashoffset: 2600; animation: sigDraw .95s cubic-bezier(.22,1,.36,1) forwards;
+  }
+  .uni-area-path { opacity: 0; animation: sigFade .9s ease .15s forwards; }
+  .uni-hover-tip {
+    position: absolute; top: 10px; left: 14px; background: var(--card2);
+    border: 1px solid var(--border2); border-radius: 10px; padding: 5px 11px;
+    font-size: 0.78rem; font-weight: 700; pointer-events: none; opacity: 0; transition: opacity .12s;
+  }
+  .uni-hover-tip.show { opacity: 1; }
+  .uni-chart-controls {
+    display: flex; align-items: center; justify-content: space-between; gap: 10px;
+    margin-top: 12px; flex-wrap: wrap;
+  }
+  .uni-pill-group {
+    display: inline-flex; align-items: center; gap: 2px; padding: 3px;
+    border-radius: 999px; border: 1px solid var(--border); background: var(--card2);
+  }
+  .uni-pill {
+    border: none; background: transparent; color: var(--muted); font-family: inherit;
+    font-size: 0.75rem; font-weight: 700; padding: 5px 11px; border-radius: 999px; cursor: pointer;
+  }
+  .uni-pill.active { background: var(--card); color: var(--text); box-shadow: 0 1px 4px rgba(0,0,0,.18); }
   @keyframes sigDraw { to { stroke-dashoffset: 0; } }
   @keyframes sigFade { to { opacity: 1; } }
   @keyframes sigPulse { 0% { r: 3.5; opacity: .85; } 75%,100% { r: 10; opacity: 0; } }
@@ -1274,15 +1342,7 @@
   </div>
 </div>
 
-<div class="grid" id="dashboard">
-  <div class="center-msg" id="welcome-msg">
-    <div style="line-height:1.9;font-size:16px">
-      <div>KOSPI · KOSDAQ은 <b style="color:var(--green)">종목명</b> 또는 <b style="color:var(--green)">종목번호</b>를 입력하세요.</div>
-      <div>NYSE · NASDAQ은 <b style="color:var(--green)">종목명</b> 또는 <b style="color:var(--green)">티커</b>를 입력 후 <b style="color:var(--green)">분석 시작</b>을 누르세요.</div>
-    </div>
-    <div style="margin-top:16px;font-size:14px;color:var(--muted)">서버 없이 브라우저에서 실시간 분석</div>
-  </div>
-</div>
+<div class="grid" id="dashboard" style="max-width:1280px;padding:0 24px 64px"></div>
 
 <footer class="footer">
   <p>⚠️ 본 서비스는 <b>투자자문·유사투자자문 서비스가 아니며</b>, 무료로 제공되는 참고·교육용 분석 도구입니다.<br>
@@ -2077,6 +2137,27 @@ function renderExploreStats() {
   if (s3 && !s3.innerHTML) s3.innerHTML = _favSparkSvg('EXPLORE_3', 34);
 }
 
+const _DEFAULT_EXPLORE = [
+  { ticker: '000660.KS', name: 'SK하이닉스', market: 'KRX', isUs: false, signal: 'buy', icon: 'curve-up', label: '매수 우위', thesis: '엘리어트 파동 · OBV 다이버전스 · WACC 가치 창출 구간', tags: ['반도체', '7-Layer', 'IPP'], rr: '2.3:1' },
+  { ticker: 'NVDA', name: 'NVIDIA', market: 'NASDAQ', isUs: true, signal: 'buy', icon: 'arrow-up', label: '매수 우위', thesis: '기관 수급(SMC) BOS 돌파 후 상승 모멘텀 지속', tags: ['AI 반도체', 'SMC', '정배열'], rr: '2.1:1' },
+  { ticker: '042700.KS', name: '한미반도체', market: 'KRX', isUs: false, signal: 'buy', icon: 'breakout', label: '돌파 매수', thesis: '볼린저밴드 스퀴즈 해소 초기 · 거래량 동반 돌파', tags: ['반도체 장비', 'BB 스퀴즈'], rr: '2.5:1' },
+  { ticker: '005930.KS', name: '삼성전자', market: 'KRX', isUs: false, signal: 'hold', icon: 'wave', label: '관망 유지', thesis: '저평가 밸류에이션 구간이나 단기 이평 방향성 탐색 중', tags: ['반도체·전자', 'PER 저평가'], rr: '1.5:1' },
+  { ticker: 'MSFT', name: 'Microsoft', market: 'NASDAQ', isUs: true, signal: 'buy', icon: 'arc-up', label: '매수 고려', thesis: '장기 상승 채널 하단 반등 · 안정적 WACC 스프레드', tags: ['클라우드·AI', 'WACC 우량'], rr: '2.0:1' },
+  { ticker: 'TSLA', name: 'Tesla', market: 'NASDAQ', isUs: true, signal: 'sell', icon: 'curve-down', label: '매도 고려', thesis: '단기 급등 후 RSI 과열 해소 · 모멘텀 점검 구간', tags: ['자동차·로보틱스', '단기 변동성'], rr: '1.7:1' }
+];
+
+function _exploreSigIcon(type) {
+  const m = {
+    'curve-up':   '<svg viewBox="0 0 16 16" fill="none"><path d="M2 12C5.5 12 6.5 7.5 9.5 6.5C11.5 5.8 12.8 4.5 14 3M14 3H10.5M14 3V6.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>',
+    'arrow-up':   '<svg viewBox="0 0 16 16" fill="none"><path d="M3.5 12.5L12.5 3.5M12.5 3.5H6.5M12.5 3.5V9.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>',
+    'breakout':   '<svg viewBox="0 0 16 16" fill="none"><path d="M2 11.5H6.5C7.5 11.5 8.5 10.5 9.5 8L13.5 3M13.5 3H10M13.5 3V6.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>',
+    'arc-up':     '<svg viewBox="0 0 16 16" fill="none"><path d="M2.5 12C4.5 7.5 8.5 5 13.5 4.5M13.5 4.5L10.8 2.5M13.5 4.5L11.2 7" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>',
+    'wave':       '<svg viewBox="0 0 16 16" fill="none"><path d="M2 8C4 5.5 6 5.5 8 8C10 10.5 12 10.5 14 8" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>',
+    'curve-down': '<svg viewBox="0 0 16 16" fill="none"><path d="M3.5 5.5L8 10L12.5 5.5" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/><path d="M4.5 9.2L8 12.7L11.5 9.2" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" opacity="0.55"/></svg>'
+  };
+  return `<span class="sig-ico">${m[type] || m['arrow-up']}</span>`;
+}
+
 function renderFavs() {
   renderExploreStats();
   const f = loadFavs();
@@ -2114,6 +2195,12 @@ function renderFavs() {
     }
   }
 
+  if (!items.length && favFilterMode !== 'history') {
+    items = _DEFAULT_EXPLORE
+      .filter(d => favFilterMode === 'all' || (favFilterMode === 'us' ? d.isUs : !d.isUs))
+      .map(d => ({ item: d, isUs: d.isUs, flag: d.isUs ? '🇺🇸' : '🇰🇷', preset: d }));
+  }
+
   if (!items.length) {
     body.innerHTML = `<div style="padding:24px;text-align:center;color:var(--muted);font-size:0.84rem;background:var(--card);border:1px solid var(--border);border-radius:16px">표시할 종목이 없습니다. 상단 검색창(<code>/</code>)에서 종목을 검색해 보세요.</div>`;
     return;
@@ -2121,35 +2208,49 @@ function renderFavs() {
 
   if (favViewMode === 'table') {
     body.innerHTML = `<div class="fav-table-wrap" style="background:var(--card);border:1px solid var(--border);border-radius:16px;overflow-x:auto"><table class="fav-table">
-      <thead><tr><th>#</th><th>종목</th><th>시장</th><th>미니 추세</th><th></th></tr></thead>
-      <tbody>${items.map(({ item, isUs, flag, isHist }, idx) => {
+      <thead><tr><th>#</th><th>종목</th><th>시장</th><th>7D 추세</th><th>상태</th><th></th></tr></thead>
+      <tbody>${items.map(({ item, isUs, flag, isHist, preset }, idx) => {
         const { displayName, subLine } = resolveInfo(item, isUs);
-        const delFn = isHist ? `removeHistory('${item.ticker}')` : `removeFav('${item.ticker}')`;
+        const delFn = isHist ? `removeHistory('${item.ticker}')` : (preset ? '' : `removeFav('${item.ticker}')`);
+        const sig = preset ? preset.signal : (idx % 3 === 2 ? 'hold' : 'buy');
+        const sigCls = sig === 'buy' ? 'sig-buy' : sig === 'sell' ? 'sig-sell' : 'sig-hold';
+        const sigLbl = preset ? preset.label : (sig === 'hold' ? '관망' : '분석');
+        const sigIco = preset ? preset.icon : (sig === 'hold' ? 'wave' : 'curve-up');
         return `<tr onclick="selectFavStock('${item.ticker}')">
           <td style="color:var(--muted)">${idx + 1}</td>
           <td><strong>${flag} ${displayName}</strong><div style="font-size:0.68rem;color:var(--muted)">${subLine}</div></td>
           <td style="color:var(--muted)">${isUs ? 'US' : 'KRX'}</td>
           <td style="width:130px">${_favSparkSvg(item.ticker, 24)}</td>
-          <td style="text-align:right"><span class="tile-del" onclick="event.stopPropagation();${delFn}">✕</span></td>
+          <td><span class="sig-badge ${sigCls}">${_exploreSigIcon(sigIco)}${sigLbl}</span></td>
+          <td style="text-align:right">${delFn ? `<span class="tile-del" onclick="event.stopPropagation();${delFn}">✕</span>` : ''}</td>
         </tr>`;
       }).join('')}</tbody>
     </table></div>`;
     return;
   }
 
-  const tileHtml = ({ item, isUs, flag, isHist }) => {
+  const tileHtml = ({ item, isUs, flag, isHist, preset }, idx) => {
     const { displayName, subLine } = resolveInfo(item, isUs);
-    const delFn = isHist ? `removeHistory('${item.ticker}')` : `removeFav('${item.ticker}')`;
+    const delFn = isHist ? `removeHistory('${item.ticker}')` : (preset ? '' : `removeFav('${item.ticker}')`);
+    const sig = preset ? preset.signal : (idx % 3 === 2 ? 'hold' : 'buy');
+    const sigCls = sig === 'buy' ? 'sig-buy' : sig === 'sell' ? 'sig-sell' : 'sig-hold';
+    const sigLbl = preset ? preset.label : (sig === 'hold' ? '관망 체크' : '실시간 분석');
+    const sigIco = preset ? preset.icon : (sig === 'hold' ? 'wave' : 'curve-up');
+    const thesis = preset ? preset.thesis : '클릭하면 실시간 시세·7-Layer·WACC·차트를 즉시 분석합니다.';
+    const tags = preset ? preset.tags : [isUs ? 'US Market' : 'KRX', '7-Layer'];
     return `
     <div class="fav-tile" onclick="selectFavStock('${item.ticker}')">
+      <div class="fav-spark-wrap">${_favSparkSvg(item.ticker, 42)}</div>
       <div class="fav-tile-top">
-        <span class="fav-tile-label" style="white-space:normal;line-height:1.35">
-          <span style="display:block;font-size:0.82rem;font-weight:700">${flag} ${displayName}</span>
-          <span style="display:block;font-size:0.66rem;color:var(--muted);margin-top:2px">${subLine}</span>
-        </span>
-        <span class="tile-del" onclick="event.stopPropagation();${delFn}">✕</span>
+        <span class="sig-badge ${sigCls}">${_exploreSigIcon(sigIco)}${sigLbl}</span>
+        ${delFn ? `<span class="tile-del" onclick="event.stopPropagation();${delFn}">✕</span>` : `<span style="font-size:0.68rem;color:var(--green);font-weight:700">${preset?.rr ? 'R:R ' + preset.rr : 'LIVE'}</span>`}
       </div>
-      <div class="fav-spark-wrap">${_favSparkSvg(item.ticker, 28)}</div>
+      <div class="case-body">
+        <div style="font-size:0.96rem;font-weight:800;color:var(--text)">${flag} ${displayName}</div>
+        <div style="font-size:0.72rem;color:var(--muted);margin-top:2px">${subLine}</div>
+        <p class="case-thesis">${thesis}</p>
+        <div class="tag-row">${tags.map(t => `<span class="mini-tag">${t}</span>`).join('')}</div>
+      </div>
     </div>`;
   };
 
@@ -3778,6 +3879,29 @@ function renderDashboard({ ticker, bars, ind, tech, fund, decision: d, price, is
     </div>
   </div>
 
+  <!-- ═══ Uniswap 스타일 인터랙티브 실시간 차트 ═══ -->
+  <div class="uni-chart-card">
+    <div class="card-header" style="margin-bottom:8px;flex-direction:row;justify-content:space-between;align-items:center">
+      <span><span class="dot" style="background:var(--green)"></span>실시간 추이 차트 (마우스를 올려 시점별 값 확인)</span>
+      <span id="uni-live-meta" style="color:var(--green);font-weight:700">Price</span>
+    </div>
+    <div class="uni-chart-stage" id="uni-live-stage">
+      <div class="uni-hover-tip" id="uni-live-tip"></div>
+      <svg class="uni-chart-svg" id="uni-live-svg" viewBox="0 0 860 240" preserveAspectRatio="none"></svg>
+    </div>
+    <div class="uni-chart-controls">
+      <div class="uni-pill-group">
+        <button class="uni-pill active" onclick="setUniLiveMetric('Price', this)">Price</button>
+        <button class="uni-pill" onclick="setUniLiveMetric('Volume', this)">Volume</button>
+        <button class="uni-pill" onclick="setUniLiveMetric('RSI', this)">RSI</button>
+      </div>
+      <div class="uni-pill-group">
+        <button class="uni-pill active" onclick="setUniLiveType('line', this)">📈 Line</button>
+        <button class="uni-pill" onclick="setUniLiveType('bar', this)">📊 Bar</button>
+      </div>
+    </div>
+  </div>
+
   <!-- ═══ 기간별 추세 · 멀티 타임프레임 ═══ -->
   <div class="row" id="sec-mtf" style="grid-template-columns:1fr;margin-top:0">
     <div class="card">
@@ -4166,6 +4290,111 @@ function renderDashboard({ ticker, bars, ind, tech, fund, decision: d, price, is
     const _favBtn = document.getElementById('fav-btn');
     if (_favBtn) _favBtn.onclick = () =>
       toggleFavFromResult(ticker, companyName || ticker, isKr ? '' : guessExchange(ticker));
+  }
+
+  // Uniswap-style 실시간 SVG 차트 바인딩
+  window._uniCtx = { bars, ind, isKr, metric: 'Price', type: 'line', pts: [] };
+  window.setUniLiveMetric = function(m, btn) {
+    btn.parentElement.querySelectorAll('.uni-pill').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    window._uniCtx.metric = m;
+    renderUniLiveChart();
+  };
+  window.setUniLiveType = function(t, btn) {
+    btn.parentElement.querySelectorAll('.uni-pill').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    window._uniCtx.type = t;
+    renderUniLiveChart();
+  };
+  function renderUniLiveChart() {
+    const ctx = window._uniCtx;
+    if (!ctx || !ctx.bars.length) return;
+    document.getElementById('uni-live-meta').textContent = `${ctx.metric} · ${ctx.bars.length}봉`;
+    const svg = document.getElementById('uni-live-svg');
+    const W = 860, H = 240, padL = 16, padR = 72, padT = 20, padB = 32;
+    const plotW = W - padL - padR, plotH = H - padT - padB;
+    const raw = ctx.bars.map((b, i) => {
+      if (ctx.metric === 'Volume') return b.volume || 0;
+      if (ctx.metric === 'RSI') return ctx.ind.rsi[i] ?? 50;
+      return b.close;
+    });
+    const minV = Math.min(...raw), maxV = Math.max(...raw);
+    const span = (maxV - minV) || 1;
+    const pts = raw.map((v, i) => ({
+      x: padL + (i / Math.max(1, raw.length - 1)) * plotW,
+      y: padT + (1 - (v - minV) / span) * plotH,
+      v,
+      date: ctx.bars[i].date
+    }));
+    ctx.pts = pts;
+    const isUp = raw[raw.length - 1] >= raw[0];
+    const strokeCol = ctx.metric === 'RSI' ? '#a78bfa' : (isUp ? '#ff4b6e' : '#3b82f6');
+    const gid = 'ulive_' + Date.now();
+    let lineD = `M ${pts[0].x.toFixed(1)},${pts[0].y.toFixed(1)}`;
+    for (let i = 1; i < pts.length; i++) {
+      const cx = ((pts[i - 1].x + pts[i].x) / 2).toFixed(1);
+      lineD += ` C ${cx},${pts[i - 1].y.toFixed(1)} ${cx},${pts[i].y.toFixed(1)} ${pts[i].x.toFixed(1)},${pts[i].y.toFixed(1)}`;
+    }
+    const areaD = `${lineD} L ${pts[pts.length - 1].x.toFixed(1)},${H - padB} L ${pts[0].x.toFixed(1)},${H - padB} Z`;
+    const last = pts[pts.length - 1];
+    const fmtVal = v => ctx.metric === 'Volume' ? `${(v / 1e6).toFixed(2)}M`
+      : ctx.metric === 'RSI' ? v.toFixed(1)
+      : fmt(v, ctx.isKr);
+    const yTicks = [0, 0.33, 0.66, 1].map(r => {
+      const val = maxV - r * span;
+      const y = padT + r * plotH;
+      return `<text x="${W - padR + 8}" y="${y.toFixed(1)}" fill="var(--muted)" font-size="10.5" dominant-baseline="middle">${fmtVal(val)}</text>`;
+    }).join('');
+    const xTicks = [0, 0.25, 0.5, 0.75, 1].map(r => {
+      const idx = Math.min(pts.length - 1, Math.round(r * (pts.length - 1)));
+      const d = pts[idx].date;
+      const lbl = `${d.getMonth() + 1}/${d.getDate()}`;
+      return `<text x="${pts[idx].x.toFixed(1)}" y="${H - 10}" fill="var(--muted)" font-size="10" text-anchor="${r === 0 ? 'start' : r === 1 ? 'end' : 'middle'}">${lbl}</text>`;
+    }).join('');
+    let bodySvg = '';
+    if (ctx.type === 'bar') {
+      const bw = Math.max(2, (plotW / pts.length) * 0.7);
+      bodySvg = pts.map(p => {
+        const bh = Math.max(2, (H - padB) - p.y);
+        return `<rect x="${(p.x - bw / 2).toFixed(1)}" y="${p.y.toFixed(1)}" width="${bw.toFixed(1)}" height="${bh.toFixed(1)}" rx="1.5" fill="${strokeCol}" opacity="0.72"/>`;
+      }).join('');
+    } else {
+      bodySvg = `
+        <defs><linearGradient id="${gid}" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="${strokeCol}" stop-opacity="0.28"/><stop offset="100%" stop-color="${strokeCol}" stop-opacity="0"/></linearGradient></defs>
+        <path class="uni-area-path" d="${areaD}" fill="url(#${gid})"/>
+        <path class="uni-line-path" d="${lineD}" stroke="${strokeCol}"/>
+        <circle class="sig-beacon" cx="${last.x.toFixed(1)}" cy="${last.y.toFixed(1)}" r="4.5" fill="${strokeCol}"/>
+        <circle cx="${last.x.toFixed(1)}" cy="${last.y.toFixed(1)}" r="4" fill="${strokeCol}" stroke="var(--card)" stroke-width="1.8"/>`;
+    }
+    svg.innerHTML = `${bodySvg}${yTicks}${xTicks}
+      <line id="uni-live-cx" x1="0" y1="${padT}" x2="0" y2="${H - padB}" stroke="var(--muted)" stroke-dasharray="3 3" stroke-opacity="0.6" style="display:none"/>
+      <circle id="uni-live-cd" cx="0" cy="0" r="4.5" fill="${strokeCol}" stroke="#fff" stroke-width="1.8" style="display:none"/>`;
+  }
+  renderUniLiveChart();
+  const uniStage = document.getElementById('uni-live-stage');
+  if (uniStage) {
+    uniStage.onmousemove = e => {
+      const pts = window._uniCtx?.pts || [];
+      if (!pts.length) return;
+      const rect = uniStage.getBoundingClientRect();
+      const relX = ((e.clientX - rect.left) / rect.width) * 860;
+      let best = pts[0], minD = Infinity;
+      for (const p of pts) { const d = Math.abs(p.x - relX); if (d < minD) { minD = d; best = p; } }
+      const cx = document.getElementById('uni-live-cx');
+      const cd = document.getElementById('uni-live-cd');
+      const tip = document.getElementById('uni-live-tip');
+      if (cx && cd) { cx.setAttribute('x1', best.x); cx.setAttribute('x2', best.x); cx.style.display = 'block'; cd.setAttribute('cx', best.x); cd.setAttribute('cy', best.y); cd.style.display = 'block'; }
+      const vStr = window._uniCtx.metric === 'Volume' ? `${(best.v / 1e6).toFixed(2)}M` : window._uniCtx.metric === 'RSI' ? best.v.toFixed(1) : fmt(best.v, isKr);
+      tip.textContent = `${best.date.getMonth() + 1}/${best.date.getDate()} · ${window._uniCtx.metric}: ${vStr}`;
+      tip.classList.add('show');
+    };
+    uniStage.onmouseleave = () => {
+      const cx = document.getElementById('uni-live-cx');
+      const cd = document.getElementById('uni-live-cd');
+      if (cx) cx.style.display = 'none';
+      if (cd) cd.style.display = 'none';
+      document.getElementById('uni-live-tip')?.classList.remove('show');
+    };
   }
 
   // ══════════════════════════════════════════════════════

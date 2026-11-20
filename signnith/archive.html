@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="ko">
+<html lang="ko" class="light">
 <head>
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-H36GJE20EL"></script>
 <script>
@@ -27,45 +27,45 @@
 
   /* ── CSS 변수: 다크 모드 (기본) — report.html과 동일한 글라스모피즘 원칙 ── */
   :root {
-    --bg:       transparent;
-    --card:     rgba(17,24,39,0.82);
-    --card2:    rgba(15,19,32,0.75);
+    --bg:       #080a0f;
+    --card:     #11141d;
+    --card2:    #171b26;
     --border:   rgba(255,255,255,0.08);
-    --border2:  rgba(255,255,255,0.14);
-    --text:     #f1f5f9;
-    --text2:    #e2e8f0;
-    --muted:    #94a3b8;
+    --border2:  rgba(255,255,255,0.15);
+    --text:     #f8fafc;
+    --text2:    #cbd5e1;
+    --muted:    #8b95a7;
     --muted2:   #64748b;
-    --topbar:   rgba(10,8,30,0.82);
+    --topbar:   rgba(8,10,15,0.84);
     --green:    #00d4aa;
     --red:      #ff4b6e;
     --up:       #ff4b6e;
     --down:     #3b82f6;
     --yellow:   #fbbf24;
     --blue:     #3b82f6;
-    --shadow:   rgba(0,0,0,.4);
+    --shadow:   rgba(0,0,0,.45);
     --sidebar:  260px;
   }
 
-  /* ── CSS 변수: 라이트 모드 — report.html과 동일 ── */
+  /* ── CSS 변수: 라이트 모드 — index.html과 동일 ── */
   html.light {
-    --bg:       transparent;
-    --card:     rgba(255,255,255,0.78);
-    --card2:    rgba(241,245,249,0.65);
-    --border:   rgba(180,160,140,0.20);
-    --border2:  rgba(180,160,140,0.30);
+    --bg:       #f6f7fb;
+    --card:     #ffffff;
+    --card2:    #f1f4f9;
+    --border:   rgba(15,23,42,0.08);
+    --border2:  rgba(15,23,42,0.16);
     --text:     #0f172a;
     --text2:    #1e293b;
-    --muted:    #334155;
+    --muted:    #475569;
     --muted2:   #64748b;
-    --topbar:   rgba(255,255,255,0.75);
+    --topbar:   rgba(246,247,251,0.92);
     --green:    #047857;
     --red:      #be123c;
     --up:       #be123c;
     --down:     #1d4ed8;
     --yellow:   #b45309;
     --blue:     #1d4ed8;
-    --shadow:   rgba(0,0,0,.10);
+    --shadow:   rgba(15,23,42,.08);
   }
 
   body {
@@ -80,25 +80,15 @@
     transition: background .25s, color .25s;
   }
 
-  /* ── Aurora Canvas ── */
-  #aurora-canvas {
+  /* ── Ambient Glow (index.html과 동일) ── */
+  .ambient-glow {
     position: fixed;
     inset: 0;
-    width: 100%;
-    height: 100%;
-    z-index: -2;
     pointer-events: none;
-    display: block;
-  }
-  /* ── Particle Canvas ── */
-  #particle-canvas {
-    position: fixed;
-    inset: 0;
-    width: 100%;
-    height: 100%;
     z-index: -1;
-    pointer-events: none;
-    display: block;
+    background:
+      radial-gradient(circle at 16% 0%, rgba(252, 114, 255, 0.08), transparent 36%),
+      radial-gradient(circle at 84% 6%, rgba(0, 212, 170, 0.07), transparent 34%);
   }
   #main-wrap {
     position: relative;
@@ -792,8 +782,7 @@
 </head>
 <body>
 
-<canvas id="aurora-canvas"></canvas>
-<canvas id="particle-canvas"></canvas>
+<div class="ambient-glow"></div>
 
 <div id="main-wrap">
 

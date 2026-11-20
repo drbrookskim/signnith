@@ -2131,6 +2131,7 @@ async function addFav(ticker, name, exchange) {
   _favsCache[group_type].push({ ticker, name: resolvedName, market });
   renderFavs();
   if (typeof renderFavModalList === 'function') renderFavModalList();
+  setTimeout(() => { if (typeof prefetchFavoritesReady === 'function') prefetchFavoritesReady(); }, 100);
 
   if (_sb) {
     const { error } = await _sb.from('favorites')
@@ -2378,7 +2379,16 @@ function renderFavs() {
   }
 
   const enriched = deduped.map((entry, idx) => {
-    const ins = entry.preset || _buildDynamicInsight(entry.item.ticker, entry.isUs, idx);
+    const baseIns = entry.preset || _buildDynamicInsight(entry.item.ticker, entry.isUs, idx);
+    const ready = _loadReadySummary()[entry.item.ticker.toUpperCase()];
+    const ins = ready ? {
+      ...baseIns,
+      price: ready.priceStr || baseIns.price,
+      chg: ready.chgStr || baseIns.chg,
+      isUp: ready.isUp ?? baseIns.isUp,
+      sparkPts: ready.sparkPts || null,
+      isReady: true
+    } : { ...baseIns, isReady: false };
     return { ...entry, ins };
   }).filter(({ ins }) => {
     if (favFilterMode === 'buy') return ins.signal === 'buy';
@@ -2403,9 +2413,9 @@ function renderFavs() {
           <td style="color:var(--muted)">${idx + 1}</td>
           <td><strong>${flag} ${displayName}</strong><div style="font-size:0.68rem;color:var(--muted)">${subLine}${ins.price ? ' · ' + ins.price : ''}</div></td>
           <td class="${ins.isUp ? 'up' : 'down'}" style="font-weight:700">${ins.chg}</td>
-          <td style="width:120px">${_favSparkSvg(item.ticker, 26)}</td>
+          <td style="width:120px">${_favSparkSvg(item.ticker, 26, ins.sparkPts || null)}</td>
           <td><span class="sig-badge ${sigCls}">${_exploreSigIcon(ins.icon)}${ins.label}</span></td>
-          <td style="color:var(--green);font-weight:700">${ins.conf}%</td>
+          <td style="color:var(--green);font-weight:700">${ins.conf}%${ins.isReady ? ' <span style="font-size:0.62rem;opacity:0.85">● READY</span>' : ''}</td>
           <td style="font-weight:700">${ins.rr}</td>
           <td style="text-align:right">${delFn ? `<span class="tile-del" onclick="event.stopPropagation();${delFn}">✕</span>` : ''}</td>
         </tr>`;
@@ -2424,11 +2434,12 @@ function renderFavs() {
         <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
           <span class="sig-badge ${sigCls}">${_exploreSigIcon(ins.icon)}${ins.label}</span>
           <span style="display:inline-flex;align-items:center;gap:6px">
+            ${ins.isReady ? '<span style="font-size:0.64rem;font-weight:800;color:var(--green);background:rgba(0,212,170,0.12);padding:2px 7px;border-radius:999px">● READY</span>' : ''}
             <span style="font-size:0.72rem;font-weight:700;color:var(--green)">신뢰도 ${ins.conf}%</span>
             ${delFn ? `<span class="tile-del" onclick="event.stopPropagation();${delFn}">✕</span>` : ''}
           </span>
         </div>
-        ${_favSparkSvg(item.ticker, 42)}
+        ${_favSparkSvg(item.ticker, 42, ins.sparkPts || null)}
       </div>
       <div class="case-body">
         <div style="display:flex;align-items:baseline;justify-content:space-between;gap:8px">
@@ -2448,6 +2459,81 @@ function renderFavs() {
 
   body.innerHTML = `<div class="fav-tiles">${enriched.map(tileHtml).join('')}</div>`;
 }
+
+// ══════════════════════════════════════════════════════
+//  즐겨찾기 당일 기준 백그라운드 프리페치 (Ready 상태 유지)
+// ══════════════════════════════════════════════════════
+window._readyFullCache = window._readyFullCache || {};
+function _todayKey() {
+  const d = new Date();
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+}
+function _readyStorageKey() { return `signnith_ready_${_todayKey()}`; }
+function _loadReadySummary() {
+  try { return JSON.parse(localStorage.getItem(_readyStorageKey()) || '{}'); }
+  catch { return {}; }
+}
+function _saveReadySummary(ticker, summary) {
+  try {
+    const map = _loadReadySummary();
+    map[ticker.toUpperCase()] = summary;
+    localStorage.setItem(_readyStorageKey(), JSON.stringify(map));
+  } catch {}
+}
+
+let _prefetchRunning = false;
+async function prefetchFavoritesReady() {
+  if (_prefetchRunning) return;
+  _prefetchRunning = true;
+  try {
+    const f = loadFavs();
+    const period = document.getElementById('period-select')?.value || '6mo';
+    const seen = new Set();
+    const targets = [];
+    [...f.us, ...f.kr].forEach(x => {
+      const k = x.ticker.toUpperCase();
+      if (!seen.has(k)) { seen.add(k); targets.push(x.ticker); }
+    });
+    if (!targets.length) return;
+
+    const existing = _loadReadySummary();
+    const queue = targets.filter(t => !existing[t.toUpperCase()] || !window._readyFullCache[`${t}|${period}`]);
+    const BATCH = 3;
+    for (let i = 0; i < queue.length; i += BATCH) {
+      await Promise.all(queue.slice(i, i + BATCH).map(async ticker => {
+        try {
+          const [ohlcvData, quote] = await Promise.all([
+            fetchOHLCV(ticker, period),
+            fetchQuote(ticker).catch(() => null)
+          ]);
+          if (!ohlcvData?.bars?.length) return;
+          window._readyFullCache[`${ticker}|${period}`] = { ohlcvData, quote };
+          const bars = ohlcvData.bars;
+          const isKr = ohlcvData.currency === 'KRW';
+          const price = quote?.regularMarketPrice || ohlcvData.regularMarketPrice || bars[bars.length - 1].close;
+          const prev = bars[bars.length - 2]?.close || quote?.regularMarketPreviousClose || ohlcvData.previousClose;
+          const chgPct = prev ? ((price / prev - 1) * 100) : 0;
+          const tail = bars.slice(-10).map(b => b.close);
+          const minC = Math.min(...tail), maxC = Math.max(...tail), span = (maxC - minC) || 1;
+          const sparkPts = tail.map(v => Math.round(28 - ((v - minC) / span) * 22));
+          _saveReadySummary(ticker, {
+            priceStr: isKr ? `${Math.round(price).toLocaleString('ko-KR')} KRW` : `$${price.toFixed(2)}`,
+            chgStr: `${chgPct >= 0 ? '+' : ''}${chgPct.toFixed(2)}%`,
+            isUp: chgPct >= 0,
+            sparkPts,
+            readyAt: new Date().toISOString()
+          });
+        } catch (err) {
+          console.warn('Prefetch skipped for', ticker, err?.message);
+        }
+      }));
+      renderFavs();
+    }
+  } finally {
+    _prefetchRunning = false;
+  }
+}
+setTimeout(() => { if (typeof prefetchFavoritesReady === 'function') prefetchFavoritesReady(); }, 500);
 
 function selectFavStock(ticker) {
   favCollapsed = false;
@@ -3738,10 +3824,11 @@ async function runAnalysis() {
   dash.innerHTML = `<div class="center-msg"><div class="spinner"></div><div>${tickerLabel} 데이터 수집 중…</div></div>`;
 
   try {
+    const _cachedReady = window._readyFullCache?.[`${ticker}|${period}`];
     const [ohlcvData, fundInfo, quote] = await Promise.all([
-      fetchOHLCV(ticker, period),
+      _cachedReady?.ohlcvData ? Promise.resolve(_cachedReady.ohlcvData) : fetchOHLCV(ticker, period),
       fetchFundamentals(ticker),
-      fetchQuote(ticker),
+      _cachedReady?.quote ? Promise.resolve(_cachedReady.quote) : fetchQuote(ticker),
     ]);
 
     const { bars, currency, regularMarketPrice, previousClose, marketState, dataUpdatedAt } = ohlcvData;

@@ -1272,9 +1272,9 @@
   </section>
 
   <section class="stats-grid" id="explore-stats">
-    <div class="stat-card">
+    <div class="stat-card" onclick="openBuySignalModal()" style="cursor:pointer;transition:border-color .15s,transform .15s" onmouseover="this.style.borderColor='var(--up)';this.style.transform='translateY(-2px)'" onmouseout="this.style.borderColor='var(--border)';this.style.transform='none'" title="클릭하여 매수 우위 종목 상세 보기">
       <div>
-        <div class="stat-lbl">매수 우위 시그널 비중</div>
+        <div class="stat-lbl">매수 우위 시그널 비중 · 상세 →</div>
         <div class="stat-val" id="stat-buy-ratio">-</div>
         <div class="stat-delta up" id="stat-buy-sub" style="display:inline-flex;align-items:center;gap:4px"><svg width="13" height="13" viewBox="0 0 16 16" fill="none"><path d="M2 12C5 12 6 8 9 7C11 6.3 12.5 5 14 3.5M14 3.5H10.5M14 3.5V7" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>실시간 집계 중</div>
       </div>
@@ -1288,9 +1288,9 @@
       </div>
       <div class="stat-spark" id="stat-spark-5"></div>
     </div>
-    <div class="stat-card">
+    <div class="stat-card" onclick="openIppModal()" style="cursor:pointer;transition:border-color .15s,transform .15s" onmouseover="this.style.borderColor='var(--blue)';this.style.transform='translateY(-2px)'" onmouseout="this.style.borderColor='var(--border)';this.style.transform='none'" title="클릭하여 변곡점 임박(IPP) 감지 종목 상세 보기">
       <div>
-        <div class="stat-lbl">변곡점 임박(IPP) 감지</div>
+        <div class="stat-lbl">변곡점 임박(IPP) 감지 · 상세 →</div>
         <div class="stat-val" id="stat-ipp-count">-</div>
         <div class="stat-delta down" id="stat-ipp-sub">BB 수축 · OBV 다이버전스</div>
       </div>
@@ -1427,6 +1427,30 @@
       </div>
     </div>
     <div id="history-modal-list" style="overflow-y:auto;display:flex;flex-direction:column;gap:8px;padding-right:4px"></div>
+  </div>
+</div>
+
+<!-- ── 매수 우위 시그널 상세 팝업 ── -->
+<div id="buy-signal-modal" onclick="if(event.target===this)closeBuySignalModal()" style="display:none;position:fixed;inset:0;z-index:9000;background:rgba(0,0,0,0.65);backdrop-filter:blur(6px);align-items:center;justify-content:center;padding:16px">
+  <div style="background:var(--card);border:1px solid var(--border2);border-radius:20px;padding:24px;width:100%;max-width:520px;max-height:82vh;display:flex;flex-direction:column;box-shadow:0 24px 60px var(--shadow)">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
+      <div style="font-size:1.02rem;font-weight:800;color:var(--text)">↗ 매수 우위 시그널 상세</div>
+      <button onclick="closeBuySignalModal()" style="background:none;border:none;color:var(--muted);font-size:1.2rem;cursor:pointer">✕</button>
+    </div>
+    <div id="buy-signal-summary" style="font-size:0.8rem;color:var(--muted);margin-bottom:12px"></div>
+    <div id="buy-signal-modal-list" style="overflow-y:auto;display:flex;flex-direction:column;gap:8px;padding-right:4px"></div>
+  </div>
+</div>
+
+<!-- ── 변곡점 임박(IPP) 상세 팝업 ── -->
+<div id="ipp-modal" onclick="if(event.target===this)closeIppModal()" style="display:none;position:fixed;inset:0;z-index:9000;background:rgba(0,0,0,0.65);backdrop-filter:blur(6px);align-items:center;justify-content:center;padding:16px">
+  <div style="background:var(--card);border:1px solid var(--border2);border-radius:20px;padding:24px;width:100%;max-width:520px;max-height:82vh;display:flex;flex-direction:column;box-shadow:0 24px 60px var(--shadow)">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
+      <div style="font-size:1.02rem;font-weight:800;color:var(--text)">🔮 변곡점 임박(IPP) 감지 상세</div>
+      <button onclick="closeIppModal()" style="background:none;border:none;color:var(--muted);font-size:1.2rem;cursor:pointer">✕</button>
+    </div>
+    <div id="ipp-modal-summary" style="font-size:0.8rem;color:var(--muted);margin-bottom:12px">BB 수축 · OBV 다이버전스 · 돌파 시그널이 포착된 종목 목록입니다.</div>
+    <div id="ipp-modal-list" style="overflow-y:auto;display:flex;flex-direction:column;gap:8px;padding-right:4px"></div>
   </div>
 </div>
 
@@ -2395,6 +2419,7 @@ function renderFavs() {
     if (favFilterMode === 'highconf') return ins.conf >= 70;
     return true;
   });
+  window._lastEnrichedExplore = enriched;
   renderExploreStats(enriched);
 
   if (!enriched.length) {
@@ -2686,6 +2711,59 @@ async function addFavFromModal() {
   } catch (e) {
     alert(e.message || '종목을 찾을 수 없습니다.');
   }
+}
+
+function openBuySignalModal() {
+  const list = window._lastEnrichedExplore || [];
+  const buys = list.filter(x => x.ins?.signal === 'buy');
+  const holds = list.filter(x => x.ins?.signal === 'hold').length;
+  const sells = list.filter(x => x.ins?.signal === 'sell').length;
+  const sum = document.getElementById('buy-signal-summary');
+  if (sum) sum.innerHTML = `전체 ${list.length}종목 중 <b style="color:var(--up)">매수 우위 ${buys.length}</b> · <b style="color:var(--yellow)">관망 ${holds}</b> · <b style="color:var(--down)">매도 ${sells}</b>`;
+  const box = document.getElementById('buy-signal-modal-list');
+  if (box) {
+    box.innerHTML = buys.length ? buys.map(({ item, flag, ins }) => `
+      <div onclick="closeBuySignalModal();selectFavStock('${item.ticker}')" style="padding:12px 14px;border-radius:12px;background:var(--card2);border:1px solid var(--border);cursor:pointer">
+        <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:4px">
+          <strong style="font-size:0.9rem;color:var(--text)">${flag} ${escapeHtml(item.name || item.ticker)} <span style="font-size:0.74rem;color:var(--muted);font-weight:500">${item.ticker}</span></strong>
+          <span style="font-size:0.78rem;font-weight:700;color:var(--green)">신뢰도 ${ins.conf}% · R:R ${ins.rr}</span>
+        </div>
+        <div style="font-size:0.78rem;color:var(--muted);line-height:1.45">${ins.thesis}</div>
+      </div>
+    `).join('') : '<div style="padding:24px;text-align:center;color:var(--muted)">매수 우위 종목이 없습니다.</div>';
+  }
+  const m = document.getElementById('buy-signal-modal');
+  if (m) m.style.display = 'flex';
+}
+function closeBuySignalModal() {
+  const m = document.getElementById('buy-signal-modal');
+  if (m) m.style.display = 'none';
+}
+
+function openIppModal() {
+  const list = window._lastEnrichedExplore || [];
+  const ipps = list.filter(x => (x.ins?.tags || []).some(t => /IPP|스퀴즈|돌파/i.test(t)) || (x.ins?.conf || 0) >= 72);
+  const sum = document.getElementById('ipp-modal-summary');
+  if (sum) sum.innerHTML = `전체 ${list.length}종목 중 <b style="color:var(--blue)">${ipps.length}개 종목</b>에서 변곡점 · 돌파 시그널이 감지되었습니다.`;
+  const box = document.getElementById('ipp-modal-list');
+  if (box) {
+    box.innerHTML = ipps.length ? ipps.map(({ item, flag, ins }) => `
+      <div onclick="closeIppModal();selectFavStock('${item.ticker}')" style="padding:12px 14px;border-radius:12px;background:var(--card2);border:1px solid var(--border);cursor:pointer">
+        <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:4px">
+          <strong style="font-size:0.9rem;color:var(--text)">${flag} ${escapeHtml(item.name || item.ticker)} <span style="font-size:0.74rem;color:var(--muted);font-weight:500">${item.ticker}</span></strong>
+          <span class="${ins.isUp ? 'up' : 'down'}" style="font-size:0.8rem;font-weight:700">${ins.chg}</span>
+        </div>
+        <div style="font-size:0.78rem;color:var(--muted);line-height:1.45;margin-bottom:6px">${ins.thesis}</div>
+        <div style="display:flex;gap:5px;flex-wrap:wrap">${(ins.tags || []).map(t => `<span class="mini-tag">${t}</span>`).join('')}</div>
+      </div>
+    `).join('') : '<div style="padding:24px;text-align:center;color:var(--muted)">감지된 변곡점 종목이 없습니다.</div>';
+  }
+  const m = document.getElementById('ipp-modal');
+  if (m) m.style.display = 'flex';
+}
+function closeIppModal() {
+  const m = document.getElementById('ipp-modal');
+  if (m) m.style.display = 'none';
 }
 
 function setTickerAndRun(ticker) {

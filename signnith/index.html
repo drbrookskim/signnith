@@ -1190,9 +1190,16 @@
   @media (max-width:640px){ .mtf-row { grid-template-columns:repeat(2,1fr); } }
   .mtf-cell {
     background:var(--card2); border:1px solid var(--border); border-radius:12px;
-    padding:13px 12px 12px; text-align:center; position:relative; overflow:hidden;
+    padding:13px 12px 15px; text-align:center; position:relative; overflow:hidden;
+    box-shadow: 0 8px 20px -12px var(--mtf-accent, transparent);
   }
-  .mtf-cell::before { content:''; position:absolute; left:0; right:0; top:0; height:3px; background:var(--mtf-accent,var(--muted)); }
+  .mtf-cell::before {
+    content:''; position:absolute; left:10%; right:10%; bottom:0; height:2.5px;
+    border-radius:999px;
+    background:var(--mtf-accent,var(--muted));
+    box-shadow: 0 0 12px 2px var(--mtf-accent, transparent), 0 -4px 14px 0 var(--mtf-accent, transparent);
+    opacity: 0.85;
+  }
   .mtf-cell .mtf-tf  { font-size:0.66rem; color:var(--muted); font-weight:700; letter-spacing:.03em; }
   .mtf-cell .mtf-ret { font-size:1.35rem; font-weight:800; margin:7px 0 3px; line-height:1; }
   .mtf-cell .mtf-ma  { font-size:0.65rem; color:var(--muted); }

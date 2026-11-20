@@ -1272,11 +1272,35 @@
   <section class="stats-grid" id="explore-stats">
     <div class="stat-card">
       <div>
+        <div class="stat-lbl">즐겨찾기 관심 종목</div>
+        <div class="stat-val" id="stat-fav-count">-</div>
+        <div class="stat-delta" id="stat-fav-sub" style="color:var(--green)">US · KR 실시간 워치리스트</div>
+      </div>
+      <div class="stat-spark" id="stat-spark-1"></div>
+    </div>
+    <div class="stat-card">
+      <div>
+        <div class="stat-lbl">최근 분석 히스토리</div>
+        <div class="stat-val" id="stat-hist-count">-</div>
+        <div class="stat-delta" id="stat-hist-sub" style="color:var(--blue)">원클릭 즉시 재분석</div>
+      </div>
+      <div class="stat-spark" id="stat-spark-2"></div>
+    </div>
+    <div class="stat-card">
+      <div>
+        <div class="stat-lbl">7-Layer 퀀트 엔진</div>
+        <div class="stat-val">Live</div>
+        <div class="stat-delta" style="color:var(--purple)">파동 · 일목 · SMC · WACC · IPP</div>
+      </div>
+      <div class="stat-spark" id="stat-spark-3"></div>
+    </div>
+    <div class="stat-card">
+      <div>
         <div class="stat-lbl">매수 우위 시그널 비중</div>
         <div class="stat-val" id="stat-buy-ratio">-</div>
         <div class="stat-delta up" id="stat-buy-sub" style="display:inline-flex;align-items:center;gap:4px"><svg width="13" height="13" viewBox="0 0 16 16" fill="none"><path d="M2 12C5 12 6 8 9 7C11 6.3 12.5 5 14 3.5M14 3.5H10.5M14 3.5V7" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>실시간 집계 중</div>
       </div>
-      <div class="stat-spark" id="stat-spark-1"></div>
+      <div class="stat-spark" id="stat-spark-4"></div>
     </div>
     <div class="stat-card">
       <div>
@@ -1284,7 +1308,7 @@
         <div class="stat-val" id="stat-avg-conf">-</div>
         <div class="stat-delta" id="stat-conf-sub" style="color:var(--green)">7-Layer 앙상블 활성</div>
       </div>
-      <div class="stat-spark" id="stat-spark-2"></div>
+      <div class="stat-spark" id="stat-spark-5"></div>
     </div>
     <div class="stat-card">
       <div>
@@ -1292,7 +1316,7 @@
         <div class="stat-val" id="stat-ipp-count">-</div>
         <div class="stat-delta down" id="stat-ipp-sub">BB 수축 · OBV 다이버전스</div>
       </div>
-      <div class="stat-spark" id="stat-spark-3"></div>
+      <div class="stat-spark" id="stat-spark-6"></div>
     </div>
   </section>
 
@@ -2161,6 +2185,17 @@ function toggleFav() {
 }
 
 function renderExploreStats(enrichedList = []) {
+  const f = loadFavs();
+  const h = loadHistory();
+  const fc = document.getElementById('stat-fav-count');
+  const fs = document.getElementById('stat-fav-sub');
+  const hc = document.getElementById('stat-hist-count');
+  const hs = document.getElementById('stat-hist-sub');
+  if (fc) fc.textContent = `${f.us.length + f.kr.length} 종목`;
+  if (fs) fs.textContent = `🇺🇸 ${f.us.length} · 🇰🇷 ${f.kr.length} 등록`;
+  if (hc) hc.textContent = `${h.length} 건`;
+  if (hs) hs.textContent = h.length ? `최근: ${h[0].name || h[0].ticker}` : '분석 기록 없음';
+
   const total = enrichedList.length || 1;
   const buyCnt = enrichedList.filter(x => x.ins?.signal === 'buy').length;
   const buyPct = ((buyCnt / total) * 100).toFixed(1);
@@ -2180,12 +2215,12 @@ function renderExploreStats(enrichedList = []) {
   if (ac) ac.textContent = `${avgConf}%`;
   if (ic) ic.textContent = `${ippCnt} 종목`;
 
-  const s1 = document.getElementById('stat-spark-1');
-  const s2 = document.getElementById('stat-spark-2');
-  const s3 = document.getElementById('stat-spark-3');
-  if (s1 && !s1.innerHTML) s1.innerHTML = _favSparkSvg('BUY_RATIO_UP', 34);
-  if (s2 && !s2.innerHTML) s2.innerHTML = _favSparkSvg('AVG_CONF_7L', 34);
-  if (s3 && !s3.innerHTML) s3.innerHTML = _favSparkSvg('IPP_DETECT', 34);
+  [['stat-spark-1', 'EXPLORE_1'], ['stat-spark-2', 'EXPLORE_2'], ['stat-spark-3', 'EXPLORE_3'],
+   ['stat-spark-4', 'BUY_RATIO_UP'], ['stat-spark-5', 'AVG_CONF_7L'], ['stat-spark-6', 'IPP_DETECT']
+  ].forEach(([id, key]) => {
+    const el = document.getElementById(id);
+    if (el && !el.innerHTML) el.innerHTML = _favSparkSvg(key, 34);
+  });
 }
 
 const _DEFAULT_EXPLORE = [

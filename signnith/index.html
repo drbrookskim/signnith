@@ -23,7 +23,7 @@
 <meta name="apple-mobile-web-app-title" content="SIGNNITH"/>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Noto+Sans+KR:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/d3@7/dist/d3.min.js"></script>
@@ -79,7 +79,8 @@
   body {
     background: var(--bg);
     color: var(--text);
-    font-family: 'Space Grotesk', -apple-system, sans-serif;
+    font-family: 'Space Grotesk', 'Noto Sans KR', -apple-system, sans-serif;
+    font-variant-numeric: tabular-nums;
     min-height: 100vh;
     transition: background .25s, color .25s;
   }
@@ -478,28 +479,104 @@
     gap: 5px;
     letter-spacing: .04em;
   }
+  /* ── Explore Feed (Contra Cards × Uniswap Table) ── */
+  .topbar-nav { display: flex; align-items: center; gap: 4px; margin-left: 16px; }
+  .topbar-nav-btn {
+    padding: 6px 12px; border-radius: 999px; border: none; background: transparent;
+    color: var(--muted); font-family: inherit; font-size: 0.78rem; font-weight: 600;
+    cursor: pointer; transition: all .15s;
+  }
+  .topbar-nav-btn:hover, .topbar-nav-btn.active { color: var(--text); background: rgba(255,255,255,0.08); }
+  html.light .topbar-nav-btn:hover, html.light .topbar-nav-btn.active { background: rgba(15,23,42,0.07); }
+  @media (max-width: 720px) { .topbar-nav { display: none; } }
+
+  .fav-controls { display: flex; align-items: center; gap: 8px; }
+  .view-sw {
+    display: inline-flex; background: var(--card2); border: 1px solid var(--border);
+    border-radius: 999px; padding: 2px; gap: 2px;
+  }
+  .view-sw-btn {
+    border: none; background: transparent; color: var(--muted); font-family: inherit;
+    font-size: 0.68rem; font-weight: 700; padding: 4px 10px; border-radius: 999px; cursor: pointer;
+  }
+  .view-sw-btn.active { background: var(--card); color: var(--text); box-shadow: 0 1px 3px rgba(0,0,0,.2); }
   .fav-tiles {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
-    gap: 6px;
+    grid-template-columns: repeat(auto-fill, minmax(185px, 1fr));
+    gap: 10px;
   }
+  .fav-card.compact .fav-tiles {
+    display: flex; overflow-x: auto; gap: 8px; padding-bottom: 4px;
+  }
+  .fav-card.compact .fav-tile { min-width: 175px; flex-shrink: 0; }
+  .fav-card.compact .fav-spark-wrap { display: none; }
   .fav-tile {
     background: var(--card2);
     border: 1px solid var(--border);
-    border-radius: 8px;
-    padding: 6px 10px;
+    border-radius: 12px;
+    padding: 10px 12px;
     font-size: 0.78rem;
     color: var(--text2);
     cursor: pointer;
-    transition: all .15s;
+    transition: transform .18s, border-color .18s, box-shadow .18s;
     display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 4px;
+    flex-direction: column;
+    gap: 6px;
     min-width: 0;
   }
-  .fav-tile:hover { background: var(--border); color: var(--text); border-color: var(--blue); }
-  .fav-tile.active { background: var(--border); color: var(--text); border-color: var(--blue); }
+  .fav-tile:hover { transform: translateY(-2px); background: var(--card); color: var(--text); border-color: var(--blue); }
+  .fav-tile.active { background: var(--card); color: var(--text); border-color: var(--green); box-shadow: 0 0 0 2px rgba(0,212,170,.18); }
+  .fav-tile-top { display: flex; align-items: center; justify-content: space-between; gap: 6px; width: 100%; }
+  .fav-spark-wrap {
+    width: 100%; height: 34px; border-radius: 8px; padding: 3px 4px;
+    background-image: radial-gradient(circle, rgba(148,163,184,0.22) 1px, transparent 1px);
+    background-size: 10px 10px;
+  }
+  @keyframes sigDraw { to { stroke-dashoffset: 0; } }
+  @keyframes sigFade { to { opacity: 1; } }
+  @keyframes sigPulse { 0% { r: 3.5; opacity: .85; } 75%,100% { r: 10; opacity: 0; } }
+  .sig-spark-line {
+    fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round;
+    stroke-dasharray: 450; stroke-dashoffset: 450; animation: sigDraw .85s cubic-bezier(.22,1,.36,1) forwards;
+  }
+  .sig-spark-area { opacity: 0; animation: sigFade .8s ease .15s forwards; }
+  .sig-beacon { animation: sigPulse 1.8s cubic-bezier(.24,0,.38,1) infinite; }
+
+  .fav-table-wrap { overflow-x: auto; }
+  .fav-table { width: 100%; border-collapse: collapse; min-width: 520px; font-size: 0.78rem; }
+  .fav-table th { text-align: left; font-size: 0.68rem; color: var(--muted); padding: 8px 10px; border-bottom: 1px solid var(--border); }
+  .fav-table td { padding: 9px 10px; border-bottom: 1px solid var(--border); vertical-align: middle; }
+  .fav-table tr { cursor: pointer; transition: background .12s; }
+  .fav-table tbody tr:hover { background: rgba(255,255,255,0.04); }
+
+  /* Dotted-Matrix Chart Stage & Sticky Jump Bar */
+  .chart-scroll {
+    background-image: radial-gradient(circle, rgba(148,163,184,0.20) 1px, transparent 1px);
+    background-size: 16px 16px;
+    border-radius: 12px;
+    padding: 8px;
+  }
+  html.light .chart-scroll {
+    background-image: radial-gradient(circle, rgba(15,23,42,0.12) 1px, transparent 1px);
+  }
+  .dash-jump-bar {
+    position: sticky; top: 62px; z-index: 45;
+    display: flex; align-items: center; justify-content: space-between; gap: 8px; flex-wrap: wrap;
+    background: var(--topbar); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
+    border: 1px solid var(--border2); border-radius: 12px; padding: 6px 10px; margin-bottom: 14px;
+  }
+  .dash-jump-pills { display: flex; gap: 4px; overflow-x: auto; }
+  .dash-jump-pill {
+    padding: 5px 11px; border-radius: 999px; border: none; background: transparent;
+    color: var(--muted); font-family: inherit; font-size: 0.74rem; font-weight: 600;
+    cursor: pointer; white-space: nowrap; text-decoration: none;
+  }
+  .dash-jump-pill:hover { color: var(--text); background: rgba(255,255,255,0.08); }
+  .sig-ico-pill {
+    width: 22px; height: 22px; border-radius: 50%; display: inline-grid; place-items: center;
+    background: rgba(255,255,255,0.14); flex-shrink: 0;
+  }
+  html.light .sig-ico-pill { background: rgba(15,23,42,0.07); }
   .fav-tile-label {
     flex: 1;
     min-width: 0;
@@ -976,8 +1053,15 @@
 
 <div id="main-wrap">
 <header class="topbar">
-  <div class="logo">
-    <img class="logo-img" src="assets/signnith-logo-white.png" alt="Signnith" />
+  <div style="display:flex;align-items:center">
+    <div class="logo">
+      <img class="logo-img" src="assets/signnith-logo-white.png" alt="Signnith" />
+    </div>
+    <nav class="topbar-nav" aria-label="주 메뉴">
+      <button class="topbar-nav-btn active" onclick="window.scrollTo({top:0,behavior:'smooth'})">Explore</button>
+      <button class="topbar-nav-btn" onclick="openArchive()">아카이브</button>
+      <button class="topbar-nav-btn" onclick="location.href='compare.html'">종목 비교</button>
+    </nav>
   </div>
   <div class="topbar-right">
     <span class="pill">Serverless Stock Analysis</span>
@@ -1083,8 +1167,17 @@
 <div class="fav-section">
   <div class="fav-card" id="fav-card">
     <div class="fav-header">
-      <span class="fav-title">⭐ 즐겨찾기</span>
-      <button class="fav-toggle" onclick="toggleFav()">접기 ↑</button>
+      <span class="fav-title">⭐ 즐겨찾기 · 탐색 피드</span>
+      <div class="fav-controls">
+        <div class="view-sw" role="group" aria-label="보기 전환">
+          <button class="view-sw-btn active" id="fav-sw-cards" onclick="setFavView('cards')">Cards</button>
+          <button class="view-sw-btn" id="fav-sw-table" onclick="setFavView('table')">Table</button>
+        </div>
+        <button class="fav-toggle" onclick="toggleFav()" style="display:inline-flex;align-items:center;gap:4px">
+          <svg width="12" height="12" viewBox="0 0 16 16" fill="none"><path d="M4 10L8 6L12 10" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          접기
+        </button>
+      </div>
     </div>
     <div id="fav-body">
       <!-- JS로 렌더링 -->
@@ -1818,11 +1911,54 @@ async function removeFav(ticker) {
   }
 }
 
+const _CHEV_DN = '<svg width="12" height="12" viewBox="0 0 16 16" fill="none"><path d="M4 6L8 10L12 6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+const _CHEV_UP = '<svg width="12" height="12" viewBox="0 0 16 16" fill="none"><path d="M4 10L8 6L12 10" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+
 let favCollapsed = false;
+let favViewMode = 'cards';
+let _favSparkUid = 0;
+
+function setFavView(mode) {
+  favViewMode = mode;
+  document.getElementById('fav-sw-cards')?.classList.toggle('active', mode === 'cards');
+  document.getElementById('fav-sw-table')?.classList.toggle('active', mode === 'table');
+  renderFavs();
+}
+
+function _favSparkSvg(ticker, h = 30) {
+  let seed = 0;
+  for (let i = 0; i < ticker.length; i++) seed = (seed * 31 + ticker.charCodeAt(i)) % 997;
+  const pts = Array.from({ length: 8 }, (_, i) => {
+    const base = 24 - i * 1.4;
+    const wave = Math.sin((i + seed) * 0.8) * 6;
+    return Math.max(4, Math.min(28, base + wave));
+  });
+  const isUp = pts[pts.length - 1] <= pts[0];
+  const color = isUp ? 'var(--up)' : 'var(--down)';
+  const w = 180, pad = 5;
+  const step = (w - pad * 2) / (pts.length - 1);
+  const mapped = pts.map((y, i) => ({ x: pad + i * step, y: Math.max(3, Math.min(h - 3, y * (h / 32))) }));
+  let d = `M ${mapped[0].x.toFixed(1)},${mapped[0].y.toFixed(1)}`;
+  for (let i = 1; i < mapped.length; i++) {
+    const cx = ((mapped[i - 1].x + mapped[i].x) / 2).toFixed(1);
+    d += ` C ${cx},${mapped[i - 1].y.toFixed(1)} ${cx},${mapped[i].y.toFixed(1)} ${mapped[i].x.toFixed(1)},${mapped[i].y.toFixed(1)}`;
+  }
+  const areaD = `${d} L ${mapped[mapped.length - 1].x.toFixed(1)},${h} L ${mapped[0].x.toFixed(1)},${h} Z`;
+  const last = mapped[mapped.length - 1];
+  const gid = 'fsg_' + (++_favSparkUid);
+  return `<svg viewBox="0 0 ${w} ${h}" width="100%" height="${h}" style="display:block;overflow:visible">
+    <defs><linearGradient id="${gid}" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="${color}" stop-opacity="0.25"/><stop offset="100%" stop-color="${color}" stop-opacity="0"/></linearGradient></defs>
+    <path class="sig-spark-area" d="${areaD}" fill="url(#${gid})"/>
+    <path class="sig-spark-line" d="${d}" stroke="${color}"/>
+    <circle class="sig-beacon" cx="${last.x.toFixed(1)}" cy="${last.y.toFixed(1)}" r="3.5" fill="${color}"/>
+    <circle cx="${last.x.toFixed(1)}" cy="${last.y.toFixed(1)}" r="2.8" fill="${color}" stroke="var(--card)" stroke-width="1.2"/>
+  </svg>`;
+}
+
 function toggleFav() {
   favCollapsed = !favCollapsed;
   document.getElementById('fav-body').style.display = favCollapsed ? 'none' : '';
-  document.querySelector('.fav-toggle').textContent = favCollapsed ? '펼치기 ↓' : '접기 ↑';
+  document.querySelector('.fav-toggle').innerHTML = favCollapsed ? (_CHEV_DN + '펼치기') : (_CHEV_UP + '접기');
 }
 
 function renderFavs() {
@@ -1830,7 +1966,7 @@ function renderFavs() {
   const body = document.getElementById('fav-body');
   if (!body) return;
 
-  const tileHtml = (item, isUs) => {
+  const resolveInfo = (item, isUs) => {
     const codeOnly = item.ticker.replace(/\.(KS|KQ|T|L|HK)$/i, '');
     let rawName = item.name || '';
     if (!rawName || rawName === item.ticker || rawName === codeOnly) {
@@ -1840,21 +1976,46 @@ function renderFavs() {
              || '';
     }
     const displayName = rawName || codeOnly;
-    let subLine;
-    if (isUs) {
-      const exch = item.market || (typeof guessExchange === 'function' ? guessExchange(item.ticker) : 'NASDAQ');
-      subLine = `${codeOnly}.${exch}`;
-    } else {
-      subLine = item.market ? `${codeOnly}.${item.market}` : codeOnly;
-    }
+    const subLine = isUs
+      ? `${codeOnly}.${item.market || (typeof guessExchange === 'function' ? guessExchange(item.ticker) : 'NASDAQ')}`
+      : (item.market ? `${codeOnly}.${item.market}` : codeOnly);
+    return { displayName, subLine };
+  };
+
+  if (favViewMode === 'table') {
+    const all = [
+      ...f.us.map(item => ({ item, isUs: true, flag: '🇺🇸' })),
+      ...f.kr.map(item => ({ item, isUs: false, flag: '🇰🇷' }))
+    ];
+    body.innerHTML = `<div class="fav-table-wrap"><table class="fav-table">
+      <thead><tr><th>#</th><th>종목</th><th>시장</th><th>미니 추세</th><th></th></tr></thead>
+      <tbody>${all.map(({ item, isUs, flag }, idx) => {
+        const { displayName, subLine } = resolveInfo(item, isUs);
+        return `<tr onclick="selectFavStock('${item.ticker}')">
+          <td style="color:var(--muted)">${idx + 1}</td>
+          <td><strong>${flag} ${displayName}</strong><div style="font-size:0.68rem;color:var(--muted)">${subLine}</div></td>
+          <td style="color:var(--muted)">${isUs ? 'US' : 'KRX'}</td>
+          <td style="width:130px">${_favSparkSvg(item.ticker, 24)}</td>
+          <td style="text-align:right"><span class="tile-del" onclick="event.stopPropagation();removeFav('${item.ticker}')">✕</span></td>
+        </tr>`;
+      }).join('')}</tbody>
+    </table></div>`;
+    return;
+  }
+
+  const tileHtml = (item, isUs) => {
+    const { displayName, subLine } = resolveInfo(item, isUs);
     return `
-    <span class="fav-tile" onclick="setTickerAndRun('${item.ticker}')">
-      <span class="fav-tile-label" style="white-space:normal;line-height:1.5">
-        <span style="display:block;font-size:0.78rem;font-weight:600">${displayName}</span>
-        <span style="display:block;font-size:0.62rem;color:var(--muted);margin-top:1px">${subLine}</span>
-      </span>
-      <span class="tile-del" onclick="event.stopPropagation();removeFav('${item.ticker}')">✕</span>
-    </span>`;
+    <div class="fav-tile" onclick="selectFavStock('${item.ticker}')">
+      <div class="fav-tile-top">
+        <span class="fav-tile-label" style="white-space:normal;line-height:1.35">
+          <span style="display:block;font-size:0.8rem;font-weight:700">${displayName}</span>
+          <span style="display:block;font-size:0.65rem;color:var(--muted);margin-top:1px">${subLine}</span>
+        </span>
+        <span class="tile-del" onclick="event.stopPropagation();removeFav('${item.ticker}')">✕</span>
+      </div>
+      <div class="fav-spark-wrap">${_favSparkSvg(item.ticker, 28)}</div>
+    </div>`;
   };
 
   body.innerHTML = `
@@ -1867,6 +2028,14 @@ function renderFavs() {
       <div class="fav-tiles">${f.kr.map(item => tileHtml(item, false)).join('')}</div>
     </div>
   `;
+}
+
+function selectFavStock(ticker) {
+  document.getElementById('fav-card')?.classList.add('compact');
+  setTickerAndRun(ticker);
+  setTimeout(() => {
+    document.getElementById('dashboard')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }, 120);
 }
 
 // 분석 결과의 즐겨찾기 버튼 상태 업데이트
@@ -3241,7 +3410,16 @@ function renderDashboard({ ticker, bars, ind, tech, fund, decision: d, price, is
   const mtfColor = v => v==='bull'?'var(--up)':v==='bear'?'var(--down)':'var(--yellow)';
   const flag      = isKr ? '🇰🇷' : '🇺🇸';
   const badgeCls  = {BUY:'buy',SELL:'sell',HOLD:'hold'}[d.action]||'hold';
-  const badgeLbl  = {BUY:'● 매수 BUY',SELL:'● 매도 SELL',HOLD:'● 관망 HOLD'}[d.action];
+  const _sigSvg = {
+    BUY:  '<span class="sig-ico-pill"><svg width="13" height="13" viewBox="0 0 16 16" fill="none"><path d="M2 12C5.5 12 6.5 7.5 9.5 6.5C11.5 5.8 12.8 4.5 14 3M14 3H10.5M14 3V6.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></span>',
+    SELL: '<span class="sig-ico-pill"><svg width="13" height="13" viewBox="0 0 16 16" fill="none"><path d="M3.5 5.5L8 10L12.5 5.5" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/><path d="M4.5 9.2L8 12.7L11.5 9.2" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" opacity="0.55"/></svg></span>',
+    HOLD: '<span class="sig-ico-pill"><svg width="13" height="13" viewBox="0 0 16 16" fill="none"><path d="M2 8C4 5.5 6 5.5 8 8C10 10.5 12 10.5 14 8" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></span>'
+  };
+  const badgeLbl  = {
+    BUY:  `${_sigSvg.BUY}<span>매수 BUY</span>`,
+    SELL: `${_sigSvg.SELL}<span>매도 SELL</span>`,
+    HOLD: `${_sigSvg.HOLD}<span>관망 HOLD</span>`
+  }[d.action];
   const gc        = {BUY:'var(--up)',SELL:'var(--down)',HOLD:'var(--yellow)'}[d.action];
   const isSell    = d.action==='SELL';
   const tgtPct    = (d.targetPrice/price-1)*100;
@@ -3298,7 +3476,18 @@ function renderDashboard({ ticker, bars, ind, tech, fund, decision: d, price, is
   const closes  = bars.map(b=>b.close);
 
   document.getElementById('dashboard').innerHTML = `
-  <div class="row row-top">
+  <div class="dash-jump-bar">
+    <div class="dash-jump-pills">
+      <a class="dash-jump-pill" href="#sec-hero">요약</a>
+      <a class="dash-jump-pill" href="#sec-mtf">멀티 타임프레임</a>
+      <a class="dash-jump-pill" href="#sec-adv">고급 시그널</a>
+      <a class="dash-jump-pill" href="#sec-charts">차트 · 패턴</a>
+    </div>
+    <div style="display:flex;gap:6px;align-items:center">
+      <button class="view-sw-btn active" onclick="document.getElementById('fav-card')?.classList.toggle('compact')">피드 접기/펼치기</button>
+    </div>
+  </div>
+  <div class="row row-top" id="sec-hero">
     <!-- 상태 카드 -->
     <div class="card">
       <div class="card-header"><span class="dot" style="background:var(--blue)"></span>current-state</div>
@@ -3321,14 +3510,14 @@ function renderDashboard({ ticker, bars, ind, tech, fund, decision: d, price, is
       ${high52w!=null?`
       <div style="margin-top:12px;font-size:0.78rem;color:var(--muted)">
         <div style="display:flex;justify-content:space-between;margin-bottom:4px">
-          <span>52주 저가</span><span style="color:#cbd5e1">${fmt(low52w,isKr)}</span>
+          <span>52주 저가</span><span style="color:var(--text2)">${fmt(low52w,isKr)}</span>
         </div>
         <div style="position:relative;background:var(--border);border-radius:4px;height:5px">
           <div style="position:absolute;left:0;height:5px;border-radius:4px;background:linear-gradient(90deg,var(--red),var(--green));
             width:${Math.min(100,Math.max(0,((price-low52w)/(high52w-low52w))*100)).toFixed(1)}%"></div>
         </div>
         <div style="display:flex;justify-content:space-between;margin-top:4px">
-          <span>52주 고가</span><span style="color:#cbd5e1">${fmt(high52w,isKr)}</span>
+          <span>52주 고가</span><span style="color:var(--text2)">${fmt(high52w,isKr)}</span>
         </div>
       </div>`:''}
       <div style="margin-top:12px">
@@ -3455,7 +3644,7 @@ function renderDashboard({ ticker, bars, ind, tech, fund, decision: d, price, is
   </div>
 
   <!-- ═══ 기간별 추세 · 멀티 타임프레임 ═══ -->
-  <div class="row" style="grid-template-columns:1fr;margin-top:0">
+  <div class="row" id="sec-mtf" style="grid-template-columns:1fr;margin-top:0">
     <div class="card">
       <div class="card-header">
         <span class="dot" style="background:var(--blue)"></span>기간별 추세 · 멀티 타임프레임 ${tip('기간별 추세 종합','단기(1주)·중기(1개월)·분기(3개월)·장기(6개월) 각 구간의 수익률과 이동평균 위치를 종합해 기간별 방향성을 한눈에 비교합니다.\n\n<b>판정</b>\n• 정배열 — 전 구간 상승 정렬 (강한 추세)\n• 역배열 — 전 구간 하락 정렬\n• 혼조 — 기간별 방향 불일치')}
@@ -3497,7 +3686,7 @@ function renderDashboard({ ticker, bars, ind, tech, fund, decision: d, price, is
   </div>
 
   <!-- ── Row 2-A: 고급 분석 시그널 (full-width) ── -->
-  <div class="row" style="margin-top:0;grid-template-columns:1fr">
+  <div class="row" id="sec-adv" style="margin-top:0;grid-template-columns:1fr">
     <div class="card">
       <div class="card-header"><span class="dot" style="background:var(--orange)"></span>고급 분석 시그널 ${tip('7개 레이어를 가중 평균한 종합 매매 신호\n각 레이어의 w(가중치)가 높을수록\n최종 복합점수에 더 큰 영향을 미침\n+1=매수 / 0=중립 / -1=매도')}
         <span style="float:right;font-weight:800;font-size:1rem;color:${d.advancedComposite>0.2?'var(--up)':d.advancedComposite<-0.2?'var(--down)':'var(--yellow)'}">
@@ -3753,7 +3942,7 @@ function renderDashboard({ ticker, bars, ind, tech, fund, decision: d, price, is
   </div>
 
   <!-- ── Row 4: 차트 (최하단) ── -->
-  <div class="card" style="padding:14px 16px;margin-top:0">
+  <div class="card" id="sec-charts" style="padding:14px 16px;margin-top:0">
     <div class="card-header"><div class="card-header-row"><span class="dot" style="background:var(--green)"></span>종가 · Bollinger Band<span id="bbEntrySummary" style="margin-left:8px;display:inline-flex;gap:4px;align-items:center"></span></div><span class="card-sub">변동성 및 가격의 상대적 위치 분석</span></div>
     <div class="chart-scroll"><div class="chart-container"><canvas id="priceChart"></canvas></div></div>
     <div id="bbEntryPanel" style="margin-top:10px"></div>
@@ -4061,6 +4250,7 @@ function renderDashboard({ ticker, bars, ind, tech, fund, decision: d, price, is
   };
   const co = {
     responsive:true, maintainAspectRatio:false,
+    animation:{duration:850, easing:'easeOutQuart'},
     interaction:{mode:'index',intersect:false},
     plugins:{legend:{display:false}, tooltip: sigTooltip},
     scales:{
@@ -4138,11 +4328,34 @@ function renderDashboard({ ticker, bars, ind, tech, fund, decision: d, price, is
   };
 
   // ── Bollinger Band 차트 ──
+  const priceCtx = document.getElementById('priceChart').getContext('2d');
+  const priceAreaGrad = priceCtx.createLinearGradient(0, 0, 0, 260);
+  priceAreaGrad.addColorStop(0, 'rgba(99, 102, 241, 0.22)');
+  priceAreaGrad.addColorStop(1, 'rgba(99, 102, 241, 0)');
+  const liveBeaconPlugin = {
+    id: 'liveBeacon',
+    afterDatasetsDraw(chart) {
+      const meta = chart.getDatasetMeta(0);
+      if (!meta || !meta.data || !meta.data.length) return;
+      const lastPt = meta.data[meta.data.length - 1];
+      const { ctx } = chart;
+      ctx.save();
+      ctx.beginPath();
+      ctx.arc(lastPt.x, lastPt.y, 7, 0, Math.PI * 2);
+      ctx.fillStyle = 'rgba(0, 212, 170, 0.28)';
+      ctx.fill();
+      ctx.beginPath();
+      ctx.arc(lastPt.x, lastPt.y, 3.8, 0, Math.PI * 2);
+      ctx.fillStyle = _closeLine;
+      ctx.fill();
+      ctx.restore();
+    }
+  };
   priceChart = new Chart(document.getElementById('priceChart'), {
     type:'line',
-    plugins: [volProfilePlugin],
+    plugins: [volProfilePlugin, liveBeaconPlugin],
     data:{ labels, datasets:[
-      {data:closes,   borderColor:_closeLine, borderWidth:_closeWidth, pointRadius:0, tension:.3},
+      {data:closes,   borderColor:_closeLine, borderWidth:_closeWidth, backgroundColor:priceAreaGrad, fill:'start', pointRadius:0, tension:.35},
       {data:ind.sma20,borderColor:'#f59e0b', borderWidth:1,   pointRadius:0, tension:.3},
       {data:ind.bbU,  borderColor:_bbBand, borderDash:[4,4], borderWidth:1, pointRadius:0},
       {data:ind.bbL,  borderColor:_bbBand, borderDash:[4,4], borderWidth:1, pointRadius:0,

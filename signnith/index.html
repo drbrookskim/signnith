@@ -2179,9 +2179,23 @@ function _favSparkSvg(ticker, h = 30) {
 }
 
 function toggleFav() {
+  const card = document.getElementById('fav-card');
+  const stats = document.getElementById('explore-stats');
+  const body = document.getElementById('fav-body');
+  const btn = document.querySelector('.fav-toggle');
+  if (card && card.classList.contains('compact')) {
+    card.classList.remove('compact');
+    favCollapsed = false;
+    if (body) body.style.display = '';
+    if (stats) stats.style.display = 'grid';
+    if (btn) btn.innerHTML = _CHEV_UP + '접기';
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+    return;
+  }
   favCollapsed = !favCollapsed;
-  document.getElementById('fav-body').style.display = favCollapsed ? 'none' : '';
-  document.querySelector('.fav-toggle').innerHTML = favCollapsed ? (_CHEV_DN + '펼치기') : (_CHEV_UP + '접기');
+  if (body) body.style.display = favCollapsed ? 'none' : '';
+  if (stats) stats.style.display = favCollapsed ? 'none' : 'grid';
+  if (btn) btn.innerHTML = favCollapsed ? (_CHEV_DN + '펼치기') : (_CHEV_UP + '접기');
 }
 
 function renderExploreStats(enrichedList = []) {
@@ -2398,9 +2412,14 @@ function renderFavs() {
 }
 
 function selectFavStock(ticker) {
+  favCollapsed = false;
+  const body = document.getElementById('fav-body');
+  if (body) body.style.display = '';
   document.getElementById('fav-card')?.classList.add('compact');
   const stats = document.getElementById('explore-stats');
   if (stats) stats.style.display = 'none';
+  const btn = document.querySelector('.fav-toggle');
+  if (btn) btn.innerHTML = _CHEV_DN + '피드 펼치기';
   setTickerAndRun(ticker);
   setTimeout(() => {
     document.getElementById('dashboard')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
@@ -4448,8 +4467,13 @@ function renderDashboard({ ticker, bars, ind, tech, fund, decision: d, price, is
   window.closeDetailDash = function() {
     document.getElementById('dashboard').innerHTML = '';
     document.getElementById('fav-card')?.classList.remove('compact');
+    favCollapsed = false;
+    const body = document.getElementById('fav-body');
+    if (body) body.style.display = '';
     const st = document.getElementById('explore-stats');
     if (st) st.style.display = 'grid';
+    const btn = document.querySelector('.fav-toggle');
+    if (btn) btn.innerHTML = _CHEV_UP + '접기';
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
   setTimeout(() => window.switchDashTab?.('summary'), 60);

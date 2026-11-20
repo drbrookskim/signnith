@@ -60,20 +60,20 @@
     --border:    rgba(15,23,42,0.08);
     --border2:   rgba(15,23,42,0.16);
     --text:      #0f172a;
-    --text2:     #334155;
-    --muted:     #64748b;
-    --muted2:    #94a3b8;
-    --topbar:    rgba(246,247,251,0.88);
-    --metric-bd: rgba(15,23,42,0.06);
-    --green:     #059669;
-    --red:       #e11d48;
-    --yellow:    #d97706;
-    --blue:      #2563eb;
-    --up:        #e11d48;
+    --text2:    #1e293b;
+    --muted:     #475569;
+    --muted2:    #64748b;
+    --topbar:    rgba(246,247,251,0.92);
+    --metric-bd: rgba(15,23,42,0.07);
+    --green:     #047857;
+    --red:       #be123c;
+    --yellow:    #b45309;
+    --blue:      #1d4ed8;
+    --up:        #be123c;
     --down:      #1d4ed8;
-    --purple:    #7c3aed;
-    --orange:    #ea580c;
-    --accent:    #d946ef;
+    --purple:    #6d28d9;
+    --orange:    #c2410c;
+    --accent:    #c026d3;
     --shadow:    rgba(15,23,42,.08);
   }
   html { font-size: 16.5px; scroll-behavior: smooth; }
@@ -174,65 +174,67 @@
      라이트 모드 최적화 오버라이드
   ══════════════════════════════════════════════════════ */
   html.light .topbar {
-    background: rgba(255,255,255,0.70);
-    border-bottom: 1px solid rgba(180,160,140,0.18);
-    box-shadow: 0 2px 24px rgba(120,90,70,0.10);
-    backdrop-filter: blur(24px) saturate(1.6);
-    -webkit-backdrop-filter: blur(24px) saturate(1.6);
+    background: rgba(246,247,251,0.92);
+    border-bottom: 1px solid rgba(15,23,42,0.09);
+    box-shadow: 0 2px 16px rgba(15,23,42,0.05);
+    backdrop-filter: blur(18px);
+    -webkit-backdrop-filter: blur(18px);
   }
   html.light .search-input,
   html.light .select-box,
   html.light .btn-theme {
-    background: rgba(255,255,255,0.78);
-    border-color: rgba(180,160,140,0.30);
-    box-shadow: 0 2px 12px rgba(120,90,70,0.08);
-    backdrop-filter: blur(8px);
-    -webkit-backdrop-filter: blur(8px);
+    background: #ffffff;
+    border-color: rgba(15,23,42,0.14);
+    box-shadow: 0 1px 4px rgba(15,23,42,0.05);
+  }
+  html.light .select-box {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath d='M2 4l4 4 4-4' stroke='%23475569' stroke-width='1.5' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
   }
   html.light .search-input:focus {
     border-color: var(--green);
     box-shadow: 0 0 0 3px rgba(4,120,87,0.12);
   }
-  html.light .card {
-    background: rgba(255,255,255,0.68);
-    border-color: rgba(180,160,140,0.22);
-    box-shadow: 0 4px 24px rgba(100,80,60,0.28), 0 1px 6px rgba(100,80,60,0.18);
-    backdrop-filter: blur(16px);
-    -webkit-backdrop-filter: blur(16px);
-  }
-  html.light .fav-card {
-    background: rgba(255,255,255,0.62);
-    border-color: rgba(180,160,140,0.20);
-    box-shadow: 0 4px 20px rgba(100,80,60,0.07);
-    backdrop-filter: blur(16px);
-    -webkit-backdrop-filter: blur(16px);
-  }
-  html.light .history-chip {
-    background: rgba(255,255,255,0.60);
-    border-color: rgba(180,160,140,0.28);
-    box-shadow: 0 1px 6px rgba(100,80,60,0.07);
-  }
-  html.light .history-chip:hover {
-    background: rgba(255,255,255,0.88);
-    border-color: var(--blue);
-  }
+  html.light .card,
+  html.light .stat-card,
   html.light .fav-tile {
-    background: rgba(255,255,255,0.55);
-    border-color: rgba(180,160,140,0.25);
+    background: #ffffff;
+    border-color: rgba(15,23,42,0.10);
+    box-shadow: 0 4px 18px rgba(15,23,42,0.05);
   }
   html.light .fav-tile:hover {
-    background: rgba(255,255,255,0.85);
+    background: #ffffff;
+    border-color: var(--blue);
+    box-shadow: 0 10px 26px rgba(15,23,42,0.09);
+  }
+  html.light .fav-card {
+    background: transparent;
+    border: none;
+    box-shadow: none;
+  }
+  html.light .fav-table tbody tr:hover { background: rgba(15,23,42,0.035); }
+  html.light .dash-jump-pill:hover { background: rgba(15,23,42,0.06); }
+  html.light .fav-toggle { color: var(--text2); }
+  html.light .sig-hold { background: rgba(180,83,9,0.10); color: #b45309; }
+  html.light .sig-buy { background: rgba(190,18,60,0.09); color: #be123c; }
+  html.light .sig-sell { background: rgba(29,78,216,0.09); color: #1d4ed8; }
+  html.light .history-chip {
+    background: #ffffff;
+    border-color: rgba(15,23,42,0.14);
+    box-shadow: 0 1px 4px rgba(15,23,42,0.05);
+  }
+  html.light .history-chip:hover {
+    background: #ffffff;
     border-color: var(--blue);
   }
   html.light .pill {
-    background: rgba(255,255,255,0.55);
-    border-color: rgba(180,160,140,0.28);
+    background: #ffffff;
+    border-color: rgba(15,23,42,0.14);
   }
   html.light .metric-row {
-    border-bottom-color: rgba(180,160,140,0.15);
+    border-bottom-color: rgba(15,23,42,0.08);
   }
   html.light .card-header {
-    color: #78716c;
+    color: var(--muted);
   }
   /* 라이트 모드 버튼: 더 따뜻한 그라디언트 */
   html.light .btn-run {
@@ -1232,7 +1234,7 @@
 
   <div class="topbar-right">
     <!-- 로그인 상태: 유저 칩 -->
-    <span id="topbar-user-chip" style="display:none;align-items:center;gap:7px;font-size:0.72rem;color:var(--muted);background:rgba(255,255,255,0.06);border:1px solid var(--border2);border-radius:20px;padding:3px 10px 3px 4px;letter-spacing:.02em;cursor:pointer" onclick="openLogoutConfirm()" title="로그아웃">
+    <span id="topbar-user-chip" style="display:none;align-items:center;gap:7px;font-size:0.72rem;color:var(--muted);background:var(--card);border:1px solid var(--border2);border-radius:20px;padding:3px 10px 3px 4px;letter-spacing:.02em;cursor:pointer" onclick="openLogoutConfirm()" title="로그아웃">
       <img id="topbar-user-avatar" src="" alt="" width="22" height="22" style="border-radius:50%;object-fit:cover;display:none;flex-shrink:0">
       <span id="topbar-user-avatar-fallback" style="width:22px;height:22px;border-radius:50%;background:var(--blue);color:#fff;font-size:0.65rem;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0">?</span>
       <span id="topbar-user-id" style="color:var(--text2);font-weight:600"></span>

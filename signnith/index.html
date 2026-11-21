@@ -1282,7 +1282,7 @@
   </section>
 
   <section class="stats-grid" id="explore-stats">
-    <div class="stat-card" onclick="openBuySignalModal()" style="cursor:pointer;transition:border-color .15s,transform .15s" onmouseover="this.style.borderColor='var(--up)';this.style.transform='translateY(-2px)'" onmouseout="this.style.borderColor='var(--border)';this.style.transform='none'" title="클릭하여 매수 우위 종목 상세 보기">
+    <div class="stat-card" onclick="openBuySignalModal(this)" style="cursor:pointer;transition:border-color .15s,transform .15s" onmouseover="this.style.borderColor='var(--up)';this.style.transform='translateY(-2px)'" onmouseout="this.style.borderColor='var(--border)';this.style.transform='none'" title="클릭하여 매수 우위 종목 상세 보기">
       <div>
         <div class="stat-lbl">매수 우위 시그널 비중 · 상세 →</div>
         <div class="stat-val" id="stat-buy-ratio">-</div>
@@ -1290,15 +1290,15 @@
       </div>
       <div class="stat-spark" id="stat-spark-4"></div>
     </div>
-    <div class="stat-card">
+    <div class="stat-card" onclick="openAvgConfModal(this)" style="cursor:pointer;transition:border-color .15s,transform .15s" onmouseover="this.style.borderColor='var(--green)';this.style.transform='translateY(-2px)'" onmouseout="this.style.borderColor='var(--border)';this.style.transform='none'" title="클릭하여 알고리즘 신뢰도 분포 보기">
       <div>
-        <div class="stat-lbl">평균 알고리즘 신뢰도</div>
+        <div class="stat-lbl">평균 알고리즘 신뢰도 · 상세 →</div>
         <div class="stat-val" id="stat-avg-conf">-</div>
         <div class="stat-delta" id="stat-conf-sub" style="color:var(--green)">7-Layer 앙상블 활성</div>
       </div>
       <div class="stat-spark" id="stat-spark-5"></div>
     </div>
-    <div class="stat-card" onclick="openIppModal()" style="cursor:pointer;transition:border-color .15s,transform .15s" onmouseover="this.style.borderColor='var(--blue)';this.style.transform='translateY(-2px)'" onmouseout="this.style.borderColor='var(--border)';this.style.transform='none'" title="클릭하여 변곡점 임박(IPP) 감지 종목 상세 보기">
+    <div class="stat-card" onclick="openIppModal(this)" style="cursor:pointer;transition:border-color .15s,transform .15s" onmouseover="this.style.borderColor='var(--blue)';this.style.transform='translateY(-2px)'" onmouseout="this.style.borderColor='var(--border)';this.style.transform='none'" title="클릭하여 변곡점 임박(IPP) 감지 종목 상세 보기">
       <div>
         <div class="stat-lbl">변곡점 임박(IPP) 감지 · 상세 →</div>
         <div class="stat-val" id="stat-ipp-count">-</div>
@@ -1306,7 +1306,7 @@
       </div>
       <div class="stat-spark" id="stat-spark-6"></div>
     </div>
-    <div class="stat-card" onclick="openFavModal()" style="cursor:pointer;transition:border-color .15s,transform .15s" onmouseover="this.style.borderColor='var(--green)';this.style.transform='translateY(-2px)'" onmouseout="this.style.borderColor='var(--border)';this.style.transform='none'" title="클릭하여 즐겨찾기 등록·해제">
+    <div class="stat-card" onclick="openFavModal(this)" style="cursor:pointer;transition:border-color .15s,transform .15s" onmouseover="this.style.borderColor='var(--green)';this.style.transform='translateY(-2px)'" onmouseout="this.style.borderColor='var(--border)';this.style.transform='none'" title="클릭하여 즐겨찾기 등록·해제">
       <div>
         <div class="stat-lbl">즐겨찾기 관심 종목 · 관리 →</div>
         <div class="stat-val" id="stat-fav-count">-</div>
@@ -1314,7 +1314,7 @@
       </div>
       <div class="stat-spark" id="stat-spark-1"></div>
     </div>
-    <div class="stat-card" onclick="openHistoryModal()" style="cursor:pointer;transition:border-color .15s,transform .15s" onmouseover="this.style.borderColor='var(--blue)';this.style.transform='translateY(-2px)'" onmouseout="this.style.borderColor='var(--border)';this.style.transform='none'" title="클릭하여 최근 검색·분석 히스토리 보기">
+    <div class="stat-card" onclick="openHistoryModal(this)" style="cursor:pointer;transition:border-color .15s,transform .15s" onmouseover="this.style.borderColor='var(--blue)';this.style.transform='translateY(-2px)'" onmouseout="this.style.borderColor='var(--border)';this.style.transform='none'" title="클릭하여 최근 검색·분석 히스토리 보기">
       <div>
         <div class="stat-lbl">최근 분석 히스토리 · 보기 →</div>
         <div class="stat-val" id="stat-hist-count">-</div>
@@ -1322,9 +1322,9 @@
       </div>
       <div class="stat-spark" id="stat-spark-2"></div>
     </div>
-    <div class="stat-card">
+    <div class="stat-card" onclick="openQuantEngineModal(this)" style="cursor:pointer;transition:border-color .15s,transform .15s" onmouseover="this.style.borderColor='var(--purple)';this.style.transform='translateY(-2px)'" onmouseout="this.style.borderColor='var(--border)';this.style.transform='none'" title="클릭하여 7-Layer 퀀트 엔진 구성 보기">
       <div>
-        <div class="stat-lbl">7-Layer 퀀트 엔진</div>
+        <div class="stat-lbl">7-Layer 퀀트 엔진 · 구조 →</div>
         <div class="stat-val">Live</div>
         <div class="stat-delta" style="color:var(--purple)">파동 · 일목 · SMC · WACC · IPP</div>
       </div>
@@ -1461,6 +1461,30 @@
     </div>
     <div id="ipp-modal-summary" style="font-size:0.8rem;color:var(--muted);margin-bottom:12px">BB 수축 · OBV 다이버전스 · 돌파 시그널이 포착된 종목 목록입니다.</div>
     <div id="ipp-modal-list" style="overflow-y:auto;display:flex;flex-direction:column;gap:8px;padding-right:4px"></div>
+  </div>
+</div>
+
+<!-- ── 평균 알고리즘 신뢰도 상세 팝업 ── -->
+<div id="avg-conf-modal" onclick="if(event.target===this)closeAvgConfModal()" style="display:none;position:fixed;inset:0;z-index:9000;background:rgba(0,0,0,0.65);backdrop-filter:blur(6px);align-items:center;justify-content:center;padding:16px">
+  <div style="background:var(--card);border:1px solid var(--border2);border-radius:20px;padding:24px;width:100%;max-width:520px;max-height:82vh;display:flex;flex-direction:column;box-shadow:0 24px 60px var(--shadow)">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
+      <div style="font-size:1.02rem;font-weight:800;color:var(--text)">🎯 평균 알고리즘 신뢰도 분포</div>
+      <button onclick="closeAvgConfModal()" style="background:none;border:none;color:var(--muted);font-size:1.2rem;cursor:pointer">✕</button>
+    </div>
+    <div id="avg-conf-summary" style="font-size:0.8rem;color:var(--muted);margin-bottom:12px"></div>
+    <div id="avg-conf-modal-list" style="overflow-y:auto;display:flex;flex-direction:column;gap:8px;padding-right:4px"></div>
+  </div>
+</div>
+
+<!-- ── 7-Layer 퀀트 엔진 구조 팝업 ── -->
+<div id="quant-engine-modal" onclick="if(event.target===this)closeQuantEngineModal()" style="display:none;position:fixed;inset:0;z-index:9000;background:rgba(0,0,0,0.65);backdrop-filter:blur(6px);align-items:center;justify-content:center;padding:16px">
+  <div style="background:var(--card);border:1px solid var(--border2);border-radius:20px;padding:24px;width:100%;max-width:520px;max-height:82vh;display:flex;flex-direction:column;box-shadow:0 24px 60px var(--shadow)">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
+      <div style="font-size:1.02rem;font-weight:800;color:var(--text)">⚙️ 7-Layer 퀀트 엔진 아키텍처</div>
+      <button onclick="closeQuantEngineModal()" style="background:none;border:none;color:var(--muted);font-size:1.2rem;cursor:pointer">✕</button>
+    </div>
+    <div style="font-size:0.8rem;color:var(--muted);margin-bottom:12px">모든 종목 분석 시 아래 7개 레이어가 병렬로 계산되어 최종 매수·매도·관망 점수를 산출합니다.</div>
+    <div id="quant-engine-modal-list" style="overflow-y:auto;display:flex;flex-direction:column;gap:8px;padding-right:4px"></div>
   </div>
 </div>
 
@@ -2262,7 +2286,7 @@ function toggleFav() {
   }
   favCollapsed = !favCollapsed;
   if (body) body.style.display = favCollapsed ? 'none' : '';
-  if (stats) stats.style.display = favCollapsed ? 'none' : 'grid';
+  if (stats) stats.style.display = 'grid';
   if (btn) btn.innerHTML = favCollapsed ? (_CHEV_DN + '펼치기') : (_CHEV_UP + '접기');
 }
 
@@ -2516,6 +2540,93 @@ function _saveReadySummary(ticker, summary) {
   } catch {}
 }
 
+// ── 종목 분석 결과 로컬 캐시 (당일 기준 localStorage + 메모리) ──
+window._analysisMemCache = window._analysisMemCache || {};
+function _analysisCacheStorageKey() { return `signnith_analysis_${_todayKey()}`; }
+function _analysisCacheKey(ticker, period, style) {
+  return `${String(ticker || '').toUpperCase()}|${period || '6mo'}|${style || 'balanced'}`;
+}
+(function _cleanupOldAnalysisCaches() {
+  try {
+    const keepReady = _readyStorageKey();
+    const keepAnalysis = _analysisCacheStorageKey();
+    for (let i = localStorage.length - 1; i >= 0; i--) {
+      const k = localStorage.key(i);
+      if (!k) continue;
+      if ((k.startsWith('signnith_ready_') && k !== keepReady) ||
+          (k.startsWith('signnith_analysis_') && k !== keepAnalysis)) {
+        localStorage.removeItem(k);
+      }
+    }
+  } catch {}
+})();
+
+function _loadAnalysisCacheMap() {
+  try { return JSON.parse(localStorage.getItem(_analysisCacheStorageKey()) || '{}'); }
+  catch { return {}; }
+}
+function _reviveAnalysisPayload(payload) {
+  if (!payload) return null;
+  const copy = { ...payload };
+  if (Array.isArray(copy.bars)) {
+    copy.bars = copy.bars.map(b => ({
+      ...b,
+      date: b.date instanceof Date ? b.date : new Date(b.date),
+    }));
+  }
+  if (copy.updatedAt && !(copy.updatedAt instanceof Date)) {
+    copy.updatedAt = new Date(copy.updatedAt);
+  }
+  return copy;
+}
+function getCachedAnalysis(ticker, period, style) {
+  const key = _analysisCacheKey(ticker, period, style);
+  if (window._analysisMemCache[key]) return window._analysisMemCache[key];
+  const map = _loadAnalysisCacheMap();
+  if (!map[key]) return null;
+  const revived = _reviveAnalysisPayload(map[key]);
+  if (revived) window._analysisMemCache[key] = revived;
+  return revived;
+}
+function saveCachedAnalysis(ticker, period, style, payload) {
+  const key = _analysisCacheKey(ticker, period, style);
+  const entry = { ...payload, cachedAt: Date.now() };
+  window._analysisMemCache[key] = _reviveAnalysisPayload(entry);
+  try {
+    const map = _loadAnalysisCacheMap();
+    map[key] = entry;
+    // 최근 20건만 유지하여 localStorage 용량 초과 방지
+    const entries = Object.entries(map).sort((a, b) => (b[1]?.cachedAt || 0) - (a[1]?.cachedAt || 0));
+    const trimmed = Object.fromEntries(entries.slice(0, 20));
+    localStorage.setItem(_analysisCacheStorageKey(), JSON.stringify(trimmed));
+  } catch {
+    try {
+      const map = _loadAnalysisCacheMap();
+      const entries = Object.entries(map).sort((a, b) => (b[1]?.cachedAt || 0) - (a[1]?.cachedAt || 0)).slice(0, 5);
+      const trimmed = Object.fromEntries(entries);
+      trimmed[key] = entry;
+      localStorage.setItem(_analysisCacheStorageKey(), JSON.stringify(trimmed));
+    } catch {}
+  }
+}
+function invalidateCachedAnalysis(ticker, period, style) {
+  const key = _analysisCacheKey(ticker, period, style);
+  delete window._analysisMemCache[key];
+  try {
+    const map = _loadAnalysisCacheMap();
+    delete map[key];
+    localStorage.setItem(_analysisCacheStorageKey(), JSON.stringify(map));
+  } catch {}
+}
+function refreshCurrentAnalysis(ticker) {
+  const period = document.getElementById('period-select')?.value || '6mo';
+  const style  = document.getElementById('style-select')?.value || 'balanced';
+  invalidateCachedAnalysis(ticker, period, style);
+  const input = document.getElementById('ticker-input');
+  if (input) input.value = ticker;
+  runAnalysis(true);
+}
+
 let _prefetchRunning = false;
 async function prefetchFavoritesReady() {
   if (_prefetchRunning) return;
@@ -2531,8 +2642,9 @@ async function prefetchFavoritesReady() {
     });
     if (!targets.length) return;
 
+    const style = document.getElementById('style-select')?.value || 'balanced';
     const existing = _loadReadySummary();
-    const queue = targets.filter(t => !existing[t.toUpperCase()] || !window._readyFullCache[`${t}|${period}`]);
+    const queue = targets.filter(t => !getCachedAnalysis(t, period, style) && (!existing[t.toUpperCase()] || !window._readyFullCache[`${t}|${period}`]));
     const BATCH = 3;
     for (let i = 0; i < queue.length; i += BATCH) {
       await Promise.all(queue.slice(i, i + BATCH).map(async ticker => {
@@ -2648,14 +2760,69 @@ function renderHistory() {
   renderHistoryModalList();
 }
 
-function openHistoryModal() {
+function _openModalFromEl(modalId, originEl) {
+  const m = document.getElementById(modalId);
+  if (!m) return;
+  if (m._closeTimer) { clearTimeout(m._closeTimer); m._closeTimer = null; }
+  const dialog = m.firstElementChild;
+  m._originEl = originEl || null;
+  const rect = originEl?.getBoundingClientRect ? originEl.getBoundingClientRect() : null;
+  m._originRect = rect;
+  m.style.display = 'flex';
+  m.style.transition = 'opacity .26s ease';
+  m.style.opacity = '0';
+  if (dialog) {
+    dialog.style.transition = 'none';
+    if (rect) {
+      const dx = (rect.left + rect.width / 2) - (window.innerWidth / 2);
+      const dy = (rect.top + rect.height / 2) - (window.innerHeight / 2);
+      dialog.style.transform = `translate(${dx.toFixed(1)}px, ${dy.toFixed(1)}px) scale(0.24)`;
+    } else {
+      dialog.style.transform = 'scale(0.88)';
+    }
+    dialog.style.opacity = '0.2';
+  }
+  requestAnimationFrame(() => {
+    requestAnimationFrame(() => {
+      m.style.opacity = '1';
+      if (dialog) {
+        dialog.style.transition = 'transform .36s cubic-bezier(0.22, 1, 0.36, 1), opacity .26s ease';
+        dialog.style.transform = 'translate(0, 0) scale(1)';
+        dialog.style.opacity = '1';
+      }
+    });
+  });
+}
+function _closeModalToEl(modalId) {
+  const m = document.getElementById(modalId);
+  if (!m) return;
+  if (m._closeTimer) clearTimeout(m._closeTimer);
+  const dialog = m.firstElementChild;
+  const rect = m._originEl?.getBoundingClientRect ? m._originEl.getBoundingClientRect() : m._originRect;
+  requestAnimationFrame(() => {
+    m.style.transition = 'opacity .30s ease';
+    m.style.opacity = '0';
+    if (dialog) {
+      dialog.style.transition = 'transform .36s cubic-bezier(0.22, 1, 0.36, 1), opacity .28s ease';
+      if (rect) {
+        const dx = (rect.left + rect.width / 2) - (window.innerWidth / 2);
+        const dy = (rect.top + rect.height / 2) - (window.innerHeight / 2);
+        dialog.style.transform = `translate(${dx.toFixed(1)}px, ${dy.toFixed(1)}px) scale(0.24)`;
+      } else {
+        dialog.style.transform = 'scale(0.88)';
+      }
+      dialog.style.opacity = '0';
+    }
+  });
+  m._closeTimer = setTimeout(() => { m.style.display = 'none'; m._closeTimer = null; }, 360);
+}
+
+function openHistoryModal(originEl) {
   renderHistoryModalList();
-  const m = document.getElementById('history-modal');
-  if (m) m.style.display = 'flex';
+  _openModalFromEl('history-modal', originEl);
 }
 function closeHistoryModal() {
-  const m = document.getElementById('history-modal');
-  if (m) m.style.display = 'none';
+  _closeModalToEl('history-modal');
 }
 function renderHistoryModalList() {
   const box = document.getElementById('history-modal-list');
@@ -2676,15 +2843,13 @@ function renderHistoryModalList() {
   `).join('');
 }
 
-function openFavModal() {
+function openFavModal(originEl) {
   renderFavModalList();
-  const m = document.getElementById('fav-modal');
-  if (m) m.style.display = 'flex';
-  setTimeout(() => document.getElementById('fav-modal-input')?.focus(), 40);
+  _openModalFromEl('fav-modal', originEl);
+  setTimeout(() => document.getElementById('fav-modal-input')?.focus(), 120);
 }
 function closeFavModal() {
-  const m = document.getElementById('fav-modal');
-  if (m) m.style.display = 'none';
+  _closeModalToEl('fav-modal');
 }
 function renderFavModalList() {
   const box = document.getElementById('fav-modal-list');
@@ -2742,12 +2907,10 @@ function openBuySignalModal() {
       </div>
     `).join('') : '<div style="padding:24px;text-align:center;color:var(--muted)">매수 우위 종목이 없습니다.</div>';
   }
-  const m = document.getElementById('buy-signal-modal');
-  if (m) m.style.display = 'flex';
+  _openModalFromEl('buy-signal-modal', arguments[0]);
 }
 function closeBuySignalModal() {
-  const m = document.getElementById('buy-signal-modal');
-  if (m) m.style.display = 'none';
+  _closeModalToEl('buy-signal-modal');
 }
 
 function openIppModal() {
@@ -2768,13 +2931,57 @@ function openIppModal() {
       </div>
     `).join('') : '<div style="padding:24px;text-align:center;color:var(--muted)">감지된 변곡점 종목이 없습니다.</div>';
   }
-  const m = document.getElementById('ipp-modal');
-  if (m) m.style.display = 'flex';
+  _openModalFromEl('ipp-modal', arguments[0]);
 }
 function closeIppModal() {
-  const m = document.getElementById('ipp-modal');
-  if (m) m.style.display = 'none';
+  _closeModalToEl('ipp-modal');
 }
+
+function openAvgConfModal(originEl) {
+  const list = (window._lastEnrichedExplore || []).slice().sort((a, b) => (b.ins?.conf || 0) - (a.ins?.conf || 0));
+  const hi = list.filter(x => (x.ins?.conf || 0) >= 70).length;
+  const mid = list.filter(x => (x.ins?.conf || 0) >= 50 && (x.ins?.conf || 0) < 70).length;
+  const lo = list.filter(x => (x.ins?.conf || 0) < 50).length;
+  const sum = document.getElementById('avg-conf-summary');
+  if (sum) sum.innerHTML = `전체 ${list.length}종목 중 <b style="color:var(--green)">고신뢰(70%+) ${hi}</b> · <b style="color:var(--yellow)">중립(50~69%) ${mid}</b> · <b style="color:var(--muted)">저신뢰(&lt;50%) ${lo}</b>`;
+  const box = document.getElementById('avg-conf-modal-list');
+  if (box) {
+    box.innerHTML = list.length ? list.slice(0, 12).map(({ item, flag, ins }) => `
+      <div onclick="closeAvgConfModal();selectFavStock('${item.ticker}')" style="display:flex;align-items:center;justify-content:space-between;padding:10px 12px;border-radius:12px;background:var(--card2);border:1px solid var(--border);cursor:pointer">
+        <div>
+          <strong style="font-size:0.88rem;color:var(--text)">${flag} ${escapeHtml(item.name || item.ticker)}</strong>
+          <div style="font-size:0.72rem;color:var(--muted)">${item.ticker} · ${ins.thesis ? escapeHtml(ins.thesis.slice(0, 38)) + '…' : ''}</div>
+        </div>
+        <span style="font-size:0.82rem;font-weight:800;color:${(ins.conf||0)>=70?'var(--green)':'var(--yellow)'}">${ins.conf || 0}%</span>
+      </div>
+    `).join('') : '<div style="padding:24px;text-align:center;color:var(--muted)">집계된 신뢰도 데이터가 없습니다.</div>';
+  }
+  _openModalFromEl('avg-conf-modal', originEl);
+}
+function closeAvgConfModal() { _closeModalToEl('avg-conf-modal'); }
+
+function openQuantEngineModal(originEl) {
+  const layers = [
+    ['Layer 1 · 기술적 지표', 'RSI(14), MACD 히스토그램, 볼린저 밴드 %B, ATR, 거래량 비율, 스토캐스틱을 종합 점수화합니다.'],
+    ['Layer 2 · 캔들스틱 패턴', '망치형, 장악형, 도지 등 반전·지속 캔들 패턴의 출현과 추세 맥락을 탐지합니다.'],
+    ['Layer 3 · 엘리엇 파동', '고점·저점 스윙 구조를 추적해 현재 파동 위치(상승 3·5파 / 조정 A·B·C)를 추정합니다.'],
+    ['Layer 4 · 일목균형표', '전환선·기준선 교차와 구름대(선행스팬 A·B) 돌파 여부를 판별합니다.'],
+    ['Layer 5 · SMC 구조', 'BOS(구조 돌파), CHoCH(추세 전환), 오더블록(OB) 및 유동성 스윕 구간을 탐지합니다.'],
+    ['Layer 6 · WACC · 펀더멘털', 'PER, PBR, ROE, 부채비율, 성장률과 CAPM 기반 가중평균자본비용(WACC)을 평가합니다.'],
+    ['Layer 7 · IPP 변곡점 예측', '변동성 수축(Squeeze), OBV 다이버전스, 거래량 이상 징후로 단기 변곡점 임박 확률을 계산합니다.']
+  ];
+  const box = document.getElementById('quant-engine-modal-list');
+  if (box) {
+    box.innerHTML = layers.map(([t, d]) => `
+      <div style="padding:10px 12px;border-radius:12px;background:var(--card2);border:1px solid var(--border)">
+        <div style="font-size:0.86rem;font-weight:800;color:var(--text);margin-bottom:3px">${t}</div>
+        <div style="font-size:0.76rem;color:var(--muted);line-height:1.45">${d}</div>
+      </div>
+    `).join('');
+  }
+  _openModalFromEl('quant-engine-modal', originEl);
+}
+function closeQuantEngineModal() { _closeModalToEl('quant-engine-modal'); }
 
 function setTickerAndRun(ticker) {
   document.getElementById('ticker-input').value = ticker;
@@ -3879,12 +4086,14 @@ async function resolveTicker(input) {
   throw new Error(`"${q}"에 해당하는 종목을 찾을 수 없습니다. 티커로 직접 입력해보세요 (예: 042700.KS, AAPL)`);
 }
 
-async function runAnalysis() {
+let _analysisSeq = 0;
+async function runAnalysis(forceRefresh = false) {
   const raw    = document.getElementById('ticker-input').value.trim();
   const period = document.getElementById('period-select').value;
   const style  = document.getElementById('style-select').value;
   if (!raw) return;
 
+  const seq  = ++_analysisSeq;
   const dash = document.getElementById('dashboard');
   const btn  = document.getElementById('run-btn');
   btn.disabled = true;
@@ -3907,17 +4116,137 @@ async function runAnalysis() {
     return;
   }
 
+  // ── 로컬 캐시 히트 시: 0ms 즉시 렌더링 + 백그라운드 최신 시세 반영(SWR) ──
+  const cached = !forceRefresh ? getCachedAnalysis(ticker, period, style) : null;
+  if (cached) {
+    saveHistory(ticker, cached.companyName || ticker);
+    const inputEl = document.getElementById('ticker-input');
+    if (inputEl) inputEl.value = '';
+    try {
+      sessionStorage.setItem('last_ticker', ticker);
+      const _nfName = cached.companyName || resolveTickerName(ticker) || ticker;
+      sessionStorage.setItem('last_name', _nfName);
+      sessionStorage.setItem('last_period', period);
+      sessionStorage.setItem('last_style', style);
+    } catch(e) {}
+
+    renderDashboard({ ...cached, fromCache: true, quoteChecking: true });
+
+    if (/\.(KS|KQ)$/i.test(ticker)) {
+      const nxtEl = document.getElementById('nxt-price-val');
+      if (nxtEl) {
+        fetchNxtPrice(ticker).then(nxtP => {
+          if (!nxtEl || _analysisSeq !== seq) return;
+          if (nxtP) nxtEl.textContent = nxtP.toLocaleString('ko-KR') + ' 원';
+          else { nxtEl.textContent = '미제공'; nxtEl.style.color = 'var(--muted)'; }
+        });
+      }
+    }
+
+    // 백그라운드에서 당일 시세(Quote)만 가볍게 확인 후 가격 변동 시 현재가·점수·판정만 재계산
+    fetchQuote(ticker).then(quote => {
+      if (_analysisSeq !== seq) return;
+      const nextPrice = quote?.regularMarketPrice;
+      if (nextPrice && Math.abs(nextPrice - cached.price) > 1e-6) {
+        const tech     = scoreTechnical(cached.ind, nextPrice);
+        const fund     = scoreFundamental(cached.fundInfo, nextPrice);
+        const advanced = fuseAdvancedSignals(cached.cs, cached.ew, cached.ichi, cached.smc, cached.quant, cached.waccResult, fund.metrics, cached.ipp);
+        const decision = makeDecision(tech, fund, style, nextPrice, advanced);
+        const prevClose = cached.bars[cached.bars.length - 2]?.close || quote?.regularMarketPreviousClose || cached.price;
+        const changeAmt = prevClose ? nextPrice - prevClose : cached.changeAmt;
+        const changePct = prevClose ? (nextPrice / prevClose - 1) * 100 : cached.changePct;
+        const updatedAt = quote?.regularMarketTime ? new Date(quote.regularMarketTime * 1000) : new Date();
+        const updatedPayload = {
+          ...cached,
+          price: nextPrice,
+          changeAmt,
+          changePct,
+          high52w: quote?.fiftyTwoWeekHigh || cached.high52w,
+          low52w:  quote?.fiftyTwoWeekLow  || cached.low52w,
+          mktState: quote?.marketState || cached.mktState,
+          updatedAt,
+          tech, fund, advanced, decision,
+        };
+        saveCachedAnalysis(ticker, period, style, updatedPayload);
+        [priceChart, rsiChart, macdChart].forEach(c => c?.destroy());
+        priceChart = rsiChart = macdChart = null;
+        renderDashboard({ ...updatedPayload, fromCache: true, quoteChecking: false, quoteUpdated: true });
+      } else {
+        const cBtn = document.getElementById('cache-refresh-btn');
+        if (cBtn) cBtn.textContent = '⚡ 캐시 · 재분석';
+      }
+    }).catch(() => {
+      const cBtn = document.getElementById('cache-refresh-btn');
+      if (cBtn) cBtn.textContent = '⚡ 캐시 · 재분석';
+    });
+
+    btn.disabled = false;
+    return;
+  }
+
   const tickerDisplayName = resolveTickerName(ticker) || '';
   const tickerLabel = tickerDisplayName ? `${tickerDisplayName} · ${ticker}` : ticker;
-  dash.innerHTML = `<div class="center-msg"><div class="spinner"></div><div>${tickerLabel} 데이터 수집 중…</div></div>`;
+  const _cachedReady = window._readyFullCache?.[`${ticker}|${period}`];
+  const _isColdFetch = !_cachedReady?.ohlcvData;
+  const _avgColdSec = (() => {
+    try {
+      const arr = JSON.parse(localStorage.getItem('signnith_avg_cold_ms') || '[]');
+      if (Array.isArray(arr) && arr.length) {
+        return (arr.reduce((a, b) => a + b, 0) / arr.length / 1000).toFixed(1);
+      }
+    } catch {}
+    return null;
+  })();
+  const _avgLabel = _avgColdSec ? `평균 약 ${_avgColdSec}s` : '보통 5~15s';
+  const _sketchIco = (d) => `<svg width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;color:var(--ink-2,var(--muted))">${d}</svg>`;
+  const _icoChart = _sketchIco('<path d="M2 12.5h12"/><path d="M3.5 9.5L6.5 6.5L9 8.5L12.5 4"/><path d="M10.5 4h2v2"/>');
+  const _icoFund  = _sketchIco('<rect x="3" y="2.5" width="10" height="11" rx="1.5"/><path d="M5.5 6h5M5.5 8.5h5M5.5 11h3"/>');
+  const _icoQuote = _sketchIco('<path d="M9 1.5L4 9h4l-1 5.5L12 7H8l1-5.5z"/>');
+  const _icoCalc  = _sketchIco('<circle cx="8" cy="8" r="2.2"/><path d="M8 2v2M8 12v2M2 8h2M12 8h2M3.8 3.8l1.4 1.4M10.8 10.8l1.4 1.4M12.2 3.8l-1.4 1.4M5.2 10.8l-1.4 1.4"/>');
+
+  const _startMs = Date.now();
+  dash.innerHTML = `
+    <div class="center-msg" style="max-width:400px;margin:0 auto">
+      <div class="spinner"></div>
+      <div style="font-weight:700;margin-bottom:4px">${escapeHtml(tickerLabel)} 데이터 수집 및 분석</div>
+      <div id="load-elapsed" style="font-size:0.75rem;color:var(--muted);margin-bottom:14px">진행 중 · 0.0s · ${_avgLabel}</div>
+      <div style="text-align:left;display:flex;flex-direction:column;gap:8px;width:100%;font-size:0.82rem;background:var(--bg2,rgba(128,128,128,0.06));padding:12px 14px;border-radius:12px;border:1px solid var(--border)">
+        <div id="step-ohlcv" style="display:flex;justify-content:space-between;align-items:center"><span style="display:inline-flex;align-items:center;gap:7px">${_icoChart}<span>일봉 차트(OHLCV) 수집</span></span><span class="step-st" style="color:var(--muted)">대기 중…</span></div>
+        <div id="step-fund"  style="display:flex;justify-content:space-between;align-items:center"><span style="display:inline-flex;align-items:center;gap:7px">${_icoFund}<span>재무 · 펀더멘털 수집</span></span><span class="step-st" style="color:var(--muted)">대기 중…</span></div>
+        <div id="step-quote" style="display:inline-flex;justify-content:space-between;align-items:center"><span style="display:inline-flex;align-items:center;gap:7px">${_icoQuote}<span>실시간 시세 확인</span></span><span class="step-st" style="color:var(--muted)">대기 중…</span></div>
+        <div id="step-calc"  style="display:flex;justify-content:space-between;align-items:center;opacity:0.55"><span style="display:inline-flex;align-items:center;gap:7px">${_icoCalc}<span>기술적·퀀트·변곡점 분석</span></span><span class="step-st" style="color:var(--muted)">대기</span></div>
+      </div>
+    </div>`;
+
+  const _markStep = (id, text, done = true) => {
+    const row = document.getElementById(id);
+    if (!row) return;
+    row.style.opacity = '1';
+    const stEl = row.querySelector('.step-st');
+    if (stEl) {
+      stEl.textContent = text;
+      stEl.style.color = done ? 'var(--green)' : 'var(--blue)';
+      stEl.style.fontWeight = '700';
+    }
+  };
+  const _loadTimer = setInterval(() => {
+    const el = document.getElementById('load-elapsed');
+    if (!el) return;
+    const sec = (Date.now() - _startMs) / 1000;
+    const extra = (_avgColdSec && sec > Number(_avgColdSec) + 2) ? ' · 프록시 응답 대기 중' : '';
+    el.textContent = `진행 중 · ${sec.toFixed(1)}s · ${_avgLabel}${extra}`;
+  }, 150);
 
   try {
-    const _cachedReady = window._readyFullCache?.[`${ticker}|${period}`];
-    const [ohlcvData, fundInfo, quote] = await Promise.all([
-      _cachedReady?.ohlcvData ? Promise.resolve(_cachedReady.ohlcvData) : fetchOHLCV(ticker, period),
-      fetchFundamentals(ticker),
-      _cachedReady?.quote ? Promise.resolve(_cachedReady.quote) : fetchQuote(ticker),
-    ]);
+    const pOhlcv = (_cachedReady?.ohlcvData ? Promise.resolve(_cachedReady.ohlcvData) : fetchOHLCV(ticker, period))
+      .then(res => { _markStep('step-ohlcv', `✓ 완료 (${((Date.now()-_startMs)/1000).toFixed(1)}s)`); return res; });
+    const pFund = fetchFundamentals(ticker)
+      .then(res => { _markStep('step-fund', `✓ 완료 (${((Date.now()-_startMs)/1000).toFixed(1)}s)`); return res; });
+    const pQuote = (_cachedReady?.quote ? Promise.resolve(_cachedReady.quote) : fetchQuote(ticker))
+      .then(res => { _markStep('step-quote', `✓ 완료 (${((Date.now()-_startMs)/1000).toFixed(1)}s)`); return res; });
+
+    const [ohlcvData, fundInfo, quote] = await Promise.all([pOhlcv, pFund, pQuote]);
+    _markStep('step-calc', '계산 중…', false);
 
     const { bars, currency, regularMarketPrice, previousClose, marketState, dataUpdatedAt } = ohlcvData;
 
@@ -3935,7 +4264,6 @@ async function runAnalysis() {
 
     const analysisName = fundInfo.companyName || quote?.longName || resolveTickerName(ticker) || ticker;
     const analysisLabel = analysisName !== ticker ? `${analysisName} · ${ticker}` : ticker;
-    dash.innerHTML = `<div class="center-msg"><div class="spinner"></div><div>${analysisLabel} 분석 중…</div></div>`;
 
     const ind      = computeIndicators(bars);
     const tech     = scoreTechnical(ind, price);
@@ -3978,7 +4306,7 @@ async function runAnalysis() {
 
     const companyNameResolved = fundInfo.companyName || quote?.longName || quote?.shortName || resolveTickerName(ticker) || ticker;
 
-    renderDashboard({
+    const dashPayload = {
       ticker, bars, ind, tech, fund, decision, price, isKr, currency,
       companyName: companyNameResolved,
       sector: fundInfo.sector || '-',
@@ -3986,7 +4314,32 @@ async function runAnalysis() {
       fundInfo, cs, ew, ichi, smc, quant, ipp, advanced,
       exchangeName: quote?.fullExchangeName || quote?.exchange || '',
       waccResult, mtf,
-    });
+    };
+    saveCachedAnalysis(ticker, period, style, dashPayload);
+    if (isFaved(ticker) && !_loadReadySummary()[ticker.toUpperCase()]) {
+      const tail = bars.slice(-10).map(b => b.close);
+      const minC = Math.min(...tail), maxC = Math.max(...tail), span = (maxC - minC) || 1;
+      _saveReadySummary(ticker, {
+        priceStr: isKr ? `${Math.round(price).toLocaleString('ko-KR')} KRW` : `$${price.toFixed(2)}`,
+        chgStr: `${(changePct || 0) >= 0 ? '+' : ''}${(changePct || 0).toFixed(2)}%`,
+        isUp: (changePct || 0) >= 0,
+        sparkPts: tail.map(v => Math.round(28 - ((v - minC) / span) * 22)),
+        readyAt: new Date().toISOString()
+      });
+      renderFavs();
+    }
+
+    renderDashboard({ ...dashPayload, fromCache: false });
+
+    // 실제 신규 네트워크 수집 소요시간만 평균에 반영 (프리페치 캐시 제외)
+    try {
+      const dur = Date.now() - _startMs;
+      if (_isColdFetch && dur > 500 && dur < 60000) {
+        const arr = JSON.parse(localStorage.getItem('signnith_avg_cold_ms') || '[]');
+        arr.push(dur);
+        localStorage.setItem('signnith_avg_cold_ms', JSON.stringify(arr.slice(-10)));
+      }
+    } catch {}
 
     // ── 보관함 자동저장 (로그인 상태일 때만) ──
     archiveSaveReport({
@@ -4052,7 +4405,7 @@ async function runAnalysis() {
           한국 주식: 005930.KS (KOSPI) · 086520.KQ (KOSDAQ)
         </div>
       </div>`;
-  } finally { btn.disabled = false; }
+  } finally { clearInterval(_loadTimer); btn.disabled = false; }
 }
 
 // ══════════════════════════════════════════════════════
@@ -4082,7 +4435,8 @@ function guessExchange(ticker) {
 
 function renderDashboard({ ticker, bars, ind, tech, fund, decision: d, price, isKr, currency,
     companyName, sector, changeAmt, changePct, high52w, low52w, mktState, updatedAt, fundInfo,
-    cs, ew, ichi, smc, quant, ipp, advanced, exchangeName, waccResult, mtf }) {
+    cs, ew, ichi, smc, quant, ipp, advanced, exchangeName, waccResult, mtf,
+    fromCache = false, quoteChecking = false, quoteUpdated = false }) {
   const mtfColor = v => v==='bull'?'var(--up)':v==='bear'?'var(--down)':'var(--yellow)';
   const flag      = isKr ? '🇰🇷' : '🇺🇸';
   const badgeCls  = {BUY:'buy',SELL:'sell',HOLD:'hold'}[d.action]||'hold';
@@ -4160,6 +4514,7 @@ function renderDashboard({ ticker, bars, ind, tech, fund, decision: d, price, is
       <span class="sig-badge ${d.action==='BUY'?'sig-buy':d.action==='SELL'?'sig-sell':'sig-hold'}">${badgeLbl}</span>
     </div>
     <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+      ${fromCache ? `<button id="cache-refresh-btn" class="btn-pill-sm" onclick="refreshCurrentAnalysis('${ticker}')" title="캐시된 결과를 무시하고 전체 다시 분석">${quoteChecking ? '⚡ 캐시 · 시세 확인 중…' : quoteUpdated ? '🔄 시세 반영됨 · 재분석' : '⚡ 캐시 · 재분석'}</button>` : ''}
       <button id="fav-btn" class="btn-pill-sm${isFaved(ticker)?' starred':''}">${isFaved(ticker) ? '⭐ 즐겨찾기됨' : '☆ 즐겨찾기'}</button>
       <button class="btn-pill-sm" id="report-btn" onclick="openReport()">📄 리포트</button>
       <button class="btn-pill-sm" id="newsfinder-btn" onclick="openNewsFinder()">📰 뉴스</button>

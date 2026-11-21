@@ -656,10 +656,12 @@
   .uni-pill.active { background: var(--card); color: var(--text); box-shadow: 0 1px 4px rgba(0,0,0,.18); }
 
   /* ── ux-fusion-sample 동일 상세 섹션 레이아웃 ── */
+  #dashboard { scroll-margin-top: 76px; }
   .detail-sticky-bar {
     position: sticky; top: 66px; z-index: 60;
-    background: var(--topbar); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
+    background: var(--card); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
     border: 1px solid var(--border2); border-radius: 14px; padding: 10px 16px;
+    box-shadow: 0 8px 24px var(--shadow);
     display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap;
     margin: 18px 0 16px;
   }
@@ -874,7 +876,7 @@
   }
   /* 라이트 모드 card-header 가독성 보완 */
   html.light .card-header { color: var(--muted); }
-  .dot { width: 6px; height: 6px; border-radius: 50%; display: inline-block; }
+  .dot { width: 6px; height: 6px; border-radius: 50%; display: inline-block; margin-right: 6px; vertical-align: middle; }
   .badge {
     display: inline-flex;
     align-items: center;
@@ -1206,6 +1208,7 @@
   .mtf-cell.na .mtf-ret { font-size:0.9rem; color:var(--muted2); font-weight:600; }
   .mtf-summary { margin-top:12px; font-size:0.76rem; color:var(--text2); line-height:1.6;
     background:var(--card2); border:1px solid var(--border); border-radius:10px; padding:9px 13px; }
+  .sk-ico { display:inline-block; vertical-align:-2px; flex-shrink:0; }
 </style>
 </head>
 <body>
@@ -1234,7 +1237,7 @@
   </div>
 
   <div class="top-search search-outer">
-    <span class="s-ico">🔍</span>
+    <span class="s-ico"><svg class="sk-ico" width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="7" cy="7" r="4.5"/><path d="M10.5 10.5L14 14"/></svg></span>
     <input id="ticker-input" class="search-input" type="text"
            placeholder="종목명(SK하이닉스) 또는 티커(NVDA) 검색..."
            autocomplete="off"/>
@@ -1336,10 +1339,10 @@
     <div class="filter-pills">
       <button class="f-pill active" onclick="setFavFilter('all', this)">전체</button>
       <button class="f-pill" onclick="setFavFilter('buy', this)">↗ 매수 우위</button>
-      <button class="f-pill" onclick="setFavFilter('highconf', this)">⚡ 고신뢰 70%+</button>
+      <button class="f-pill" onclick="setFavFilter('highconf', this)"><svg class="sk-ico" width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" style="margin-right:4px"><path d="M9 1.5L4 9h4l-1 5.5L12 7H8l1-5.5z"/></svg>고신뢰 70%+</button>
       <button class="f-pill" onclick="setFavFilter('kr', this)">🇰🇷 국내 KRX</button>
       <button class="f-pill" onclick="setFavFilter('us', this)">🇺🇸 미국 US</button>
-      <button class="f-pill" onclick="setFavFilter('history', this)">🕐 최근 분석</button>
+      <button class="f-pill" onclick="setFavFilter('history', this)"><svg class="sk-ico" width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" style="margin-right:4px"><circle cx="8" cy="8" r="5.5"/><path d="M8 5v3.2l2.2 1.3"/></svg>최근 분석</button>
     </div>
     <div class="fav-controls">
       <button class="fav-toggle" onclick="toggleFav()" style="display:inline-flex;align-items:center;gap:4px;font-size:0.78rem">
@@ -1415,7 +1418,7 @@
 <div id="fav-modal" onclick="if(event.target===this)closeFavModal()" style="display:none;position:fixed;inset:0;z-index:9000;background:rgba(0,0,0,0.65);backdrop-filter:blur(6px);align-items:center;justify-content:center;padding:16px">
   <div style="background:var(--card);border:1px solid var(--border2);border-radius:20px;padding:24px;width:100%;max-width:480px;max-height:82vh;display:flex;flex-direction:column;box-shadow:0 24px 60px var(--shadow)">
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">
-      <div style="font-size:1.02rem;font-weight:800;color:var(--text)">⭐ 즐겨찾기 등록 · 해제</div>
+      <div style="font-size:1.02rem;font-weight:800;color:var(--text);display:flex;align-items:center;gap:7px"><svg class="sk-ico" width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M8 1.8l1.9 3.9 4.3.6-3.1 3 .7 4.3L8 11.6l-3.8 2 .7-4.3-3.1-3 4.3-.6z"/></svg><span>즐겨찾기 등록 · 해제</span></div>
       <button onclick="closeFavModal()" style="background:none;border:none;color:var(--muted);font-size:1.2rem;cursor:pointer">✕</button>
     </div>
     <div style="display:flex;gap:8px;margin-bottom:12px">
@@ -1430,7 +1433,7 @@
 <div id="history-modal" onclick="if(event.target===this)closeHistoryModal()" style="display:none;position:fixed;inset:0;z-index:9000;background:rgba(0,0,0,0.65);backdrop-filter:blur(6px);align-items:center;justify-content:center;padding:16px">
   <div style="background:var(--card);border:1px solid var(--border2);border-radius:20px;padding:24px;width:100%;max-width:480px;max-height:82vh;display:flex;flex-direction:column;box-shadow:0 24px 60px var(--shadow)">
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">
-      <div style="font-size:1.02rem;font-weight:800;color:var(--text)">🕐 최근 분석 히스토리</div>
+      <div style="font-size:1.02rem;font-weight:800;color:var(--text);display:flex;align-items:center;gap:7px"><svg class="sk-ico" width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="8" cy="8" r="5.5"/><path d="M8 5v3.2l2.2 1.3"/></svg><span>최근 분석 히스토리</span></div>
       <div style="display:flex;align-items:center;gap:10px">
         <button onclick="clearHistory()" style="background:none;border:1px solid var(--border2);border-radius:8px;padding:4px 10px;font-size:0.74rem;color:var(--red);cursor:pointer">전체 삭제</button>
         <button onclick="closeHistoryModal()" style="background:none;border:none;color:var(--muted);font-size:1.2rem;cursor:pointer">✕</button>
@@ -1456,7 +1459,7 @@
 <div id="ipp-modal" onclick="if(event.target===this)closeIppModal()" style="display:none;position:fixed;inset:0;z-index:9000;background:rgba(0,0,0,0.65);backdrop-filter:blur(6px);align-items:center;justify-content:center;padding:16px">
   <div style="background:var(--card);border:1px solid var(--border2);border-radius:20px;padding:24px;width:100%;max-width:520px;max-height:82vh;display:flex;flex-direction:column;box-shadow:0 24px 60px var(--shadow)">
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
-      <div style="font-size:1.02rem;font-weight:800;color:var(--text)">🔮 변곡점 임박(IPP) 감지 상세</div>
+      <div style="font-size:1.02rem;font-weight:800;color:var(--text);display:flex;align-items:center;gap:7px"><svg class="sk-ico" width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M8 2v2M8 12v2M2 8h2M12 8h2"/><circle cx="8" cy="8" r="3"/></svg><span>변곡점 임박(IPP) 감지 상세</span></div>
       <button onclick="closeIppModal()" style="background:none;border:none;color:var(--muted);font-size:1.2rem;cursor:pointer">✕</button>
     </div>
     <div id="ipp-modal-summary" style="font-size:0.8rem;color:var(--muted);margin-bottom:12px">BB 수축 · OBV 다이버전스 · 돌파 시그널이 포착된 종목 목록입니다.</div>
@@ -1468,7 +1471,7 @@
 <div id="avg-conf-modal" onclick="if(event.target===this)closeAvgConfModal()" style="display:none;position:fixed;inset:0;z-index:9000;background:rgba(0,0,0,0.65);backdrop-filter:blur(6px);align-items:center;justify-content:center;padding:16px">
   <div style="background:var(--card);border:1px solid var(--border2);border-radius:20px;padding:24px;width:100%;max-width:520px;max-height:82vh;display:flex;flex-direction:column;box-shadow:0 24px 60px var(--shadow)">
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
-      <div style="font-size:1.02rem;font-weight:800;color:var(--text)">🎯 평균 알고리즘 신뢰도 분포</div>
+      <div style="font-size:1.02rem;font-weight:800;color:var(--text);display:flex;align-items:center;gap:7px"><svg class="sk-ico" width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="8" cy="8" r="5.5"/><circle cx="8" cy="8" r="2.2"/></svg><span>평균 알고리즘 신뢰도 분포</span></div>
       <button onclick="closeAvgConfModal()" style="background:none;border:none;color:var(--muted);font-size:1.2rem;cursor:pointer">✕</button>
     </div>
     <div id="avg-conf-summary" style="font-size:0.8rem;color:var(--muted);margin-bottom:12px"></div>
@@ -1480,7 +1483,7 @@
 <div id="quant-engine-modal" onclick="if(event.target===this)closeQuantEngineModal()" style="display:none;position:fixed;inset:0;z-index:9000;background:rgba(0,0,0,0.65);backdrop-filter:blur(6px);align-items:center;justify-content:center;padding:16px">
   <div style="background:var(--card);border:1px solid var(--border2);border-radius:20px;padding:24px;width:100%;max-width:520px;max-height:82vh;display:flex;flex-direction:column;box-shadow:0 24px 60px var(--shadow)">
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
-      <div style="font-size:1.02rem;font-weight:800;color:var(--text)">⚙️ 7-Layer 퀀트 엔진 아키텍처</div>
+      <div style="font-size:1.02rem;font-weight:800;color:var(--text);display:flex;align-items:center;gap:7px"><svg class="sk-ico" width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="8" cy="8" r="2.2"/><path d="M8 2v2M8 12v2M2 8h2M12 8h2M3.8 3.8l1.4 1.4M10.8 10.8l1.4 1.4M12.2 3.8l-1.4 1.4M5.2 10.8l-1.4 1.4"/></svg><span>7-Layer 퀀트 엔진 아키텍처</span></div>
       <button onclick="closeQuantEngineModal()" style="background:none;border:none;color:var(--muted);font-size:1.2rem;cursor:pointer">✕</button>
     </div>
     <div style="font-size:0.8rem;color:var(--muted);margin-bottom:12px">모든 종목 분석 시 아래 7개 레이어가 병렬로 계산되어 최종 매수·매도·관망 점수를 산출합니다.</div>
@@ -1500,7 +1503,7 @@
 <div class="grid" id="dashboard" style="max-width:1280px;padding:0 24px 64px"></div>
 
 <footer class="footer">
-  <p>⚠️ 본 서비스는 <b>투자자문·유사투자자문 서비스가 아니며</b>, 무료로 제공되는 참고·교육용 분석 도구입니다.<br>
+  <p><svg class="sk-ico" width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="margin-right:4px"><path d="M8 2L1.5 13.5h13L8 2z"/><path d="M8 6.5v3.5M8 11.8v.2"/></svg>본 서비스는 <b>투자자문·유사투자자문 서비스가 아니며</b>, 무료로 제공되는 참고·교육용 분석 도구입니다.<br>
      모든 신호·점수·목표가·신뢰도는 알고리즘이 산출한 참고 정보이며,<br>
      <b>자체 백테스트 검증 결과 시장 대비 초과수익(알파)은 확인되지 않았습니다.</b><br>
      투자 결정과 그 손익에 대한 책임은 전적으로 사용자 본인에게 있습니다.</p>
@@ -1598,7 +1601,35 @@ function applyPrefs() {
 }
 // 테마 순서: dark → light
 const THEME_CYCLE = ['dark', 'light'];
-const THEME_ICONS = { dark: '🌙', light: '☀️' };
+const THEME_ICONS = {
+  dark: '<svg class="sk-ico" width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M13.5 9.8A5.5 5.5 0 0 1 6.2 2.5a5.5 5.5 0 1 0 7.3 7.3z"/></svg>',
+  light: '<svg class="sk-ico" width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="8" cy="8" r="3"/><path d="M8 1.5v1.5M8 13v1.5M1.5 8H3M13 8h1.5M3.4 3.4l1 1M11.6 11.6l1 1M12.6 3.4l-1 1M4.4 11.6l-1 1"/></svg>'
+};
+function skIcon(name, size = 14) {
+  const paths = {
+    bolt: '<path d="M9 1.5L4 9h4l-1 5.5L12 7H8l1-5.5z"/>',
+    refresh: '<path d="M13.5 8a5.5 5.5 0 1 1-1.6-3.9L13.5 5.5"/><path d="M13.5 2.5v3h-3"/>',
+    star: '<path d="M8 1.8l1.9 3.9 4.3.6-3.1 3 .7 4.3L8 11.6l-3.8 2 .7-4.3-3.1-3 4.3-.6z"/>',
+    doc: '<rect x="3" y="2" width="10" height="12" rx="1.5"/><path d="M5.5 6h5M5.5 8.5h5M5.5 11h3"/>',
+    news: '<rect x="2" y="3" width="12" height="10" rx="1.5"/><path d="M5 6.5h4M5 9h6M5 11h4"/>',
+    chart: '<path d="M2 12.5h12"/><path d="M3.5 9.5L6.5 6.5L9 8.5L12.5 4"/>',
+    bar: '<path d="M2 13h12"/><path d="M4.5 13V8.5M8 13V5M11.5 13V6.5"/>',
+    cpu: '<rect x="4" y="4" width="8" height="8" rx="1.2"/><path d="M6.5 2v2M9.5 2v2M6.5 12v2M9.5 12v2M2 6.5h2M2 9.5h2M12 6.5h2M12 9.5h2"/>',
+    compass: '<circle cx="8" cy="8" r="5.5"/><path d="M10.2 5.8l-1.4 3.4-3.4 1.4 1.4-3.4z"/>',
+    graph: '<circle cx="4" cy="5" r="1.5"/><circle cx="12" cy="5" r="1.5"/><circle cx="8" cy="12" r="1.5"/><path d="M5.3 5.8l2 5M10.7 5.8l-2 5M5.5 5h5"/>',
+    check: '<path d="M3 8.5l3.2 3.2L13 4.8"/>',
+    target: '<circle cx="8" cy="8" r="5.5"/><circle cx="8" cy="8" r="2.2"/>',
+    shield: '<path d="M8 2l5 2v4c0 3.2-2.1 5.3-5 6-2.9-.7-5-2.8-5-6V4l5-2z"/>',
+    alert: '<path d="M8 2L1.5 13.5h13L8 2z"/><path d="M8 6.5v3.5M8 11.8v.2"/>',
+    eye: '<path d="M1.5 8s2.5-4 6.5-4 6.5 4 6.5 4-2.5 4-6.5 4-6.5-4-6.5-4z"/><circle cx="8" cy="8" r="1.6"/>',
+    ban: '<circle cx="8" cy="8" r="5.5"/><path d="M4.2 4.2l7.6 7.6"/>',
+    sparkle: '<path d="M8 2v2M8 12v2M2 8h2M12 8h2"/><circle cx="8" cy="8" r="2.5"/>',
+    bulb: '<path d="M6 11.5h4M6.5 13.5h3M5.5 9.5c-.9-.7-1.5-1.8-1.5-3a4 4 0 1 1 8 0c0 1.2-.6 2.3-1.5 3l-.5 1H6l-.5-1z"/>',
+    pin: '<path d="M8 14s4.5-4.2 4.5-7.5a4.5 4.5 0 1 0-9 0C3.5 9.8 8 14 8 14z"/><circle cx="8" cy="6.5" r="1.4"/>',
+    up: '<path d="M3 10l5-5 5 5"/>'
+  };
+  return `<svg class="sk-ico" width="${size}" height="${size}" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="margin-right:4px">${paths[name] || paths.bolt}</svg>`;
+}
 
 // 항상 현재 테마 기준으로 범례 텍스트 색상 반환
 function getLegendColor() {
@@ -1614,7 +1645,7 @@ function applyTheme(theme) {
   savePrefs({ theme });
   // 토글 버튼 아이콘 반영
   const knob = document.querySelector('#theme-toggle-btn .theme-toggle-knob');
-  if (knob) knob.textContent = THEME_ICONS[resolved];
+  if (knob) knob.innerHTML = THEME_ICONS[resolved];
   // 차트 범례 색상 즉시 반영 (차트 변수가 선언된 이후에만 접근)
   if (typeof Chart !== 'undefined') {
     Chart.defaults.color = getLegendColor();
@@ -1626,6 +1657,15 @@ function applyTheme(theme) {
       });
     } catch(e) { /* 차트 미생성 상태 무시 */ }
   }
+  // Knowledge Graph / Value Chain 테마 즉시 반영 (초기 로드 TDZ 방어)
+  try {
+    if (typeof _kgLastArgs !== 'undefined' && _kgLastArgs && document.getElementById('kgWrap')) {
+      renderKnowledgeGraph(_kgLastArgs);
+    }
+    if (typeof _vcLastArgs !== 'undefined' && _vcLastArgs && document.getElementById('vcWrap')) {
+      renderValueChain(_vcLastArgs);
+    }
+  } catch(e) {}
 }
 
 function toggleTheme() {
@@ -2098,7 +2138,18 @@ const DEFAULT_FAVS = {
 let _favsCache = JSON.parse(JSON.stringify(DEFAULT_FAVS));
 let _favsRefreshing = false; // 동시 호출 방지 락
 
-function loadFavs() { return _favsCache; }
+function _favsLocalBackupKey() { return `signnith_favs_backup_${currentUser()}`; }
+function loadFavs() {
+  if (!_favsCache.us.length && !_favsCache.kr.length) {
+    try {
+      const saved = JSON.parse(localStorage.getItem(_favsLocalBackupKey()) || 'null');
+      if (saved && (Array.isArray(saved.us) || Array.isArray(saved.kr))) {
+        _favsCache = { us: saved.us || [], kr: saved.kr || [] };
+      }
+    } catch {}
+  }
+  return _favsCache;
+}
 
 function isFaved(ticker) {
   return [..._favsCache.us, ..._favsCache.kr].some(x => x.ticker === ticker);
@@ -2144,6 +2195,7 @@ async function refreshFavsFromDB() {
     }
 
     buildCache(data || []);
+    try { localStorage.setItem(_favsLocalBackupKey(), JSON.stringify(_favsCache)); } catch {}
   } catch(e) {
     console.warn('refreshFavsFromDB error', e);
     _favsCache = JSON.parse(JSON.stringify(DEFAULT_FAVS));
@@ -4173,11 +4225,11 @@ async function runAnalysis(forceRefresh = false) {
         renderDashboard({ ...updatedPayload, fromCache: true, quoteChecking: false, quoteUpdated: true });
       } else {
         const cBtn = document.getElementById('cache-refresh-btn');
-        if (cBtn) cBtn.textContent = '⚡ 캐시 · 재분석';
+        if (cBtn) cBtn.innerHTML = `${skIcon('bolt', 13)}캐시 · 재분석`;
       }
     }).catch(() => {
       const cBtn = document.getElementById('cache-refresh-btn');
-      if (cBtn) cBtn.textContent = '⚡ 캐시 · 재분석';
+      if (cBtn) cBtn.innerHTML = `${skIcon('bolt', 13)}캐시 · 재분석`;
     });
 
     btn.disabled = false;
@@ -4299,7 +4351,7 @@ async function runAnalysis(forceRefresh = false) {
       const nfBtn = document.getElementById('newsfinder-btn');
       const _nfName = fundInfo.companyName || quote?.longName || quote?.shortName || resolveTickerName(ticker) || ticker;
       sessionStorage.setItem('last_name', _nfName);
-      if (nfBtn) nfBtn.innerHTML = `📰<span class="btn-label"> ${escapeHtml(_nfName)} 뉴스 확인!</span>`;
+      if (nfBtn) nfBtn.innerHTML = `${skIcon('news', 13)}<span class="btn-label"> ${escapeHtml(_nfName)} 뉴스 확인!</span>`;
       sessionStorage.setItem('last_period',  document.getElementById('period-select').value);
       sessionStorage.setItem('last_style',   document.getElementById('style-select').value);
     } catch(e) {}
@@ -4514,10 +4566,10 @@ function renderDashboard({ ticker, bars, ind, tech, fund, decision: d, price, is
       <span class="sig-badge ${d.action==='BUY'?'sig-buy':d.action==='SELL'?'sig-sell':'sig-hold'}">${badgeLbl}</span>
     </div>
     <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
-      ${fromCache ? `<button id="cache-refresh-btn" class="btn-pill-sm" onclick="refreshCurrentAnalysis('${ticker}')" title="캐시된 결과를 무시하고 전체 다시 분석">${quoteChecking ? '⚡ 캐시 · 시세 확인 중…' : quoteUpdated ? '🔄 시세 반영됨 · 재분석' : '⚡ 캐시 · 재분석'}</button>` : ''}
-      <button id="fav-btn" class="btn-pill-sm${isFaved(ticker)?' starred':''}">${isFaved(ticker) ? '⭐ 즐겨찾기됨' : '☆ 즐겨찾기'}</button>
-      <button class="btn-pill-sm" id="report-btn" onclick="openReport()">📄 리포트</button>
-      <button class="btn-pill-sm" id="newsfinder-btn" onclick="openNewsFinder()">📰 뉴스</button>
+      ${fromCache ? `<button id="cache-refresh-btn" class="btn-pill-sm" onclick="refreshCurrentAnalysis('${ticker}')" title="캐시된 결과를 무시하고 전체 다시 분석">${quoteChecking ? `${skIcon('bolt', 13)}캐시 · 시세 확인 중…` : quoteUpdated ? `${skIcon('refresh', 13)}시세 반영됨 · 재분석` : `${skIcon('bolt', 13)}캐시 · 재분석`}</button>` : ''}
+      <button id="fav-btn" class="btn-pill-sm${isFaved(ticker)?' starred':''}">${isFaved(ticker) ? `${skIcon('star', 13)}즐겨찾기됨` : `${skIcon('star', 13)}즐겨찾기`}</button>
+      <button class="btn-pill-sm" id="report-btn" onclick="openReport()">${skIcon('doc', 13)}리포트</button>
+      <button class="btn-pill-sm" id="newsfinder-btn" onclick="openNewsFinder()">${skIcon('news', 13)}뉴스</button>
       <button class="btn-pill-sm" onclick="closeDetailDash()">✕ 닫기</button>
     </div>
   </div>
@@ -4584,24 +4636,24 @@ function renderDashboard({ ticker, bars, ind, tech, fund, decision: d, price, is
           const highConf=d.confidence>=0.8, goodRR=d.rr>=2;
           const steps=[];
           if(isBuy && highConf && goodRR){
-            steps.push(`✅ <b>진입</b>: 현재가 ${fmt(price,isKr)} 부근 매수`);
-            steps.push(`🎯 <b>목표</b>: ${fmt(d.targetPrice,isKr)} 분할 차익실현`);
-            steps.push(`🛡️ <b>손절</b>: ${fmt(d.stopLoss,isKr)} 이탈 시 즉시 손절`);
+            steps.push(`${skIcon('check', 13)}<b>진입</b>: 현재가 ${fmt(price,isKr)} 부근 매수`);
+            steps.push(`${skIcon('target', 13)}<b>목표</b>: ${fmt(d.targetPrice,isKr)} 분할 차익실현`);
+            steps.push(`${skIcon('shield', 13)}<b>손절</b>: ${fmt(d.stopLoss,isKr)} 이탈 시 즉시 손절`);
           } else if(isBuy){
-            steps.push(`⚠️ <b>분할 진입</b>: 신뢰도 ${Math.round(d.confidence*100)}% — 3분할 이상 진입`);
-            steps.push(`🎯 <b>목표</b>: ${fmt(d.targetPrice,isKr)} &nbsp; 🛡️ <b>손절</b>: ${fmt(d.stopLoss,isKr)}`);
+            steps.push(`${skIcon('alert', 13)}<b>분할 진입</b>: 신뢰도 ${Math.round(d.confidence*100)}% — 3분할 이상 진입`);
+            steps.push(`${skIcon('target', 13)}<b>목표</b>: ${fmt(d.targetPrice,isKr)} &nbsp; ${skIcon('shield', 13)}<b>손절</b>: ${fmt(d.stopLoss,isKr)}`);
           } else if(isSell){
-            steps.push(`📤 <b>차익실현</b>: 보유 중이라면 ${fmt(d.targetPrice,isKr)} 근처 분할 매도`);
-            steps.push(`🚫 <b>신규 매수 금지</b> — RSI 30↓ + MACD 골든크로스 시 재검토`);
+            steps.push(`${skIcon('up', 13)}<b>차익실현</b>: 보유 중이라면 ${fmt(d.targetPrice,isKr)} 근처 분할 매도`);
+            steps.push(`${skIcon('ban', 13)}<b>신규 매수 금지</b> — RSI 30↓ + MACD 골든크로스 시 재검토`);
           } else {
-            steps.push(`⏸️ <b>현금 대기</b>: 통합 신호 ±0.25 돌파 + 신뢰도 50%↑ 시 재분석`);
-            steps.push(`👀 <b>지지 모니터링</b>: BB 하단 ${fmt(I.bbLower,isKr)} 지지 여부 주시`);
+            steps.push(`${skIcon('alert', 13)}<b>현금 대기</b>: 통합 신호 ±0.25 돌파 + 신뢰도 50%↑ 시 재분석`);
+            steps.push(`${skIcon('eye', 13)}<b>지지 모니터링</b>: BB 하단 ${fmt(I.bbLower,isKr)} 지지 여부 주시`);
           }
           const acBg=isBuy?'rgba(0,212,170,.08)':isSell?'rgba(59,130,246,.08)':'rgba(251,191,36,.08)';
           const acBdr=isBuy?'rgba(0,212,170,.3)':isSell?'rgba(59,130,246,.3)':'rgba(251,191,36,.3)';
           const acCol=isBuy?'var(--green)':isSell?'var(--down)':'var(--yellow)';
           return `<div style="padding:12px 14px;border-radius:12px;background:${acBg};border:1px solid ${acBdr}">
-            <div style="font-size:0.72rem;font-weight:800;color:${acCol};letter-spacing:.06em;text-transform:uppercase;margin-bottom:5px">🎯 Action Item</div>
+            <div style="font-size:0.72rem;font-weight:800;color:${acCol};letter-spacing:.06em;text-transform:uppercase;margin-bottom:5px">${skIcon('target', 12)}Action Item</div>
             ${steps.map(s=>`<div style="font-size:0.8rem;color:var(--text2);line-height:1.65">${s}</div>`).join('')}
           </div>`;
         })()}
@@ -4626,8 +4678,8 @@ function renderDashboard({ ticker, bars, ind, tech, fund, decision: d, price, is
         <button class="uni-pill" onclick="setUniLiveMetric('RSI', this)">RSI</button>
       </div>
       <div class="uni-pill-group">
-        <button class="uni-pill active" onclick="setUniLiveType('line', this)">📈 Line</button>
-        <button class="uni-pill" onclick="setUniLiveType('bar', this)">📊 Bar</button>
+        <button class="uni-pill active" onclick="setUniLiveType('line', this)">${skIcon('chart', 12)}Line</button>
+        <button class="uni-pill" onclick="setUniLiveType('bar', this)">${skIcon('bar', 12)}Bar</button>
       </div>
     </div>
   </div>
@@ -4635,11 +4687,11 @@ function renderDashboard({ ticker, bars, ind, tech, fund, decision: d, price, is
   <!-- ═══ 결과 탭 바 (ux-fusion-sample 동일) ═══ -->
   <div class="tabs-bar">
     <div class="tab-group">
-      <button class="tab-btn active" onclick="switchDashTab('summary', this)">📊 요약 · 추세</button>
-      <button class="tab-btn" onclick="switchDashTab('signals', this)">🧠 고급 시그널 (7L)</button>
-      <button class="tab-btn" onclick="switchDashTab('charts', this)">📈 차트 · 패턴</button>
-      <button class="tab-btn" onclick="switchDashTab('valuation', this)">📐 밸류에이션 · WACC</button>
-      <button class="tab-btn" onclick="switchDashTab('graph', this)">🕸️ Knowledge Graph</button>
+      <button class="tab-btn active" onclick="switchDashTab('summary', this)">${skIcon('bar', 13)}요약 · 추세</button>
+      <button class="tab-btn" onclick="switchDashTab('signals', this)">${skIcon('cpu', 13)}고급 시그널 (7L)</button>
+      <button class="tab-btn" onclick="switchDashTab('charts', this)">${skIcon('chart', 13)}차트 · 패턴</button>
+      <button class="tab-btn" onclick="switchDashTab('valuation', this)">${skIcon('compass', 13)}밸류에이션 · WACC</button>
+      <button class="tab-btn" onclick="switchDashTab('graph', this)">${skIcon('graph', 13)}Knowledge Graph</button>
     </div>
     <button class="btn-pill-sm" id="dash-expand-btn" onclick="toggleDashShowAll()">전체 펼치기</button>
   </div>
@@ -4864,7 +4916,7 @@ function renderDashboard({ ticker, bars, ind, tech, fund, decision: d, price, is
     <!-- 변곡점 예측 (IPP) -->
     <div class="card">
       <div class="card-header">
-        <div class="card-header-row"><span class="dot" style="background:var(--purple)"></span>🔮 변곡점 예측 (IPP) ${tip('변곡점 예측 (IPP)','RSI 다이버전스 · OBV · 볼린저밴드 수축 · ATR 수축 · 거래량 이상 · 캔들 패턴 등 규칙 기반 앙상블로 N일 이내 주가 방향 전환 가능성을 수치화합니다.\n\n<b>해석</b>\n+20 이상 → 상승전환 임박\n-20 이하 → 하락전환 임박\n중간 → 방향성 불명확')}</div>
+        <div class="card-header-row"><span class="dot" style="background:var(--purple)"></span>${skIcon('sparkle', 13)}변곡점 예측 (IPP) ${tip('변곡점 예측 (IPP)','RSI 다이버전스 · OBV · 볼린저밴드 수축 · ATR 수축 · 거래량 이상 · 캔들 패턴 등 규칙 기반 앙상블로 N일 이내 주가 방향 전환 가능성을 수치화합니다.\n\n<b>해석</b>\n+20 이상 → 상승전환 임박\n-20 이하 → 하락전환 임박\n중간 → 방향성 불명확')}</div>
         <span class="card-sub">단기 변곡점 탐지 — 규칙 기반 앙상블 (RSI·OBV·BB·ATR·거래량·캔들)</span>
       </div>
       ${(() => {
@@ -4959,7 +5011,7 @@ function renderDashboard({ ticker, bars, ind, tech, fund, decision: d, price, is
         ${waccResult.interestCoverage!=null?`<div style="display:flex;justify-content:space-between"><span>이자보상배율${tip('이자보상배율 (Interest Coverage Ratio)','<b>계산 방법</b>\nEBIT(영업이익) / 이자비용\n\n<b>해석 기준</b>\n<span class="tag-buy">▲ 8.5x 이상</span> — AA급 우량. 부채 상환 능력 매우 우수\n4.25x ~ 8.5x — BBB급 투자적격\n1.5x ~ 4.25x — BB급 (투기등급 진입 전)\n<span class="tag-sell">▼ 1.5x 미만</span> — CCC 이하. 이자 지급 능력 취약\n\n이 비율을 통해 기업의 신용등급을 추정하고, 타인자본비용(Rd)을 산정합니다.')}</span><span style="color:var(--text2)">${waccResult.interestCoverage.toFixed(1)}x</span></div>`:''}
       </div>
       <div style="margin-top:8px;font-size:0.68rem;color:var(--muted);padding:6px 8px;background:rgba(255,200,0,.06);border-radius:6px">
-        💡 WACC = Re×E/V + Rd×D/V×(1−Tc) · CAPM 기반 · ${isKr?'한국':'미국'} 시장 기준
+        ${skIcon('bulb', 12)}WACC = Re×E/V + Rd×D/V×(1−Tc) · CAPM 기반 · ${isKr?'한국':'미국'} 시장 기준
       </div>
     </div>
   </div>
@@ -5324,7 +5376,7 @@ function renderDashboard({ ticker, bars, ind, tech, fund, decision: d, price, is
       </button>` : '';
 
     el.innerHTML = `<div style="background:var(--card2,#0f1923);border-radius:8px;padding:8px 12px;margin-top:2px">
-      <div style="font-size:0.72rem;color:var(--muted);margin-bottom:6px;font-weight:600">📍 진입점 이력 (최근 ${rows.length}건)</div>
+      <div style="font-size:0.72rem;color:var(--muted);margin-bottom:6px;font-weight:600">${skIcon('pin', 12)}진입점 이력 (최근 ${rows.length}건)</div>
       ${makeGrid(visible)}
       ${foldHtml}
     </div>`;
@@ -5755,14 +5807,15 @@ function renderKnowledgeGraph(args) {
   const GR = _kgNodeR;
   const isDark = !document.documentElement.classList.contains('light');
   const kgBg   = isDark ? '#0f1320' : '#f1f5f9';
-  const textCol = isDark ? '#f8fafc' : '#1e293b';
-  const linkCol = isDark ? '#475569' : '#cbd5e1';
+  const textCol = isDark ? '#f1f5f9' : '#0f172a';
+  const linkCol = isDark ? '#64748b' : '#94a3b8';
+  const crossLinkCol = isDark ? '#818cf8' : '#6366f1';
+  const nodeStroke = isDark ? 'rgba(255,255,255,0.22)' : 'rgba(15,23,42,0.16)';
 
-  // 그레이 팔레트: 0=가장 좋음(어두움) → 4=레드블랙(나쁨)
-  // 다크모드: 라이트모드와 반대 방향 — 좋을수록 밝은 원, 나쁠수록 어두운 원
+  // 다크/라이트 최적화 팔레트 (0=좋음, 1=카테고리, 2=중립, 3=약세, 4=매도/주의)
   const GRAYS = isDark
-    ? ['#f1f5f9','#94a3b8','#64748b','#334155','#7f1d1d']
-    : ['#1e293b','#334155','#475569','#64748b','#7f1d1d'];
+    ? ['#f1f5f9','#cbd5e1','#94a3b8','#475569','#ef4444']
+    : ['#0f172a','#334155','#64748b','#94a3b8','#dc2626'];
 
   // 핵심 노드용 radial gradient
   const defs = svg.append('defs');
@@ -5790,10 +5843,10 @@ function renderKnowledgeGraph(args) {
   // 링크
   const link = g.append('g').selectAll('line').data(links).join('line')
     .attr('class','kg-link')
-    .attr('stroke', linkCol)
-    .attr('stroke-width', d => d.dashed ? 1 : 1.2)
+    .attr('stroke', d => d.dashed ? crossLinkCol : linkCol)
+    .attr('stroke-width', d => d.dashed ? 1.1 : 1.25)
     .attr('stroke-dasharray', d => d.dashed ? '4 3' : null)
-    .attr('stroke-opacity', 0.5);
+    .attr('stroke-opacity', d => d.dashed ? (isDark ? 0.55 : 0.6) : (isDark ? 0.48 : 0.65));
 
   // 노드 그룹
   const node = g.append('g').selectAll('g').data(nodes).join('g')
@@ -5806,20 +5859,20 @@ function renderKnowledgeGraph(args) {
   // 배경 원 (선 가리기)
   node.append('circle').attr('class','bg-c').attr('r', GR).attr('fill', kgBg).attr('stroke','none');
 
-  // 컬러 원 (그레이 스케일, 핵심노드는 그라데이션)
+  // 컬러 원 (테마 최적화 팔레트 + 미세 테두리)
   node.append('circle').attr('class','cl-c').attr('r', GR)
     .attr('fill', d => d.group === 'center' ? 'url(#kg-center-grad)' : GRAYS[sigIdx(d.sig)])
-    .attr('stroke','none');
+    .attr('stroke', nodeStroke)
+    .attr('stroke-width', 1);
 
   // 텍스트 — 원 아래 고정
-  // text dy=0, 첫 tspan에 (r + gap + font) 값 직접 지정 → 단/다중 줄 모두 원 아래
   node.append('text')
     .attr('class','nd-lbl')
     .attr('text-anchor','middle')
     .attr('dy', 0)
     .attr('fill', textCol)
-    .attr('font-size', 9)
-    .attr('font-weight', '500')
+    .attr('font-size', d => d.group === 'leaf' ? 9 : 10)
+    .attr('font-weight', d => d.group === 'leaf' ? '500' : '700')
     .each(function(d) {
       const r = GR, fs = 9, gap = 4;
       const firstDy = r + gap + fs; // 원 하단 + 간격 + 폰트 높이 = 베이스라인
@@ -6961,7 +7014,8 @@ document.addEventListener('click', e => {
 
 // 페이지 로드 시 초기화
 applyTheme(localStorage.getItem(THEME_KEY) || 'light');
-refreshFavsFromDB(); // DB 기반 즐겨찾기 (renderFavs 포함)
+renderFavs();        // 즉시 기본/캐시 즐겨찾기 및 상단 6개 타일 수치 렌더링
+refreshFavsFromDB(); // DB 기반 즐겨찾기 동기화 후 재렌더
 renderHistory();
 
 // 새로고침 시 마지막 분석 결과 자동 복원

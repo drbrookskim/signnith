@@ -150,10 +150,10 @@
     background-size: 10px 10px;
   }
   .explore-toolbar {
-    display: flex; align-items: center; justify-content: space-between; gap: 10px;
-    margin-bottom: 14px; flex-wrap: wrap;
+    display: flex; flex-direction: column; align-items: stretch; gap: 10px;
+    margin-bottom: 14px;
   }
-  .filter-pills { display: flex; align-items: center; gap: 7px; overflow-x: auto; padding-bottom: 2px; }
+  .filter-pills { display: flex; align-items: center; gap: 7px; flex-wrap: wrap; }
   .f-pill {
     padding: 7px 14px; border-radius: 999px; border: 1px solid var(--border);
     background: var(--card); color: var(--muted); font-family: inherit;
@@ -544,7 +544,7 @@
   html.light .topbar-nav-btn:hover, html.light .topbar-nav-btn.active { background: rgba(15,23,42,0.07); }
   @media (max-width: 720px) { .topbar-nav { display: none; } }
 
-  .fav-controls { display: flex; align-items: center; gap: 8px; }
+  .fav-controls { display: flex; align-items: center; gap: 8px; align-self: flex-end; margin-left: auto; }
   .view-sw {
     display: inline-flex; background: var(--card2); border: 1px solid var(--border);
     border-radius: 999px; padding: 2px; gap: 2px;

@@ -4641,6 +4641,8 @@ function renderDashboard({ ticker, bars, ind, tech, fund, decision: d, price, is
       <button id="fav-btn" class="btn-pill-sm${isFaved(ticker)?' starred':''}">${isFaved(ticker) ? `${skIcon('star', 13)}즐겨찾기됨` : `${skIcon('star', 13)}즐겨찾기`}</button>
       <button class="btn-pill-sm" id="report-btn" onclick="openReport()">${skIcon('doc', 13)}리포트</button>
       <button class="btn-pill-sm" id="newsfinder-btn" onclick="openNewsFinder()">${skIcon('news', 13)}뉴스</button>
+      <button class="btn-pill-sm" id="buythedip-btn" onclick="openBuyTheDip()">${skIcon('chart', 13)}BuyTheDip</button>
+      <button class="btn-pill-sm" id="chartdeepdive-btn" onclick="openChartDeepDive()">${skIcon('compass', 13)}ChartDeepDive</button>
       <button class="btn-pill-sm" onclick="closeDetailDash()">✕ 닫기</button>
     </div>
   </div>
@@ -7384,6 +7386,35 @@ function openNewsFinder() {
   const query = lastName || lastTicker || inputTicker;
   const base = 'https://drbrookskim.github.io/newsfinder/';
   window.open(query ? `${base}?ticker=${encodeURIComponent(query)}` : base, '_blank');
+}
+
+function openBuyTheDip() {
+  const lastTicker = sessionStorage.getItem('last_ticker') || '';
+  const lastName   = sessionStorage.getItem('last_name') || '';
+  const raw = document.getElementById('ticker-input')?.value.trim() || '';
+  const parenMatch = raw.match(/\(([A-Z0-9]+(?:\.[A-Z]{1,3})?)\)\s*$/i);
+  const inputTicker = raw ? (parenMatch ? parenMatch[1] : raw).toUpperCase() : '';
+  const ticker = lastTicker || inputTicker;
+  const base = 'https://drbrookskim.github.io/buythedip/';
+  if (!ticker) { window.open(base, '_blank'); return; }
+  const params = new URLSearchParams({ ticker });
+  if (lastName && lastName !== ticker) params.set('name', lastName);
+  window.open(`${base}?${params.toString()}`, '_blank');
+}
+
+function openChartDeepDive() {
+  const lastTicker = sessionStorage.getItem('last_ticker') || '';
+  const lastName   = sessionStorage.getItem('last_name') || '';
+  const raw = document.getElementById('ticker-input')?.value.trim() || '';
+  const parenMatch = raw.match(/\(([A-Z0-9]+(?:\.[A-Z]{1,3})?)\)\s*$/i);
+  const inputTicker = raw ? (parenMatch ? parenMatch[1] : raw).toUpperCase() : '';
+  const symbol = lastTicker || inputTicker;
+  const base = 'https://chartdeepdive.vercel.app/';
+  if (!symbol) { window.open(base, '_blank'); return; }
+  const market = /\.(KS|KQ)$/i.test(symbol) ? 'KR' : 'US';
+  const params = new URLSearchParams({ symbol, market });
+  if (lastName && lastName !== symbol) params.set('name', lastName);
+  window.open(`${base}chart?${params.toString()}`, '_blank');
 }
 
 // 외부(프록시 경유 API·사용자 입력) 문자열을 innerHTML에 삽입하기 전 이스케이프

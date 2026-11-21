@@ -332,7 +332,7 @@
   html.light .theme-toggle-switch { background: rgba(59,130,246,.15); }
   .theme-toggle-knob {
     position: absolute; top: 2px; left: 2px; width: 22px; height: 22px;
-    border-radius: 50%; background: var(--card); display: flex;
+    border-radius: 50%; background: var(--card); color: var(--text); display: flex;
     align-items: center; justify-content: center; font-size: 0.78rem;
     transition: transform .2s ease; box-shadow: 0 1px 4px rgba(0,0,0,.3);
   }
@@ -561,7 +561,7 @@
   }
   .fav-card.compact .fav-tiles {
     columns: unset;
-    display: flex; overflow-x: auto; gap: 10px; padding-bottom: 6px;
+    display: flex; overflow-x: auto; gap: 10px; padding: 8px 6px 12px;
   }
   .fav-card.compact .fav-tile { min-width: 210px; margin-bottom: 0; flex-shrink: 0; border-radius: 14px; }
   .fav-card.compact .fav-spark-wrap,
@@ -709,9 +709,11 @@
   .sig-beacon { animation: sigPulse 1.8s cubic-bezier(.24,0,.38,1) infinite; }
 
   .fav-table-wrap { overflow-x: auto; }
-  .fav-table { width: 100%; border-collapse: collapse; min-width: 520px; font-size: 0.78rem; }
-  .fav-table th { text-align: left; font-size: 0.68rem; color: var(--muted); padding: 8px 10px; border-bottom: 1px solid var(--border); }
-  .fav-table td { padding: 9px 10px; border-bottom: 1px solid var(--border); vertical-align: middle; }
+  .fav-table { width: 100%; border-collapse: collapse; min-width: 680px; font-size: 0.78rem; }
+  .fav-table th { text-align: left; font-size: 0.68rem; color: var(--muted); padding: 10px 12px; border-bottom: 1px solid var(--border); white-space: nowrap; user-select: none; }
+  .fav-table th.sortable { cursor: pointer; transition: color .15s; }
+  .fav-table th.sortable:hover, .fav-table th.sortable.on { color: var(--text); }
+  .fav-table td { padding: 10px 12px; border-bottom: 1px solid var(--border); vertical-align: middle; font-variant-numeric: tabular-nums; }
   .fav-table tr { cursor: pointer; transition: background .12s; }
   .fav-table tbody tr:hover { background: rgba(255,255,255,0.04); }
 
@@ -1194,13 +1196,36 @@
     background:var(--card2); border:1px solid var(--border); border-radius:12px;
     padding:13px 12px 15px; text-align:center; position:relative; overflow:hidden;
     box-shadow: 0 8px 20px -12px var(--mtf-accent, transparent);
+    transition: border-color .35s ease, box-shadow .35s ease, transform .25s ease;
   }
+  .mtf-cell > * { position: relative; z-index: 1; transition: opacity .38s ease, filter .38s ease; }
   .mtf-cell::before {
-    content:''; position:absolute; left:0; right:0; bottom:0; height:2.5px;
+    content:''; position:absolute; left:0; right:0; bottom:0; height:2.5px; z-index: 2;
     background:var(--mtf-accent,var(--muted));
     box-shadow: 0 0 12px 2px var(--mtf-accent, transparent), 0 -4px 14px 0 var(--mtf-accent, transparent);
     opacity: 0.85;
+    transition: opacity .38s ease, height .35s ease, box-shadow .38s ease;
   }
+  .mtf-cell::after {
+    content:''; position:absolute; left:0; right:0; bottom:0; height:0%; z-index: 0;
+    background: linear-gradient(to top, rgba(239, 68, 68, 0.24) 0%, rgba(239, 68, 68, 0.08) 100%);
+    transition: height .48s cubic-bezier(0.22, 1, 0.36, 1);
+    pointer-events: none;
+  }
+  .mtf-cell.is-bull:hover {
+    border-color: rgba(239, 68, 68, 0.65);
+    box-shadow: 0 10px 24px -10px rgba(239, 68, 68, 0.45);
+    transform: translateY(-2px);
+  }
+  .mtf-cell.is-bull:hover::after { height: 100%; }
+  .mtf-cell.is-bull:hover::before { height: 3.5px; opacity: 1; }
+  .mtf-cell.is-bear:hover {
+    box-shadow: none;
+    border-color: var(--border);
+  }
+  .mtf-cell.is-bear:hover::before { opacity: 0.06; box-shadow: none; }
+  .mtf-cell.is-bear:hover .mtf-ret,
+  .mtf-cell.is-bear:hover .mtf-sig { opacity: 0.22; filter: saturate(0.1); }
   .mtf-cell .mtf-tf  { font-size:0.66rem; color:var(--muted); font-weight:700; letter-spacing:.03em; }
   .mtf-cell .mtf-ret { font-size:1.35rem; font-weight:800; margin:7px 0 3px; line-height:1; }
   .mtf-cell .mtf-ma  { font-size:0.65rem; color:var(--muted); }
@@ -1256,7 +1281,7 @@
     <button id="topbar-login-btn" onclick="openAuthModal()"
       style="display:none;height:32px;padding:0 14px;border-radius:20px;border:1px solid var(--border2);background:var(--card);color:var(--text2);font-size:0.76rem;font-weight:600;cursor:pointer;transition:background .2s">로그인</button>
     <button id="theme-toggle-btn" onclick="toggleTheme()" class="theme-toggle-switch" title="테마 변경">
-      <span class="theme-toggle-knob">🌙</span>
+      <span class="theme-toggle-knob"><svg class="sk-ico" width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M13.5 9.8A5.5 5.5 0 0 1 6.2 2.5a5.5 5.5 0 1 0 7.3 7.3z"/></svg></span>
     </button>
   </div>
 </header>
@@ -1340,6 +1365,11 @@
       <button class="f-pill active" onclick="setFavFilter('all', this)">전체</button>
       <button class="f-pill" onclick="setFavFilter('buy', this)">↗ 매수 우위</button>
       <button class="f-pill" onclick="setFavFilter('highconf', this)"><svg class="sk-ico" width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" style="margin-right:4px"><path d="M9 1.5L4 9h4l-1 5.5L12 7H8l1-5.5z"/></svg>고신뢰 70%+</button>
+      <button class="f-pill" onclick="setFavFilter('ipp', this)"><svg class="sk-ico" width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" style="margin-right:4px"><path d="M8 2v2M8 12v2M2 8h2M12 8h2"/><circle cx="8" cy="8" r="2.5"/></svg>변곡점 IPP</button>
+      <button class="f-pill" onclick="setFavFilter('rr2', this)"><svg class="sk-ico" width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" style="margin-right:4px"><circle cx="8" cy="8" r="5.5"/><circle cx="8" cy="8" r="2.2"/></svg>손익비 2:1+</button>
+      <button class="f-pill" onclick="setFavFilter('up', this)"><svg class="sk-ico" width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" style="margin-right:4px"><path d="M3 11l4-4 3 3 3.5-4.5M10.5 5.5h3v3"/></svg>상승 중</button>
+      <button class="f-pill" onclick="setFavFilter('down', this)"><svg class="sk-ico" width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" style="margin-right:4px"><path d="M3 5l4 4 3-3 3.5 4.5M10.5 10.5h3v-3"/></svg>하락·눌림</button>
+      <button class="f-pill" onclick="setFavFilter('watch', this)"><svg class="sk-ico" width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" style="margin-right:4px"><path d="M1.5 8s2.5-4 6.5-4 6.5 4 6.5 4-2.5 4-6.5 4-6.5-4-6.5-4z"/><circle cx="8" cy="8" r="1.6"/></svg>관망·매도</button>
       <button class="f-pill" onclick="setFavFilter('kr', this)">🇰🇷 국내 KRX</button>
       <button class="f-pill" onclick="setFavFilter('us', this)">🇺🇸 미국 US</button>
       <button class="f-pill" onclick="setFavFilter('history', this)"><svg class="sk-ico" width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" style="margin-right:4px"><circle cx="8" cy="8" r="5.5"/><path d="M8 5v3.2l2.2 1.3"/></svg>최근 분석</button>
@@ -2285,6 +2315,13 @@ function setFavFilter(mode, btn) {
   renderFavs();
 }
 
+let _favTableSort = { key: null, dir: -1 };
+function setFavTableSort(key) {
+  if (_favTableSort.key === key) _favTableSort.dir *= -1;
+  else { _favTableSort.key = key; _favTableSort.dir = -1; }
+  renderFavs();
+}
+
 function setFavView(mode) {
   favViewMode = mode;
   document.getElementById('fav-sw-cards')?.classList.toggle('active', mode === 'cards');
@@ -2484,7 +2521,7 @@ function renderFavs() {
 
   if (!deduped.length && favFilterMode !== 'history') {
     _DEFAULT_EXPLORE
-      .filter(d => favFilterMode === 'all' || favFilterMode === 'buy' || favFilterMode === 'highconf' || (favFilterMode === 'us' ? d.isUs : !d.isUs))
+      .filter(d => (favFilterMode !== 'us' && favFilterMode !== 'kr') || (favFilterMode === 'us' ? d.isUs : !d.isUs))
       .forEach(d => pushUnique({ item: d, isUs: d.isUs, flag: d.isUs ? '🇺🇸' : '🇰🇷', preset: d }));
   }
 
@@ -2501,8 +2538,13 @@ function renderFavs() {
     } : { ...baseIns, isReady: false };
     return { ...entry, ins };
   }).filter(({ ins }) => {
-    if (favFilterMode === 'buy') return ins.signal === 'buy';
+    if (favFilterMode === 'buy')      return ins.signal === 'buy';
     if (favFilterMode === 'highconf') return ins.conf >= 70;
+    if (favFilterMode === 'ipp')      return (ins.tags || []).some(t => /IPP|스퀴즈|돌파/i.test(t)) || (ins.conf || 0) >= 72;
+    if (favFilterMode === 'rr2')      return (parseFloat(ins.rr) || 0) >= 2;
+    if (favFilterMode === 'up')       return !!ins.isUp;
+    if (favFilterMode === 'down')     return !ins.isUp;
+    if (favFilterMode === 'watch')    return ins.signal !== 'buy';
     return true;
   });
   window._lastEnrichedExplore = enriched;
@@ -2514,20 +2556,49 @@ function renderFavs() {
   }
 
   if (favViewMode === 'table') {
+    const numFromStr = s => parseFloat(String(s || '').replace(/[^0-9.\-]/g, '')) || 0;
+    const sorted = _favTableSort.key ? enriched.slice().sort((a, b) => {
+      const k = _favTableSort.key;
+      let va = 0, vb = 0;
+      if (k === 'chg') { va = numFromStr(a.ins.chg); vb = numFromStr(b.ins.chg); }
+      else if (k === 'conf') { va = a.ins.conf || 0; vb = b.ins.conf || 0; }
+      else if (k === 'rr') { va = parseFloat(a.ins.rr) || 0; vb = parseFloat(b.ins.rr) || 0; }
+      else if (k === 'price') { va = numFromStr(a.ins.price); vb = numFromStr(b.ins.price); }
+      return (va - vb) * _favTableSort.dir;
+    }) : enriched;
+    const sortArrow = k => _favTableSort.key === k ? (_favTableSort.dir > 0 ? ' ↑' : ' ↓') : '';
+    const sortCls = k => `sortable${_favTableSort.key === k ? ' on' : ''}`;
+
     body.innerHTML = `<div class="fav-table-wrap" style="background:var(--card);border:1px solid var(--border);border-radius:16px;overflow-x:auto"><table class="fav-table">
-      <thead><tr><th>#</th><th>종목</th><th>등락률</th><th>7D 추세</th><th>신호</th><th>신뢰도</th><th>R:R</th><th></th></tr></thead>
-      <tbody>${enriched.map(({ item, isUs, flag, isHist, preset, ins }, idx) => {
+      <thead><tr>
+        <th>#</th>
+        <th>종목</th>
+        <th class="${sortCls('price')}" onclick="setFavTableSort('price')">현재가${sortArrow('price')}</th>
+        <th class="${sortCls('chg')}" onclick="setFavTableSort('chg')">등락률${sortArrow('chg')}</th>
+        <th>7D 추세</th>
+        <th>신호</th>
+        <th class="${sortCls('conf')}" onclick="setFavTableSort('conf')">신뢰도${sortArrow('conf')}</th>
+        <th class="${sortCls('rr')}" onclick="setFavTableSort('rr')">R:R${sortArrow('rr')}</th>
+        <th>목표가</th>
+        <th>핵심 태그</th>
+        <th></th>
+      </tr></thead>
+      <tbody>${sorted.map(({ item, isUs, flag, isHist, preset, ins }, idx) => {
         const { displayName, subLine } = resolveInfo(item, isUs);
         const delFn = isHist ? `removeHistory('${item.ticker}')` : (preset ? '' : `removeFav('${item.ticker}')`);
         const sigCls = ins.signal === 'buy' ? 'sig-buy' : ins.signal === 'sell' ? 'sig-sell' : 'sig-hold';
+        const tagsHtml = (ins.tags || []).slice(0, 2).map(t => `<span class="mini-tag">${t}</span>`).join('');
         return `<tr onclick="selectFavStock('${item.ticker}')">
           <td style="color:var(--muted)">${idx + 1}</td>
-          <td><strong>${flag} ${displayName}</strong><div style="font-size:0.68rem;color:var(--muted)">${subLine}${ins.price ? ' · ' + ins.price : ''}</div></td>
-          <td class="${ins.isUp ? 'up' : 'down'}" style="font-weight:700">${ins.chg}</td>
-          <td style="width:120px">${_favSparkSvg(item.ticker, 26, ins.sparkPts || null)}</td>
+          <td><strong>${flag} ${displayName}</strong><div style="font-size:0.68rem;color:var(--muted)">${subLine}</div></td>
+          <td style="font-weight:700;color:var(--text);white-space:nowrap">${ins.price || '-'}</td>
+          <td class="${ins.isUp ? 'up' : 'down'}" style="font-weight:700;white-space:nowrap">${ins.chg}</td>
+          <td style="width:110px">${_favSparkSvg(item.ticker, 26, ins.sparkPts || null)}</td>
           <td><span class="sig-badge ${sigCls}">${_exploreSigIcon(ins.icon)}${ins.label}</span></td>
-          <td style="color:var(--green);font-weight:700">${ins.conf}%${ins.isReady ? ' <span style="font-size:0.62rem;opacity:0.85">● READY</span>' : ''}</td>
+          <td style="color:var(--green);font-weight:700;white-space:nowrap">${ins.conf}%${ins.isReady ? ' <span style="font-size:0.62rem;opacity:0.85">●</span>' : ''}</td>
           <td style="font-weight:700">${ins.rr}</td>
+          <td style="color:var(--text2);font-weight:600;white-space:nowrap">${ins.target || '-'}</td>
+          <td><div style="display:flex;gap:4px;flex-wrap:wrap">${tagsHtml}</div></td>
           <td style="text-align:right">${delFn ? `<span class="tile-del" onclick="event.stopPropagation();${delFn}">✕</span>` : ''}</td>
         </tr>`;
       }).join('')}</tbody>
@@ -4745,7 +4816,8 @@ function renderDashboard({ ticker, bars, ind, tech, fund, decision: d, price, is
           </div>`;
           const col = mtfColor(r.sig);
           const sigLbl = r.sig==='bull'?'▲ 매수우위':r.sig==='bear'?'▼ 매도우위':'— 중립';
-          return `<div class="mtf-cell" style="--mtf-accent:${col}">
+          const sigCls = r.sig==='bull'?'is-bull':r.sig==='bear'?'is-bear':'is-neutral';
+          return `<div class="mtf-cell ${sigCls}" style="--mtf-accent:${col}">
             <div class="mtf-tf">${r.tf}</div>
             <div class="mtf-ret" style="color:${r.ret>=0?'var(--up)':'var(--down)'}">${r.ret>=0?'+':''}${r.ret.toFixed(1)}%</div>
             <div class="mtf-ma">가격 ${r.aboveMA>0?'>':'<'} ${r.maLabel}</div>

@@ -114,24 +114,78 @@
     -webkit-backdrop-filter: blur(18px);
   }
   /* ── Explore Layout (Uniswap × Contra) ── */
-  .top-search { flex: 1; max-width: 420px; position: relative; }
-  .top-search .search-input {
-    width: 100%; height: 38px; border-radius: 999px;
-    border: 1px solid var(--border2); background: var(--card);
-    color: var(--text); padding: 0 42px 0 36px; font-size: 0.86rem;
+  /* ── Command Button Search (DesignBookmark) ── */
+  :root {
+    --cb-bg: #1c212e; --cb-bg-hover: #252b3b;
+    --cb-text: rgba(255,255,255,.85); --cb-strong: #fff;
+    --cb-placeholder: rgba(255,255,255,.38); --cb-muted: rgba(255,255,255,.52);
+    --cb-key: rgba(255,255,255,.08); --cb-key-on: rgba(255,255,255,.22);
   }
-  .top-search .s-ico { position: absolute; left: 13px; top: 50%; transform: translateY(-50%); color: var(--muted); font-size: 0.85rem; pointer-events: none; }
-  .top-search .kbd {
-    position: absolute; right: 11px; top: 50%; transform: translateY(-50%);
-    font-size: 0.7rem; color: var(--muted); background: var(--card2);
-    border: 1px solid var(--border); border-radius: 6px; padding: 2px 6px; pointer-events: none;
+  html.light {
+    --cb-bg: #eef1f6; --cb-bg-hover: #e4e8f0;
+    --cb-text: rgba(15,23,42,.82); --cb-strong: #0f172a;
+    --cb-placeholder: rgba(15,23,42,.38); --cb-muted: rgba(15,23,42,.5);
+    --cb-key: rgba(15,23,42,.07); --cb-key-on: rgba(15,23,42,.18);
   }
+  .top-search { position: relative; display: flex; align-items: center; justify-content: flex-end; overflow: visible; }
+  .cmd-pill {
+    position: relative; height: 38px; border-radius: 20px; overflow: hidden;
+    background: var(--cb-bg); color: var(--cb-text);
+    display: flex; align-items: center;
+    transition: background .15s; will-change: width, transform;
+  }
+  .cmd-pill:not(.open):hover { background: var(--cb-bg-hover); }
+  .cmd-btn {
+    height: 38px; padding: 0 10px 0 14px; border: none; background: transparent; color: inherit;
+    font-family: inherit; font-size: 0.84rem; font-weight: 500;
+    display: inline-flex; align-items: center; gap: 10px; white-space: nowrap; cursor: pointer; outline: none;
+    transition: opacity .18s cubic-bezier(.23,1,.32,1), filter .18s cubic-bezier(.23,1,.32,1);
+  }
+  .cmd-keys { display: inline-flex; align-items: center; gap: 4px; }
+  .cmd-kbd {
+    display: inline-flex; align-items: center; justify-content: center;
+    height: 20px; min-width: 20px; padding: 0 6px; border-radius: 6px;
+    background: var(--cb-key); color: var(--cb-muted);
+    font-family: inherit; font-size: 11px; font-weight: 600; line-height: 1;
+    transition: background .15s, color .15s; border: none; cursor: inherit;
+  }
+  .cmd-kbd[data-on="true"] { background: var(--cb-key-on); color: var(--cb-strong); transition-duration: .075s; }
+  .cmd-field {
+    position: absolute; inset: 0; display: flex; align-items: center; gap: 9px;
+    padding: 0 10px 0 13px; opacity: 0; pointer-events: none; filter: blur(4px);
+    transition: opacity .18s cubic-bezier(.23,1,.32,1), filter .18s cubic-bezier(.23,1,.32,1);
+  }
+  .cmd-pill.open .cmd-btn { opacity: 0; pointer-events: none; filter: blur(4px); position: absolute; left: 0; }
+  .cmd-pill.open .cmd-field { opacity: 1; pointer-events: auto; filter: blur(0px); transition-delay: .05s; }
+  .cmd-field .s-ico { color: var(--cb-muted); display: inline-flex; flex-shrink: 0; }
+  .cmd-field #ticker-input.search-input,
+  html.light .cmd-field #ticker-input.search-input,
+  .cmd-field #ticker-input.search-input:focus,
+  html.light .cmd-field #ticker-input.search-input:focus {
+    min-width: 0; flex: 1; height: 100%; border: none !important; border-radius: 0 !important;
+    background: transparent !important; box-shadow: none !important;
+    color: var(--cb-strong); font-family: inherit; font-size: 0.85rem; font-weight: 500;
+    outline: none !important; padding: 0 !important;
+  }
+  .cmd-field #ticker-input.search-input::placeholder,
+  html.light .cmd-field #ticker-input.search-input::placeholder { color: var(--cb-placeholder) !important; }
   .explore-wrap { max-width: 1280px; margin: 0 auto; padding: 24px 24px 0; }
   .page-head {
     display: flex; align-items: flex-end; justify-content: space-between; gap: 16px;
     margin-bottom: 18px; flex-wrap: wrap;
   }
-  .page-head h1 { font-size: 1.7rem; font-weight: 800; letter-spacing: -0.02em; }
+  .page-head h1 { font-size: 1.7rem; font-weight: 800; letter-spacing: -0.02em; line-height: 1.25; }
+  .db-word-roll {
+    display: inline-flex; align-items: center; gap: .26em; white-space: nowrap;
+    cursor: pointer; outline: none; user-select: none; -webkit-user-select: none;
+  }
+  .db-roll-lead { color: var(--muted); }
+  .db-roll-slot {
+    position: relative; display: inline-block; height: 1.25em;
+    color: var(--text); clip-path: inset(0 -.5em);
+  }
+  .db-roll-word { position: absolute; left: 0; top: 0; display: flex; }
+  .db-roll-ch { display: inline-block; white-space: pre; will-change: transform, opacity; }
   .page-head p { font-size: 0.86rem; color: var(--muted); margin-top: 4px; }
   .cmd-controls { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
   .stats-grid {
@@ -156,6 +210,23 @@
     width: 7px; height: 7px; border-radius: 50%;
     will-change: transform; pointer-events: none;
     box-shadow: 0 0 0 2px var(--card);
+  }
+  .db-tile-cw { position: relative; height: 64px; margin: 4px 0 8px; }
+  .db-tile-cw .db-dot { left: 0; top: 0; width: 8px; height: 8px; }
+  .db-seg {
+    position: relative; display: flex; padding: 3px; border-radius: 999px;
+    background: var(--card2); border: 1px solid var(--border); margin-top: 6px;
+  }
+  .db-seg button {
+    position: relative; z-index: 1; flex: 1; padding: 4px 0; border: 0; background: none;
+    cursor: pointer; font: inherit; font-size: 0.68rem; font-weight: 600;
+    color: var(--muted); transition: color .2s;
+  }
+  .db-seg button.on { color: var(--text); }
+  .db-seg-pill {
+    position: absolute; left: 0; top: 3px; bottom: 3px; border-radius: 999px;
+    background: var(--card); box-shadow: 0 1px 3px rgba(0,0,0,.18);
+    will-change: transform, width; pointer-events: none;
   }
   .explore-toolbar {
     display: flex; flex-direction: row; align-items: center; justify-content: space-between;
@@ -186,7 +257,7 @@
   #fav-btn.starred svg { fill: currentColor; }
   .db-morph-bar .sk-ico { margin-right: 0 !important; }
   .db-morph-bar { position: relative; }
-  .db-morph-bar > button { position: relative; z-index: 1; will-change: transform; }
+  .db-morph-bar button { position: relative; z-index: 1; will-change: transform; }
   .db-morph-hl {
     position: absolute; left: 0; top: 0; height: 34px; border-radius: 999px;
     background: rgba(148, 163, 184, 0.16);
@@ -748,16 +819,17 @@
   .tabs-bar {
     margin-top: 16px; background: var(--card); border: 1px solid var(--border);
     border-radius: 14px; padding: 6px; display: flex; align-items: center;
-    justify-content: space-between; gap: 8px; overflow-x: auto;
+    justify-content: space-between; gap: 8px;
   }
-  .tab-group { display: flex; gap: 4px; }
+  .tab-group { display: flex; align-items: center; gap: 7px; }
   .tab-btn {
-    padding: 8px 14px; border-radius: 10px; border: none; background: transparent;
-    color: var(--muted); font-family: inherit; font-size: 0.82rem; font-weight: 600;
-    cursor: pointer; white-space: nowrap; transition: all .15s;
+    width: 40px; height: 34px; padding: 0; border-radius: 999px; border: 1px solid var(--border);
+    background: transparent; color: var(--muted); font-family: inherit;
+    display: inline-flex; align-items: center; justify-content: center;
+    cursor: pointer; transition: color .15s, border-color .15s, background .15s;
   }
-  .tab-btn:hover { color: var(--text); }
-  .tab-btn.active { background: var(--blue); color: #fff; }
+  .tab-btn:hover { color: var(--text); border-color: var(--border2); }
+  .tab-btn.active { background: var(--text); color: var(--bg); border-color: var(--text); }
   .tab-panel { display: none; margin-top: 14px; }
   .tab-panel.active { display: block; }
   .show-all .tab-panel { display: block; }
@@ -1330,12 +1402,24 @@
     </nav>
   </div>
 
-  <div class="top-search search-outer">
-    <span class="s-ico"><svg class="sk-ico" width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="7" cy="7" r="4.5"/><path d="M10.5 10.5L14 14"/></svg></span>
-    <input id="ticker-input" class="search-input" type="text"
-           placeholder="종목명(SK하이닉스) 또는 티커(NVDA) 검색..."
-           autocomplete="off"/>
-    <span class="kbd">/</span>
+  <div class="top-search search-outer" id="cmd-search-root">
+    <div class="cmd-pill" id="cmd-search-pill">
+      <button type="button" class="cmd-btn" id="cmd-search-btn" aria-expanded="false">
+        <span>Search</span>
+        <span class="cmd-keys" aria-hidden="true">
+          <kbd class="cmd-kbd" id="cmd-key-mod">⌘</kbd>
+          <kbd class="cmd-kbd" id="cmd-key-k">K</kbd>
+        </span>
+      </button>
+      <div class="cmd-field" id="cmd-search-field">
+        <span class="s-ico" aria-hidden="true"><svg class="sk-ico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg></span>
+        <input id="ticker-input" class="search-input" type="text"
+               placeholder="종목명 또는 티커 검색..."
+               aria-label="종목 검색"
+               autocomplete="off"/>
+        <button type="button" class="cmd-kbd" id="cmd-esc-btn" title="닫기 (Esc)">Esc</button>
+      </div>
+    </div>
     <div id="ac-list" class="autocomplete-list" style="display:none"></div>
   </div>
 
@@ -1358,7 +1442,10 @@
 <div class="explore-wrap">
   <section class="page-head">
     <div>
-      <h1>Explore Signals &amp; Cases</h1>
+      <h1 id="explore-word-roll" class="db-word-roll" role="button" tabindex="0" aria-label="Explore Signals & Cases">
+        <span class="db-roll-lead" aria-hidden="true">Explore</span>
+        <span class="db-roll-slot" id="explore-roll-slot" aria-hidden="true"></span>
+      </h1>
       <p>종목을 선택하면 피드가 컴팩트하게 정리되고, 바로 아래에 실시간 퀀트 분석이 펼쳐집니다.</p>
     </div>
     <div class="cmd-controls">
@@ -2561,7 +2648,81 @@ function attachMorphTooltipBar(bar, btnSelector = 'button') {
 }
 
 if (typeof document !== 'undefined') {
-  const _bindExploreMorph = () => attachMorphTooltipBar(document.getElementById('explore-filter-pills'), '.f-pill');
+  const _bindExploreMorph = () => {
+    attachMorphTooltipBar(document.getElementById('explore-filter-pills'), '.f-pill');
+    const roll = document.getElementById('explore-word-roll');
+    const slot = document.getElementById('explore-roll-slot');
+    if (roll && slot && !roll.dataset.rollBound) {
+      roll.dataset.rollBound = '1';
+      const { S, step, clamp, after, cancel, register } = window.Motion;
+      const WORDS = ['Signals & Cases', 'Quant Insights', 'Alpha Setups', 'Dip Entries'];
+      const width = S(0, 320, 30);
+      let live = [], idx = 0, timer = null;
+
+      function makeWord(word) {
+        const el = document.createElement('span');
+        el.className = 'db-roll-word';
+        const letters = [...word].map(ch => {
+          const l = document.createElement('span');
+          l.className = 'db-roll-ch';
+          l.textContent = ch;
+          el.appendChild(l);
+          return { el: l, s: S(1, 420, 26) };
+        });
+        slot.appendChild(el);
+        return { el, letters, out: false };
+      }
+
+      function showWord(word, first) {
+        live.forEach(w => {
+          if (w.out) return;
+          w.out = true;
+          w.letters.forEach((l, k) => after(k * 0.022, () => { l.s.t = -1; }));
+          after(1, () => { w.el.remove(); live = live.filter(x => x !== w); });
+        });
+        const w = makeWord(word);
+        w.letters.forEach((l, k) => {
+          if (first) l.s.x = l.s.t = 0;
+          else after(0.06 + k * 0.028, () => { l.s.t = 0; });
+        });
+        live.push(w);
+        width.t = w.el.offsetWidth;
+        if (first) width.x = width.t;
+        roll.setAttribute('aria-label', `Explore ${word}`);
+      }
+
+      function schedule() { if (timer) cancel(timer); timer = after(2.4, nextWord); }
+      function nextWord() { idx = (idx + 1) % WORDS.length; showWord(WORDS[idx], false); schedule(); }
+
+      roll.addEventListener('click', nextWord);
+      roll.addEventListener('keydown', e => {
+        if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); nextWord(); }
+      });
+      showWord(WORDS[0], true);
+      schedule();
+      if (document.fonts) {
+        document.fonts.ready.then(() => {
+          const w = live[live.length - 1];
+          if (w) width.t = w.el.offsetWidth;
+        });
+      }
+
+      register({
+        frame(dt) {
+          step(width, dt);
+          live.forEach(w => w.letters.forEach(l => step(l.s, dt)));
+        },
+        render() {
+          slot.style.width = width.x.toFixed(2) + 'px';
+          live.forEach(w => w.letters.forEach(l => {
+            const y = l.s.x;
+            l.el.style.transform = `translateY(${(y * 105).toFixed(2)}%)`;
+            l.el.style.opacity = clamp(1 - Math.abs(y) * 0.9, 0, 1).toFixed(3);
+          }));
+        }
+      });
+    }
+  };
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', _bindExploreMorph);
   else _bindExploreMorph();
 }
@@ -2614,6 +2775,144 @@ function mountSpringSpark(el, normPts, color) {
       fill.setAttribute('d', `${d} L${xy[n - 1][0].toFixed(2)} ${H} L${xy[0][0].toFixed(2)} ${H} Z`);
       const [lx, ly] = xy[n - 1];
       dot.style.transform = `translate(${(lx - 3.5).toFixed(2)}px,${(ly - 3.5).toFixed(2)}px)`;
+    }
+  });
+}
+
+function _buildTileStatRanges(ticker, ins) {
+  let h = 0;
+  for (let i = 0; i < ticker.length; i++) h = (h * 31 + ticker.charCodeAt(i)) % 997;
+  const parsePct = s => { const n = parseFloat(String(s || '').replace(/[^0-9.\-]/g, '')); return Number.isFinite(n) ? n : 1.2; };
+  const basePct = parsePct(ins.chg);
+  const mkPts = (seed, trend) => Array.from({ length: 12 }, (_, i) => {
+    const t = i / 11;
+    const wave = Math.sin(seed * 0.13 + i * 0.95) * 0.14 + Math.cos(seed * 0.07 + i * 1.6) * 0.08;
+    const base = trend >= 0 ? (0.22 + t * 0.62) : (0.78 - t * 0.54);
+    return Math.max(0.08, Math.min(0.94, base + wave));
+  });
+  let weekPts;
+  if (Array.isArray(ins.sparkPts) && ins.sparkPts.length >= 4) {
+    const mn = Math.min(...ins.sparkPts), mx = Math.max(...ins.sparkPts), sp = mx - mn || 1;
+    const raw = ins.sparkPts.map(v => 0.1 + ((v - mn) / sp) * 0.8);
+    weekPts = Array.from({ length: 12 }, (_, i) => raw[Math.min(raw.length - 1, Math.round(i / 11 * (raw.length - 1)))]);
+  } else {
+    weekPts = mkPts(h + 7, basePct);
+  }
+  const mMult = 2.1 + (h % 14) * 0.15;
+  const yMult = 4.5 + (h % 25) * 0.35;
+  const mPct = +(basePct * mMult + ((h % 7) - 3) * 0.4).toFixed(2);
+  const yPct = +(Math.abs(basePct) * yMult * (ins.signal === 'sell' ? -0.4 : 1) + ((h % 11) - 4) * 1.1).toFixed(2);
+  return [
+    { d: basePct, pts: weekPts },
+    { d: mPct,    pts: mkPts(h + 43, mPct) },
+    { d: yPct,    pts: mkPts(h + 97, yPct) }
+  ];
+}
+
+function mountTileStatCard(tile, ranges) {
+  if (!tile || tile.dataset.statBound) return;
+  tile.dataset.statBound = '1';
+  const cw = tile.querySelector('.db-tile-cw');
+  const seg = tile.querySelector('.db-seg');
+  const chgEl = tile.querySelector('.db-tile-chg');
+  if (!cw || !seg) return;
+
+  const uid = ++_favSparkUid;
+  const gid = 'db_tile_area_' + uid;
+  cw.innerHTML = `<svg class="db-chart" aria-hidden="true">
+    <defs><linearGradient id="${gid}" x1="0" y1="0" x2="0" y2="1">
+      <stop class="db-g0" offset="0%" stop-color="var(--up)" stop-opacity=".30"/>
+      <stop class="db-g1" offset="100%" stop-color="var(--up)" stop-opacity="0"/>
+    </linearGradient></defs>
+    <path class="db-fill" fill="url(#${gid})"/>
+    <path class="db-line" fill="none" stroke="var(--up)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+  </svg><span class="db-dot"></span>`;
+
+  const svg = cw.querySelector('.db-chart');
+  const line = cw.querySelector('.db-line');
+  const fill = cw.querySelector('.db-fill');
+  const dot = cw.querySelector('.db-dot');
+  const g0 = cw.querySelector('.db-g0');
+  const g1 = cw.querySelector('.db-g1');
+  const pill = seg.querySelector('.db-seg-pill');
+  const btns = [...seg.querySelectorAll('button')];
+
+  const { S, step, clamp, after, register } = window.Motion;
+  const pts = ranges[0].pts.map(() => S(0, 200, 17));
+  const dv = S(ranges[0].d, 160, 22);
+  const px = S(0, 380, 30), pw = S(0, 380, 30);
+  let r = 0;
+
+  function applyColor(isUp) {
+    const col = isUp ? 'var(--up)' : 'var(--down)';
+    line.setAttribute('stroke', col);
+    dot.style.background = col;
+    g0.setAttribute('stop-color', col);
+    g1.setAttribute('stop-color', col);
+    if (chgEl) {
+      chgEl.classList.toggle('up', isUp);
+      chgEl.classList.toggle('down', !isUp);
+    }
+  }
+
+  function pick(i, instant = false) {
+    r = i;
+    btns.forEach((b, k) => b.classList.toggle('on', k === i));
+    const b = btns[i];
+    if (b && b.offsetWidth) {
+      px.t = b.offsetLeft; pw.t = b.offsetWidth;
+      if (instant || !pw.x) { px.x = px.t; pw.x = pw.t; }
+    }
+    dv.t = ranges[i].d;
+    applyColor(ranges[i].d >= 0);
+    if (instant) {
+      dv.x = dv.t;
+      pts.forEach((p, k) => after(k * 0.025, () => { if (r === i) p.t = ranges[i].pts[k]; }));
+    } else {
+      pts.forEach((p, k) => after(k * 0.03, () => { if (r === i) p.t = ranges[i].pts[k]; }));
+    }
+  }
+
+  btns.forEach((b, i) => {
+    b.addEventListener('click', e => {
+      e.stopPropagation();
+      pick(i, false);
+    });
+  });
+  pick(0, true);
+  requestAnimationFrame(() => {
+    const b = btns[r];
+    if (b && b.offsetWidth && !pw.x) { px.x = px.t = b.offsetLeft; pw.x = pw.t = b.offsetWidth; }
+  });
+
+  register({
+    frame(dt) {
+      if (!tile.isConnected) return;
+      pts.forEach(p => step(p, dt));
+      step(dv, dt); step(px, dt); step(pw, dt);
+    },
+    render() {
+      if (!tile.isConnected) return;
+      const W = svg.clientWidth || 220, H = 64, n = pts.length;
+      if (svg.getAttribute('viewBox') !== `0 0 ${W} ${H}`) svg.setAttribute('viewBox', `0 0 ${W} ${H}`);
+      const xy = pts.map((p, i) => [4 + i / (n - 1) * (W - 8), 7 + (1 - clamp(p.x, -0.05, 1.05)) * (H - 14)]);
+      let d = `M${xy[0][0].toFixed(2)} ${xy[0][1].toFixed(2)}`;
+      for (let i = 0; i < n - 1; i++) {
+        const p0 = xy[i - 1] || xy[i], p1 = xy[i], p2 = xy[i + 1], p3 = xy[i + 2] || p2;
+        d += ` C${(p1[0] + (p2[0] - p0[0]) / 6).toFixed(2)} ${(p1[1] + (p2[1] - p0[1]) / 6).toFixed(2)} ${(p2[0] - (p3[0] - p1[0]) / 6).toFixed(2)} ${(p2[1] - (p3[1] - p1[1]) / 6).toFixed(2)} ${p2[0].toFixed(2)} ${p2[1].toFixed(2)}`;
+      }
+      line.setAttribute('d', d);
+      fill.setAttribute('d', `${d} L${xy[n - 1][0].toFixed(2)} ${H} L${xy[0][0].toFixed(2)} ${H} Z`);
+      const [lx, ly] = xy[n - 1];
+      dot.style.transform = `translate(${(lx - 4).toFixed(2)}px,${(ly - 4).toFixed(2)}px)`;
+      if (chgEl) {
+        const v = dv.x;
+        chgEl.textContent = `${v >= 0 ? '+' : ''}${v.toFixed(2)}%`;
+      }
+      if (pill && pw.x > 0) {
+        pill.style.transform = `translateX(${px.x.toFixed(2)}px)`;
+        pill.style.width = `${pw.x.toFixed(2)}px`;
+      }
     }
   });
 }
@@ -2899,14 +3198,14 @@ function renderFavs() {
     return;
   }
 
-  const tileHtml = ({ item, isUs, flag, isHist, preset, ins }) => {
+  const tileHtml = ({ item, isUs, flag, isHist, preset, ins }, idx) => {
     const { displayName, subLine } = resolveInfo(item, isUs);
     const delFn = isHist ? `removeHistory('${item.ticker}')` : (preset ? '' : `removeFav('${item.ticker}')`);
     const sigCls = ins.signal === 'buy' ? 'sig-buy' : ins.signal === 'sell' ? 'sig-sell' : 'sig-hold';
     return `
-    <div class="fav-tile" onclick="selectFavStock('${item.ticker}')">
-      <div class="fav-spark-wrap" style="height:auto;padding:12px 14px 8px">
-        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
+    <div class="fav-tile" data-stat-idx="${idx}" onclick="selectFavStock('${item.ticker}')">
+      <div class="fav-spark-wrap" style="height:auto;padding:12px 14px 10px">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px">
           <span class="sig-badge ${sigCls}">${_exploreSigIcon(ins.icon)}${ins.label}</span>
           <span style="display:inline-flex;align-items:center;gap:6px">
             ${ins.isReady ? '<span style="font-size:0.64rem;font-weight:800;color:var(--green);background:rgba(0,212,170,0.12);padding:2px 7px;border-radius:999px">● READY</span>' : ''}
@@ -2914,12 +3213,18 @@ function renderFavs() {
             ${delFn ? `<span class="tile-del" onclick="event.stopPropagation();${delFn}">✕</span>` : ''}
           </span>
         </div>
-        ${_favSparkSvg(item.ticker, 42, ins.sparkPts || null)}
+        <div class="db-tile-cw"></div>
+        <div class="db-seg" onclick="event.stopPropagation()">
+          <span class="db-seg-pill"></span>
+          <button type="button" data-r="0" class="on">Week</button>
+          <button type="button" data-r="1">Month</button>
+          <button type="button" data-r="2">Year</button>
+        </div>
       </div>
       <div class="case-body">
         <div style="display:flex;align-items:baseline;justify-content:space-between;gap:8px">
           <div style="font-size:0.98rem;font-weight:800;color:var(--text)">${flag} ${displayName}</div>
-          <div class="${ins.isUp ? 'up' : 'down'}" style="font-size:0.86rem;font-weight:700">${ins.chg}</div>
+          <div class="db-tile-chg ${ins.isUp ? 'up' : 'down'}" style="font-size:0.86rem;font-weight:700">${ins.chg}</div>
         </div>
         <div style="font-size:0.74rem;color:var(--muted);margin-top:2px">${subLine}${ins.price ? ' · ' + ins.price : ''}</div>
         <p class="case-thesis">${ins.thesis}</p>
@@ -2933,6 +3238,10 @@ function renderFavs() {
   };
 
   body.innerHTML = `<div class="fav-tiles">${enriched.map(tileHtml).join('')}</div>`;
+  body.querySelectorAll('.fav-tile[data-stat-idx]').forEach(tile => {
+    const entry = enriched[Number(tile.dataset.statIdx)];
+    if (entry) mountTileStatCard(tile, _buildTileStatRanges(entry.item.ticker, entry.ins));
+  });
 }
 
 // ══════════════════════════════════════════════════════
@@ -3113,12 +3422,106 @@ function selectFavStock(ticker) {
   }, 120);
 }
 
-document.addEventListener('keydown', e => {
-  if (e.key === '/' && !['INPUT', 'TEXTAREA', 'SELECT'].includes(document.activeElement?.tagName)) {
-    e.preventDefault();
-    document.getElementById('ticker-input')?.focus();
-  }
-});
+// Command Button Search (DesignBookmark)
+(() => {
+  const root = document.getElementById('cmd-search-root');
+  const pill = document.getElementById('cmd-search-pill');
+  const btn = document.getElementById('cmd-search-btn');
+  const input = document.getElementById('ticker-input');
+  const escBtn = document.getElementById('cmd-esc-btn');
+  const kMod = document.getElementById('cmd-key-mod');
+  const kKey = document.getElementById('cmd-key-k');
+  if (!root || !pill || !btn || !input || !window.Motion) return;
+
+  const isMac = /mac|iphone|ipad|ipod/i.test(navigator.userAgentData?.platform ?? navigator.platform ?? '');
+  if (kMod) kMod.textContent = isMac ? '⌘' : 'Ctrl';
+
+  const { S, step, register } = window.Motion;
+  const closedW = () => Math.max(118, Math.ceil(btn.offsetWidth) || 128);
+  const openW = () => Math.min(360, Math.max(240, window.innerWidth - 40));
+  const wS = S(closedW(), 300, 28);
+  const scS = S(1, 520, 34);
+  let isOpen = false;
+
+  const setOpen = (next, focusInput = false, clear = false) => {
+    if (isOpen === next) return;
+    isOpen = next;
+    pill.classList.toggle('open', next);
+    btn.setAttribute('aria-expanded', next ? 'true' : 'false');
+    wS.t = next ? openW() : closedW();
+    if (next) {
+      if (focusInput) setTimeout(() => input.focus({ preventScroll: true }), 40);
+    } else {
+      if (clear) input.value = '';
+      if (typeof hideAC === 'function') hideAC();
+      input.blur();
+    }
+  };
+  window.openCmdSearch = () => setOpen(true, true);
+
+  btn.addEventListener('pointerdown', () => { if (!isOpen) scS.t = 0.97; });
+  btn.addEventListener('pointerup', () => { scS.t = 1; });
+  btn.addEventListener('pointerleave', () => { scS.t = 1; });
+  btn.addEventListener('click', () => setOpen(true, true));
+  escBtn?.addEventListener('click', () => setOpen(false, false, true));
+
+  input.addEventListener('blur', () => {
+    setTimeout(() => {
+      if (isOpen && !input.value.trim() && !root.contains(document.activeElement)) {
+        setOpen(false, false, false);
+      }
+    }, 120);
+  });
+  input.addEventListener('keydown', e => {
+    if (e.key === 'Escape') {
+      const list = document.getElementById('ac-list');
+      if (list && list.style.display !== 'none') return;
+      e.preventDefault();
+      setOpen(false, false, true);
+    }
+  });
+
+  document.addEventListener('pointerdown', e => {
+    if (isOpen && !root.contains(e.target)) setOpen(false, false, false);
+  });
+
+  const isTypingTarget = t => t instanceof HTMLElement && (t.isContentEditable || /^(INPUT|TEXTAREA|SELECT)$/.test(t.tagName));
+  window.addEventListener('keydown', e => {
+    const modDown = isMac ? e.metaKey : e.ctrlKey;
+    const kDown = e.key.toLowerCase() === 'k' || e.code === 'KeyK';
+    if (!isOpen) {
+      if (kMod) kMod.dataset.on = modDown ? 'true' : '';
+      if (kKey) kKey.dataset.on = kDown ? 'true' : '';
+      scS.t = (modDown || kDown) ? 0.97 : 1;
+    }
+    if (!e.repeat && modDown && kDown) {
+      e.preventDefault();
+      setOpen(!isOpen, !isOpen, false);
+      return;
+    }
+    if (!isOpen && e.key === '/' && !isTypingTarget(e.target)) {
+      e.preventDefault();
+      setOpen(true, true);
+    }
+  });
+  const resetKeys = e => {
+    const modDown = e ? (isMac ? e.metaKey : e.ctrlKey) : false;
+    const kDown = e ? (e.key?.toLowerCase() === 'k' || e.code === 'KeyK') && e.type === 'keydown' : false;
+    if (kMod) kMod.dataset.on = modDown ? 'true' : '';
+    if (kKey) kKey.dataset.on = kDown ? 'true' : '';
+    if (!modDown && !kDown) scS.t = 1;
+  };
+  window.addEventListener('keyup', resetKeys);
+  window.addEventListener('blur', () => resetKeys(null));
+
+  register({
+    frame(dt) { step(wS, dt); step(scS, dt); },
+    render() {
+      pill.style.width = `${Math.max(96, wS.x).toFixed(2)}px`;
+      pill.style.transform = Math.abs(scS.x - 1) > 0.001 ? `scale(${scS.x.toFixed(4)})` : '';
+    }
+  });
+})();
 
 // 분석 결과의 즐겨찾기 버튼 상태 업데이트
 function updateFavBtn(ticker) {
@@ -5056,14 +5459,14 @@ function renderDashboard({ ticker, bars, ind, tech, fund, decision: d, price, is
 
   <!-- ═══ 결과 탭 바 (ux-fusion-sample 동일) ═══ -->
   <div class="tabs-bar">
-    <div class="tab-group">
-      <button class="tab-btn active" onclick="switchDashTab('summary', this)">${skIcon('bar', 13)}요약 · 추세</button>
-      <button class="tab-btn" onclick="switchDashTab('signals', this)">${skIcon('cpu', 13)}고급 시그널 (7L)</button>
-      <button class="tab-btn" onclick="switchDashTab('charts', this)">${skIcon('chart', 13)}차트 · 패턴</button>
-      <button class="tab-btn" onclick="switchDashTab('valuation', this)">${skIcon('compass', 13)}밸류에이션 · WACC</button>
-      <button class="tab-btn" onclick="switchDashTab('graph', this)">${skIcon('graph', 13)}Knowledge Graph</button>
+    <div class="tab-group" id="dash-tab-group">
+      <button class="tab-btn active" aria-label="요약 · 추세" data-morph-tip="요약 · 추세" onclick="switchDashTab('summary', this)">${skIcon('bar', 15)}</button>
+      <button class="tab-btn" aria-label="고급 시그널 (7L)" data-morph-tip="고급 시그널 (7L)" onclick="switchDashTab('signals', this)">${skIcon('cpu', 15)}</button>
+      <button class="tab-btn" aria-label="차트 · 패턴" data-morph-tip="차트 · 패턴" onclick="switchDashTab('charts', this)">${skIcon('chart', 15)}</button>
+      <button class="tab-btn" aria-label="밸류에이션 · WACC" data-morph-tip="밸류에이션 · WACC" onclick="switchDashTab('valuation', this)">${skIcon('compass', 15)}</button>
+      <button class="tab-btn" aria-label="Knowledge Graph" data-morph-tip="Knowledge Graph" onclick="switchDashTab('graph', this)">${skIcon('graph', 15)}</button>
     </div>
-    <button class="btn-pill-sm" id="dash-expand-btn" onclick="toggleDashShowAll()">전체 펼치기</button>
+    <button class="btn-pill-sm icon-pill" id="dash-expand-btn" aria-label="전체 펼치기" data-morph-tip="전체 펼치기" onclick="toggleDashShowAll()"><svg class="sk-ico" role="img" aria-label="전체 펼치기" width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><title>전체 펼치기</title><path d="M9.5 2.5h4v4M13.5 2.5l-4.2 4.2M6.5 13.5h-4v-4M2.5 13.5l4.2-4.2"/></svg></button>
   </div>
 
   <div id="panels-wrap" class="show-all">
@@ -5495,11 +5898,17 @@ function renderDashboard({ ticker, bars, ind, tech, fund, decision: d, price, is
   </div><!-- /#panels-wrap -->
   `;
 
+  const _EXP_ICO = '<svg class="sk-ico" role="img" aria-label="전체 펼치기" width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><title>전체 펼치기</title><path d="M9.5 2.5h4v4M13.5 2.5l-4.2 4.2M6.5 13.5h-4v-4M2.5 13.5l4.2-4.2"/></svg>';
+  const _COL_ICO = '<svg class="sk-ico" role="img" aria-label="탭으로 보기" width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><title>탭으로 보기</title><path d="M13.5 6.5h-4v-4M9.5 6.5l4.2-4.2M2.5 9.5h4v4M6.5 9.5l-4.2 4.2"/></svg>';
   window.switchDashTab = function(id, btn) {
     const wrap = document.getElementById('panels-wrap');
     if (wrap) wrap.classList.remove('show-all');
     const eb = document.getElementById('dash-expand-btn');
-    if (eb) eb.textContent = '전체 펼치기';
+    if (eb) {
+      eb.classList.remove('active');
+      eb.innerHTML = _EXP_ICO;
+      eb.dataset.morphTip = '전체 펼치기'; eb.setAttribute('aria-label', '전체 펼치기');
+    }
     document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
     if (btn) btn.classList.add('active');
     else document.querySelector(`.tab-btn[onclick*="'${id}'"]`)?.classList.add('active');
@@ -5515,7 +5924,12 @@ function renderDashboard({ ticker, bars, ind, tech, fund, decision: d, price, is
     if (!wrap) return;
     const on = wrap.classList.toggle('show-all');
     const eb = document.getElementById('dash-expand-btn');
-    if (eb) eb.textContent = on ? '탭으로 보기' : '전체 펼치기';
+    if (eb) {
+      eb.classList.toggle('active', on);
+      eb.innerHTML = on ? _COL_ICO : _EXP_ICO;
+      const lbl = on ? '탭으로 보기' : '전체 펼치기';
+      eb.dataset.morphTip = lbl; eb.setAttribute('aria-label', lbl);
+    }
     if (on) {
       [priceChart, rsiChart, macdChart].forEach(c => c?.resize());
       if (typeof _kgLastArgs !== 'undefined' && _kgLastArgs) {
@@ -5543,6 +5957,7 @@ function renderDashboard({ ticker, bars, ind, tech, fund, decision: d, price, is
     if (_favBtn) _favBtn.onclick = () =>
       toggleFavFromResult(ticker, companyName || ticker, isKr ? '' : guessExchange(ticker));
     attachMorphTooltipBar(document.getElementById('detail-action-pills'), '.btn-pill-sm');
+    attachMorphTooltipBar(document.querySelector('#dashboard .tabs-bar'), 'button');
   }
 
   // Uniswap-style 실시간 SVG 차트 바인딩

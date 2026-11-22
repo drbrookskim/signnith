@@ -41,7 +41,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <meta name="apple-mobile-web-app-title" content="EquiSense" />
         <meta name="apple-mobile-web-app-status-bar-style" content="default" />
         {/* no-flash: JSON.parse handles both raw 'dark' and JSON-encoded '"dark"' */}
-        <script dangerouslySetInnerHTML={{ __html: `try{var _t=localStorage.getItem('eq-theme');try{_t=JSON.parse(_t)}catch(e){}if(_t==='dark'){var r=document.documentElement;r.setAttribute('data-theme','dark');r.classList.add('dark');}}catch(e){}` }} />
+        <script dangerouslySetInnerHTML={{ __html: `try{var _qt=new URLSearchParams(location.search).get('theme');if(_qt==='dark'||_qt==='light'){try{localStorage.setItem('eq-theme',JSON.stringify(_qt));}catch(e){}}var _t=_qt||localStorage.getItem('eq-theme');try{_t=JSON.parse(_t)}catch(e){}var r=document.documentElement;if(_t==='dark'){r.setAttribute('data-theme','dark');r.classList.add('dark');}else if(_t==='light'){r.setAttribute('data-theme','light');r.classList.remove('dark');}}catch(e){}` }} />
         {/* Google Analytics */}
         <script async src="https://www.googletagmanager.com/gtag/js?id=G-KJQ91WEN93" />
         <script dangerouslySetInnerHTML={{ __html: `window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','G-KJQ91WEN93');` }} />

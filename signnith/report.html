@@ -2119,7 +2119,9 @@ function applyThemeR(theme) {
   const isLight = theme === 'light' || (theme === 'system' && window.matchMedia('(prefers-color-scheme: light)').matches);
   document.documentElement.classList.toggle('light', isLight);
 }
-applyThemeR(localStorage.getItem(THEME_KEY) || 'dark');
+const _qThemeR = new URLSearchParams(location.search).get('theme');
+if (_qThemeR === 'light' || _qThemeR === 'dark') { try { localStorage.setItem(THEME_KEY, _qThemeR); } catch {} }
+applyThemeR(_qThemeR || localStorage.getItem(THEME_KEY) || 'dark');
 
 // ══════════════════════════════════════════════════════
 // ══════════════════════════════════════════════════════

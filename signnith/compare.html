@@ -381,7 +381,9 @@
 <script>
 // ── 테마 (index.html과 동일한 tsa_theme 키, system 지원) ──
 (function() {
-  const theme = localStorage.getItem('tsa_theme') || 'dark';
+  const qTheme = new URLSearchParams(location.search).get('theme');
+  if (qTheme === 'light' || qTheme === 'dark') { try { localStorage.setItem('tsa_theme', qTheme); } catch {} }
+  const theme = qTheme || localStorage.getItem('tsa_theme') || 'dark';
   const resolved = theme === 'system'
     ? (window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark')
     : theme;

@@ -1273,7 +1273,7 @@
     <nav class="topbar-nav" aria-label="주 메뉴">
       <button class="topbar-nav-btn active" onclick="window.scrollTo({top:0,behavior:'smooth'})" data-tip="Explore" title="Explore" aria-label="Explore" style="display:inline-flex;align-items:center;justify-content:center;padding:6px 10px"><svg class="sk-ico" role="img" aria-label="Explore" width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><title>Explore</title><circle cx="8" cy="8" r="5.5"/><path d="M10.2 5.8l-1.4 3.4-3.4 1.4 1.4-3.4z"/></svg></button>
       <button class="topbar-nav-btn" onclick="openArchive()" data-tip="아카이브" title="아카이브" aria-label="아카이브" style="display:inline-flex;align-items:center;justify-content:center;padding:6px 10px"><svg class="sk-ico" role="img" aria-label="아카이브" width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><title>아카이브</title><rect x="2" y="3" width="12" height="3" rx="1"/><path d="M3 6v7a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1V6"/><path d="M6.5 9.5h3"/></svg></button>
-      <button class="topbar-nav-btn" onclick="location.href='compare.html'" data-tip="종목 비교" title="종목 비교" aria-label="종목 비교" style="display:inline-flex;align-items:center;justify-content:center;padding:6px 10px"><svg class="sk-ico" role="img" aria-label="종목 비교" width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><title>종목 비교</title><rect x="2" y="3" width="5" height="10" rx="1"/><rect x="9" y="3" width="5" height="10" rx="1"/></svg></button>
+      <button class="topbar-nav-btn" onclick="location.href='compare.html?theme='+getResolvedTheme()" data-tip="종목 비교" title="종목 비교" aria-label="종목 비교" style="display:inline-flex;align-items:center;justify-content:center;padding:6px 10px"><svg class="sk-ico" role="img" aria-label="종목 비교" width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><title>종목 비교</title><rect x="2" y="3" width="5" height="10" rx="1"/><rect x="9" y="3" width="5" height="10" rx="1"/></svg></button>
     </nav>
   </div>
 
@@ -4657,6 +4657,7 @@ function renderDashboard({ ticker, bars, ind, tech, fund, decision: d, price, is
       <button id="fav-btn" class="btn-pill-sm${isFaved(ticker)?' starred':''}">${isFaved(ticker) ? `${skIcon('star', 13)}즐겨찾기됨` : `${skIcon('star', 13)}즐겨찾기`}</button>
       <button class="btn-pill-sm" id="report-btn" onclick="openReport('${ticker}')">${skIcon('doc', 13)}리포트</button>
       <button class="btn-pill-sm" id="newsfinder-btn" onclick="openNewsFinder()">${skIcon('news', 13)}뉴스</button>
+      <button class="btn-pill-sm" id="equisense-btn" onclick="openEquiSense()">${skIcon('bulb', 13)}EquiSense</button>
       <button class="btn-pill-sm" id="buythedip-btn" onclick="openBuyTheDip()">${skIcon('chart', 13)}BuyTheDip</button>
       <button class="btn-pill-sm" id="chartdeepdive-btn" onclick="openChartDeepDive()">${skIcon('compass', 13)}ChartDeepDive</button>
       <button class="btn-pill-sm" onclick="closeDetailDash()">✕ 닫기</button>
@@ -7261,18 +7262,20 @@ function showAuthView(view) {
 
 function openArchive() {
   if (isLoggedIn()) {
-    window.open('archive.html', '_blank');
+    window.open(`archive.html?theme=${getResolvedTheme()}`, '_blank');
   } else {
-    const modal = document.getElementById('auth-modal');
-    modal.style.display = 'flex';
-    showAuthView('login');
-    setTimeout(() => document.getElementById('auth-email')?.focus(), 100);
+    openAuthModal();
   }
 }
 
 function closeAuthModal() {
   document.getElementById('auth-modal').style.display = 'none';
   updateTopbarUser();
+  if (isLoggedIn() && typeof window._pendingAuthAction === 'function') {
+    const fn = window._pendingAuthAction;
+    window._pendingAuthAction = null;
+    fn();
+  }
 }
 
 async function authLogout() {
@@ -7381,6 +7384,19 @@ function archiveSaveReport(payload) {
   localStorage.setItem(key, JSON.stringify(list));
 }
 
+function getResolvedTheme() {
+  return document.documentElement.classList.contains('light') ? 'light' : 'dark';
+}
+
+function _requireLoginForExternal(fn) {
+  if (isLoggedIn()) {
+    fn();
+    return;
+  }
+  window._pendingAuthAction = fn;
+  openAuthModal();
+}
+
 function openReport(explicitTicker) {
   const raw    = document.getElementById('ticker-input')?.value.trim() || '';
   const period = document.getElementById('period-select')?.value || sessionStorage.getItem('last_period') || '6mo';
@@ -7390,7 +7406,7 @@ function openReport(explicitTicker) {
   const inputTicker = raw ? (parenMatch ? parenMatch[1] : raw).toUpperCase() : '';
   const ticker = (explicitTicker || lastTicker || inputTicker).trim();
   if (!ticker) { alert('먼저 종목을 선택하거나 티커를 입력하세요.'); return; }
-  const url = `report.html?ticker=${encodeURIComponent(ticker)}&period=${encodeURIComponent(period)}&style=${encodeURIComponent(style)}`;
+  const url = `report.html?ticker=${encodeURIComponent(ticker)}&period=${encodeURIComponent(period)}&style=${encodeURIComponent(style)}&theme=${getResolvedTheme()}`;
   window.open(url, '_blank');
 }
 
@@ -7402,36 +7418,62 @@ function openNewsFinder() {
   const inputTicker = raw ? (parenMatch ? parenMatch[1] : raw).toUpperCase() : '';
   const query = lastName || lastTicker || inputTicker;
   const base = 'https://drbrookskim.github.io/newsfinder/';
-  window.open(query ? `${base}?ticker=${encodeURIComponent(query)}` : base, '_blank');
-}
-
-function openBuyTheDip() {
-  const lastTicker = sessionStorage.getItem('last_ticker') || '';
-  const lastName   = sessionStorage.getItem('last_name') || '';
-  const raw = document.getElementById('ticker-input')?.value.trim() || '';
-  const parenMatch = raw.match(/\(([A-Z0-9]+(?:\.[A-Z]{1,3})?)\)\s*$/i);
-  const inputTicker = raw ? (parenMatch ? parenMatch[1] : raw).toUpperCase() : '';
-  const ticker = lastTicker || inputTicker;
-  const base = 'https://drbrookskim.github.io/buythedip/';
-  if (!ticker) { window.open(base, '_blank'); return; }
-  const params = new URLSearchParams({ ticker });
-  if (lastName && lastName !== ticker) params.set('name', lastName);
+  const params = new URLSearchParams({ theme: getResolvedTheme() });
+  if (query) params.set('ticker', query);
   window.open(`${base}?${params.toString()}`, '_blank');
 }
 
+function openEquiSense() {
+  _requireLoginForExternal(() => {
+    const lastTicker = sessionStorage.getItem('last_ticker') || '';
+    const lastName   = sessionStorage.getItem('last_name') || '';
+    const raw = document.getElementById('ticker-input')?.value.trim() || '';
+    const parenMatch = raw.match(/\(([A-Z0-9]+(?:\.[A-Z]{1,3})?)\)\s*$/i);
+    const inputTicker = raw ? (parenMatch ? parenMatch[1] : raw).toUpperCase() : '';
+    const ticker = lastTicker || inputTicker;
+    const theme = getResolvedTheme();
+    const base = 'https://drbrookskim.github.io/equisense/';
+    if (!ticker) { window.open(`${base}?theme=${theme}`, '_blank'); return; }
+    const market = /\.(KS|KQ)$/i.test(ticker) ? 'KR' : 'US';
+    const params = new URLSearchParams({ ticker, market, theme });
+    if (lastName && lastName !== ticker) params.set('name', lastName);
+    window.open(`${base}companies/_/fundamentals?${params.toString()}`, '_blank');
+  });
+}
+
+function openBuyTheDip() {
+  _requireLoginForExternal(() => {
+    const lastTicker = sessionStorage.getItem('last_ticker') || '';
+    const lastName   = sessionStorage.getItem('last_name') || '';
+    const raw = document.getElementById('ticker-input')?.value.trim() || '';
+    const parenMatch = raw.match(/\(([A-Z0-9]+(?:\.[A-Z]{1,3})?)\)\s*$/i);
+    const inputTicker = raw ? (parenMatch ? parenMatch[1] : raw).toUpperCase() : '';
+    const ticker = lastTicker || inputTicker;
+    const theme = getResolvedTheme();
+    const base = 'https://drbrookskim.github.io/buythedip/';
+    const params = new URLSearchParams({ theme });
+    if (ticker) params.set('ticker', ticker);
+    if (lastName && lastName !== ticker) params.set('name', lastName);
+    window.open(`${base}?${params.toString()}`, '_blank');
+  });
+}
+
 function openChartDeepDive() {
-  const lastTicker = sessionStorage.getItem('last_ticker') || '';
-  const lastName   = sessionStorage.getItem('last_name') || '';
-  const raw = document.getElementById('ticker-input')?.value.trim() || '';
-  const parenMatch = raw.match(/\(([A-Z0-9]+(?:\.[A-Z]{1,3})?)\)\s*$/i);
-  const inputTicker = raw ? (parenMatch ? parenMatch[1] : raw).toUpperCase() : '';
-  const symbol = lastTicker || inputTicker;
-  const base = 'https://chartdeepdive.vercel.app/';
-  if (!symbol) { window.open(base, '_blank'); return; }
-  const market = /\.(KS|KQ)$/i.test(symbol) ? 'KR' : 'US';
-  const params = new URLSearchParams({ symbol, market });
-  if (lastName && lastName !== symbol) params.set('name', lastName);
-  window.open(`${base}chart?${params.toString()}`, '_blank');
+  _requireLoginForExternal(() => {
+    const lastTicker = sessionStorage.getItem('last_ticker') || '';
+    const lastName   = sessionStorage.getItem('last_name') || '';
+    const raw = document.getElementById('ticker-input')?.value.trim() || '';
+    const parenMatch = raw.match(/\(([A-Z0-9]+(?:\.[A-Z]{1,3})?)\)\s*$/i);
+    const inputTicker = raw ? (parenMatch ? parenMatch[1] : raw).toUpperCase() : '';
+    const symbol = lastTicker || inputTicker;
+    const theme = getResolvedTheme();
+    const base = 'https://chartdeepdive.vercel.app/';
+    if (!symbol) { window.open(`${base}?theme=${theme}`, '_blank'); return; }
+    const market = /\.(KS|KQ)$/i.test(symbol) ? 'KR' : 'US';
+    const params = new URLSearchParams({ symbol, market, theme });
+    if (lastName && lastName !== symbol) params.set('name', lastName);
+    window.open(`${base}chart?${params.toString()}`, '_blank');
+  });
 }
 
 // 외부(프록시 경유 API·사용자 입력) 문자열을 innerHTML에 삽입하기 전 이스케이프

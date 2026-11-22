@@ -35,6 +35,10 @@
   --status-stop-bg:  rgba(220, 38, 38, 0.10);
   --status-info:     #2563eb;
   --status-info-bg:  rgba(37, 99, 235, 0.08);
+  --cb-bg: #eef1f6; --cb-bg-hover: #e4e8f0;
+  --cb-text: rgba(15,23,42,.82); --cb-strong: #0f172a;
+  --cb-placeholder: rgba(15,23,42,.38); --cb-muted: rgba(15,23,42,.5);
+  --cb-key: rgba(15,23,42,.07); --cb-key-on: rgba(15,23,42,.18);
 }
 
 body {
@@ -81,7 +85,50 @@ body::before {
   --status-stop-bg:  rgba(248, 113, 113, 0.12);
   --status-info:     #60a5fa;
   --status-info-bg:  rgba(96, 165, 250, 0.12);
+  --cb-bg: #242421; --cb-bg-hover: #2d2d29;
+  --cb-text: rgba(255,255,255,.85); --cb-strong: #fff;
+  --cb-placeholder: rgba(255,255,255,.38); --cb-muted: rgba(255,255,255,.52);
+  --cb-key: rgba(255,255,255,.08); --cb-key-on: rgba(255,255,255,.22);
 }
+
+/* ── Command Button Search (signnith 동일) ── */
+.eq-cmd-wrap { position: relative; display: flex; align-items: center; justify-content: flex-end; width: 100%; }
+.eq-cmd-pill {
+  position: relative; height: 38px; border-radius: 20px; overflow: hidden;
+  background: var(--cb-bg); color: var(--cb-text);
+  display: flex; align-items: center;
+  transition: background .15s; will-change: width, transform;
+}
+.eq-cmd-pill:not(.open):hover { background: var(--cb-bg-hover); }
+.eq-cmd-btn {
+  height: 38px; padding: 0 10px 0 14px; border: none; background: transparent; color: inherit;
+  font-family: inherit; font-size: 13.5px; font-weight: 500;
+  display: inline-flex; align-items: center; gap: 10px; white-space: nowrap; cursor: pointer; outline: none;
+  transition: opacity .18s cubic-bezier(.23,1,.32,1), filter .18s cubic-bezier(.23,1,.32,1);
+}
+.eq-cmd-keys { display: inline-flex; align-items: center; gap: 4px; }
+.eq-cmd-kbd {
+  display: inline-flex; align-items: center; justify-content: center;
+  height: 20px; min-width: 20px; padding: 0 6px; border-radius: 6px;
+  background: var(--cb-key); color: var(--cb-muted);
+  font-family: inherit; font-size: 11px; font-weight: 600; line-height: 1;
+  transition: background .15s, color .15s; border: none; cursor: inherit;
+}
+.eq-cmd-kbd[data-on="true"] { background: var(--cb-key-on); color: var(--cb-strong); transition-duration: .075s; }
+.eq-cmd-field {
+  position: absolute; inset: 0; display: flex; align-items: center; gap: 9px;
+  padding: 0 10px 0 13px; opacity: 0; pointer-events: none; filter: blur(4px);
+  transition: opacity .18s cubic-bezier(.23,1,.32,1), filter .18s cubic-bezier(.23,1,.32,1);
+}
+.eq-cmd-pill.open .eq-cmd-btn { opacity: 0; pointer-events: none; filter: blur(4px); position: absolute; left: 0; }
+.eq-cmd-pill.open .eq-cmd-field { opacity: 1; pointer-events: auto; filter: blur(0px); transition-delay: .05s; }
+.eq-cmd-input {
+  min-width: 0; flex: 1; height: 100%; border: none !important; border-radius: 0 !important;
+  background: transparent !important; box-shadow: none !important;
+  color: var(--cb-strong); font-family: inherit; font-size: 13.5px; font-weight: 500;
+  outline: none !important; padding: 0 !important;
+}
+.eq-cmd-input::placeholder { color: var(--cb-placeholder); }
 
 :root[data-theme="dark"] body::before {
   background: radial-gradient(

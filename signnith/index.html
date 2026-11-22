@@ -145,22 +145,75 @@
   .stat-val { font-size: 1.32rem; font-weight: 800; margin: 3px 0 2px; }
   .stat-delta { font-size: 0.74rem; font-weight: 700; }
   .stat-spark {
-    width: 96px; height: 42px; border-radius: 10px; padding: 4px; flex-shrink: 0;
+    position: relative;
+    width: 102px; height: 44px; border-radius: 10px; padding: 4px; flex-shrink: 0;
     background-image: radial-gradient(circle, rgba(148,163,184,0.2) 1px, transparent 1px);
     background-size: 10px 10px;
   }
-  .explore-toolbar {
-    display: flex; flex-direction: column; align-items: stretch; gap: 10px;
-    margin-bottom: 14px;
+  .db-chart { display: block; width: 100%; height: 100%; overflow: visible; }
+  .db-dot {
+    position: absolute; left: 4px; top: 4px;
+    width: 7px; height: 7px; border-radius: 50%;
+    will-change: transform; pointer-events: none;
+    box-shadow: 0 0 0 2px var(--card);
   }
-  .filter-pills { display: flex; align-items: center; gap: 7px; flex-wrap: wrap; }
+  .explore-toolbar {
+    display: flex; flex-direction: row; align-items: center; justify-content: space-between;
+    gap: 12px; margin-bottom: 14px; flex-wrap: nowrap;
+  }
+  .filter-pills { display: flex; align-items: center; gap: 7px; flex-wrap: wrap; min-width: 0; }
   .f-pill {
-    padding: 7px 14px; border-radius: 999px; border: 1px solid var(--border);
-    background: var(--card); color: var(--muted); font-family: inherit;
-    font-size: 0.8rem; font-weight: 600; cursor: pointer; white-space: nowrap; transition: all .15s;
+    width: 40px; height: 34px; padding: 0; border-radius: 999px; border: 1px solid var(--border);
+    background: transparent; color: var(--muted); font-family: inherit;
+    display: inline-flex; align-items: center; justify-content: center;
+    cursor: pointer; transition: color .15s, border-color .15s, background .15s;
   }
   .f-pill:hover { color: var(--text); border-color: var(--border2); }
-  .f-pill.active { background: var(--text); color: var(--bg); border-color: var(--text); }
+  .f-pill.active,
+  .icon-pill.active,
+  .icon-pill.starred {
+    background: var(--text); color: var(--bg); border-color: var(--text);
+  }
+  .btn-pill-sm.icon-pill {
+    width: 38px; height: 34px; padding: 0; justify-content: center;
+    background: transparent; color: var(--muted); border-color: var(--border);
+  }
+  .btn-pill-sm.icon-pill:hover { color: var(--text); border-color: var(--border2); }
+  .btn-pill-sm.icon-pill.active,
+  .btn-pill-sm.icon-pill.starred {
+    background: var(--text); color: var(--bg); border-color: var(--text);
+  }
+  #fav-btn.starred svg { fill: currentColor; }
+  .db-morph-bar .sk-ico { margin-right: 0 !important; }
+  .db-morph-bar { position: relative; }
+  .db-morph-bar > button { position: relative; z-index: 1; will-change: transform; }
+  .db-morph-hl {
+    position: absolute; left: 0; top: 0; height: 34px; border-radius: 999px;
+    background: rgba(148, 163, 184, 0.16);
+    pointer-events: none; z-index: 0; opacity: 0;
+    will-change: transform, width, height, opacity;
+  }
+  .db-morph-tip {
+    position: absolute; left: 0; top: 0; z-index: 90; height: 30px; border-radius: 10px;
+    background: var(--text); color: var(--bg);
+    font-size: 12px; font-weight: 600; letter-spacing: -0.01em;
+    white-space: nowrap; pointer-events: none; overflow: hidden;
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.18);
+    opacity: 0; will-change: transform, width, opacity;
+  }
+  .db-morph-lab {
+    position: absolute; inset: 0; display: grid; place-items: center; padding: 0 11px;
+    will-change: transform, opacity, filter;
+  }
+  .db-morph-tail {
+    position: absolute; left: 0; top: 0; z-index: 89; width: 8px; height: 8px; border-radius: 2px;
+    background: var(--text); pointer-events: none; opacity: 0;
+    will-change: transform, opacity;
+  }
+  .db-morph-meas {
+    position: absolute; left: -9999px; top: -9999px; visibility: hidden; pointer-events: none;
+    white-space: nowrap; font-size: 12px; font-weight: 600; letter-spacing: -0.01em; padding: 0 11px;
+  }
   @media (max-width: 900px) { .stats-grid { grid-template-columns: 1fr; } }
   @media (max-width: 720px) {
     .explore-wrap { padding: 18px 14px 0; }
@@ -560,7 +613,7 @@
   html.light .topbar-nav-btn:hover, html.light .topbar-nav-btn.active { background: rgba(15,23,42,0.07); }
   @media (max-width: 720px) { .topbar-nav { display: none; } }
 
-  .fav-controls { display: flex; align-items: center; gap: 8px; align-self: flex-end; margin-left: auto; }
+  .fav-controls { display: flex; align-items: center; gap: 8px; margin-left: auto; flex-shrink: 0; white-space: nowrap; }
   .view-sw {
     display: inline-flex; background: var(--card2); border: 1px solid var(--border);
     border-radius: 999px; padding: 2px; gap: 2px;
@@ -1377,23 +1430,22 @@
   </section>
 
   <section class="explore-toolbar">
-    <div class="filter-pills">
-      <button class="f-pill active" onclick="setFavFilter('all', this)">전체</button>
-      <button class="f-pill" onclick="setFavFilter('buy', this)">↗ 매수 우위</button>
-      <button class="f-pill" onclick="setFavFilter('highconf', this)"><svg class="sk-ico" width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" style="margin-right:4px"><path d="M9 1.5L4 9h4l-1 5.5L12 7H8l1-5.5z"/></svg>고신뢰 70%+</button>
-      <button class="f-pill" onclick="setFavFilter('ipp', this)"><svg class="sk-ico" width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" style="margin-right:4px"><path d="M8 2v2M8 12v2M2 8h2M12 8h2"/><circle cx="8" cy="8" r="2.5"/></svg>변곡점 IPP</button>
-      <button class="f-pill" onclick="setFavFilter('rr2', this)"><svg class="sk-ico" width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" style="margin-right:4px"><circle cx="8" cy="8" r="5.5"/><circle cx="8" cy="8" r="2.2"/></svg>손익비 2:1+</button>
-      <button class="f-pill" onclick="setFavFilter('up', this)"><svg class="sk-ico" width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" style="margin-right:4px"><path d="M3 11l4-4 3 3 3.5-4.5M10.5 5.5h3v3"/></svg>상승 중</button>
-      <button class="f-pill" onclick="setFavFilter('down', this)"><svg class="sk-ico" width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" style="margin-right:4px"><path d="M3 5l4 4 3-3 3.5 4.5M10.5 10.5h3v-3"/></svg>하락·눌림</button>
-      <button class="f-pill" onclick="setFavFilter('watch', this)"><svg class="sk-ico" width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" style="margin-right:4px"><path d="M1.5 8s2.5-4 6.5-4 6.5 4 6.5 4-2.5 4-6.5 4-6.5-4-6.5-4z"/><circle cx="8" cy="8" r="1.6"/></svg>관망·매도</button>
-      <button class="f-pill" onclick="setFavFilter('kr', this)">🇰🇷 국내 KRX</button>
-      <button class="f-pill" onclick="setFavFilter('us', this)">🇺🇸 미국 US</button>
-      <button class="f-pill" onclick="setFavFilter('history', this)"><svg class="sk-ico" width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" style="margin-right:4px"><circle cx="8" cy="8" r="5.5"/><path d="M8 5v3.2l2.2 1.3"/></svg>최근 분석</button>
+    <div class="filter-pills" id="explore-filter-pills">
+      <button class="f-pill active" aria-label="전체" data-morph-tip="전체 (모든 종목)" onclick="setFavFilter('all', this)"><svg class="sk-ico" width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="2.5" y="2.5" width="4.5" height="4.5" rx="1"/><rect x="9" y="2.5" width="4.5" height="4.5" rx="1"/><rect x="2.5" y="9" width="4.5" height="4.5" rx="1"/><rect x="9" y="9" width="4.5" height="4.5" rx="1"/></svg></button>
+      <button class="f-pill" aria-label="매수 우위" data-morph-tip="매수 우위 (BUY)" onclick="setFavFilter('buy', this)"><svg class="sk-ico" width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12L12 4"/><path d="M6.5 4H12v5.5"/></svg></button>
+      <button class="f-pill" aria-label="고신뢰 70%+" data-morph-tip="고신뢰 70%+" onclick="setFavFilter('highconf', this)"><svg class="sk-ico" width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M9 1.5L4 9h4l-1 5.5L12 7H8l1-5.5z"/></svg></button>
+      <button class="f-pill" aria-label="변곡점 IPP" data-morph-tip="변곡점 IPP" onclick="setFavFilter('ipp', this)"><svg class="sk-ico" width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M8 2v2M8 12v2M2 8h2M12 8h2"/><circle cx="8" cy="8" r="2.5"/></svg></button>
+      <button class="f-pill" aria-label="손익비 2:1+" data-morph-tip="손익비 2:1+" onclick="setFavFilter('rr2', this)"><svg class="sk-ico" width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="8" cy="8" r="5.5"/><circle cx="8" cy="8" r="2.2"/></svg></button>
+      <button class="f-pill" aria-label="상승 중" data-morph-tip="상승 중" onclick="setFavFilter('up', this)"><svg class="sk-ico" width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l4-4 3 3 3.5-4.5M10.5 5.5h3v3"/></svg></button>
+      <button class="f-pill" aria-label="하락·눌림" data-morph-tip="하락·눌림" onclick="setFavFilter('down', this)"><svg class="sk-ico" width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 5l4 4 3-3 3.5 4.5M10.5 10.5h3v-3"/></svg></button>
+      <button class="f-pill" aria-label="관망·매도" data-morph-tip="관망·매도" onclick="setFavFilter('watch', this)"><svg class="sk-ico" width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M1.5 8s2.5-4 6.5-4 6.5 4 6.5 4-2.5 4-6.5 4-6.5-4-6.5-4z"/><circle cx="8" cy="8" r="1.6"/></svg></button>
+      <button class="f-pill" aria-label="국내 KRX" data-morph-tip="국내 KRX" onclick="setFavFilter('kr', this)"><svg class="sk-ico" width="17" height="15" viewBox="0 0 18 16" fill="none" stroke="currentColor" stroke-width="1.4"><rect x="1.5" y="3" width="15" height="10" rx="2.5"/><text x="9" y="10" text-anchor="middle" font-size="6.2" font-weight="700" fill="currentColor" stroke="none" font-family="inherit">KR</text></svg></button>
+      <button class="f-pill" aria-label="미국 US" data-morph-tip="미국 US" onclick="setFavFilter('us', this)"><svg class="sk-ico" width="17" height="15" viewBox="0 0 18 16" fill="none" stroke="currentColor" stroke-width="1.4"><rect x="1.5" y="3" width="15" height="10" rx="2.5"/><text x="9" y="10" text-anchor="middle" font-size="6.2" font-weight="700" fill="currentColor" stroke="none" font-family="inherit">US</text></svg></button>
+      <button class="f-pill" aria-label="최근 분석" data-morph-tip="최근 분석" onclick="setFavFilter('history', this)"><svg class="sk-ico" width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="8" cy="8" r="5.5"/><path d="M8 5v3.2l2.2 1.3"/></svg></button>
     </div>
     <div class="fav-controls">
-      <button class="fav-toggle" onclick="toggleFav()" style="display:inline-flex;align-items:center;gap:4px;font-size:0.78rem">
-        <svg width="12" height="12" viewBox="0 0 16 16" fill="none"><path d="M4 10L8 6L12 10" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
-        접기
+      <button class="fav-toggle" onclick="toggleFav()" aria-label="피드 접기" title="피드 접기" style="width:32px;height:32px;padding:0;border-radius:999px;border:1px solid var(--border);display:inline-flex;align-items:center;justify-content:center">
+        <svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M4 10L8 6L12 10" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
       </button>
       <div class="view-sw" role="group" aria-label="보기 전환">
         <button class="view-sw-btn active" id="fav-sw-cards" onclick="setFavView('cards')">Cards</button>
@@ -2345,33 +2397,254 @@ function setFavView(mode) {
   renderFavs();
 }
 
+// DesignBookmark Spring Engine (Stat-Card + Morph-Tooltip)
+window.Motion = window.Motion || (() => {
+  const reduce = typeof matchMedia !== 'undefined' && matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const S = (x, k = 400, c = 30) => ({ x, v: 0, t: x, k, c: reduce ? 2 * Math.sqrt(k) : c });
+  const step = (s, dt) => { const a = -s.k * (s.x - s.t) - s.c * s.v; s.v += a * dt; s.x += s.v * dt; };
+  const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
+  const tune = (s, k, c) => { s.k = k; s.c = reduce ? 2 * Math.sqrt(k) : c; };
+  const timers = [];
+  const after = (sec, fn) => { const t = { t: sec, fn }; timers.push(t); return t; };
+  const cancel = t => { const i = timers.indexOf(t); if (i >= 0) timers.splice(i, 1); };
+  const comps = [];
+  let last = typeof performance !== 'undefined' ? performance.now() : Date.now();
+  function loop(now) {
+    const dt = Math.min((now - last) / 1000, 1 / 30); last = now;
+    for (let i = timers.length - 1; i >= 0; i--) {
+      if ((timers[i].t -= dt) <= 0) timers.splice(i, 1)[0].fn();
+    }
+    const sub = 4;
+    for (let k = 0; k < sub; k++) comps.forEach(c => c.frame(dt / sub));
+    comps.forEach(c => c.render());
+    requestAnimationFrame(loop);
+  }
+  if (typeof requestAnimationFrame !== 'undefined') requestAnimationFrame(loop);
+  return { S, step, clamp, after, cancel, tune, register: c => comps.push(c) };
+})();
+
+function attachMorphTooltipBar(bar, btnSelector = 'button') {
+  if (!bar || bar.dataset.morphBound) return;
+  const btns = [...bar.querySelectorAll(btnSelector)];
+  if (!btns.length) return;
+  bar.dataset.morphBound = '1';
+  bar.classList.add('db-morph-bar');
+
+  const hl = document.createElement('div');
+  hl.className = 'db-morph-hl';
+  const tip = document.createElement('div');
+  tip.className = 'db-morph-tip';
+  tip.innerHTML = '<div class="db-morph-lab"></div><div class="db-morph-lab"></div>';
+  const tail = document.createElement('div');
+  tail.className = 'db-morph-tail';
+  const meas = document.createElement('span');
+  meas.className = 'db-morph-meas';
+  bar.append(hl, tip, tail, meas);
+
+  const labs = [...tip.querySelectorAll('.db-morph-lab')];
+  btns.forEach(b => {
+    if (b.hasAttribute('title') && !b.dataset.morphTip) {
+      b.dataset.morphTip = b.getAttribute('title');
+      b.removeAttribute('title');
+    }
+  });
+
+  const { S, step, after, cancel, tune, register } = window.Motion;
+  const LEAD = [620, 36], TRAIL = [190, 19];
+  const hlL = S(0, 620, 36), hlR = S(0, 190, 19), hlT = S(0, 420, 32), hlH = S(34, 420, 32), hlO = S(0, 420, 32);
+  const tipL = S(0, 620, 36), tipR = S(0, 190, 19), tipT = S(0, 420, 32), tipO = S(0, 420, 32), tipY = S(6, 420, 32);
+  const tailX = S(0, 380, 26), tailT = S(0, 420, 32);
+  const lab = [
+    { x: S(0, 420, 32), o: S(0, 420, 32), b: S(0, 420, 32) },
+    { x: S(0, 420, 32), o: S(0, 420, 32), b: S(0, 420, 32) }
+  ];
+  const btnScales = btns.map(() => S(1, 520, 16));
+
+  let cur = 0, curIdx = -1, prevCx = 0, shown = false, leaveT = null;
+
+  const getLabel = b => b.dataset.morphTip || b.textContent.trim();
+  const snap = (s, v) => { s.x = s.t = v; s.v = 0; };
+  const setEdgeSprings = dir => {
+    const [L, T] = dir > 0 ? [LEAD, TRAIL] : [TRAIL, LEAD];
+    tune(hlR, ...L); tune(hlL, ...T);
+    tune(tipR, ...L); tune(tipL, ...T);
+  };
+
+  function aim(i) {
+    if (leaveT) { cancel(leaveT); leaveT = null; }
+    const b = btns[i];
+    if (!b || !b.offsetWidth) return;
+    const left = b.offsetLeft, right = left + b.offsetWidth, top = b.offsetTop, h = b.offsetHeight;
+    const cx = left + b.offsetWidth / 2;
+    const label = getLabel(b);
+    meas.textContent = label;
+    const tw = Math.max(44, Math.ceil(meas.getBoundingClientRect().width));
+    const tl = cx - tw / 2, tr = cx + tw / 2;
+    const tipTop = top - 38, tailTop = top - 12;
+
+    if (!shown) {
+      snap(hlL, left); snap(hlR, right); snap(hlT, top); snap(hlH, h);
+      snap(tipL, tl); snap(tipR, tr); snap(tipT, tipTop);
+      snap(tailX, cx); snap(tailT, tailTop);
+      hlO.t = 1; tipO.t = 1; tipY.t = 0;
+      labs[cur].textContent = label;
+      snap(lab[cur].x, 0); snap(lab[cur].o, 1); snap(lab[cur].b, 0);
+      snap(lab[1 - cur].o, 0);
+      shown = true;
+    } else if (i !== curIdx) {
+      const dir = cx >= prevCx ? 1 : -1;
+      setEdgeSprings(dir);
+      hlL.t = left; hlR.t = right; hlT.t = top; hlH.t = h;
+      tipL.t = tl; tipR.t = tr; tipT.t = tipTop;
+      tailX.t = cx; tailT.t = tailTop;
+      const prev = cur; cur = 1 - cur;
+      labs[cur].textContent = label;
+      snap(lab[cur].x, dir * 10); snap(lab[cur].o, 0); snap(lab[cur].b, 5);
+      lab[cur].x.t = 0; lab[cur].o.t = 1; lab[cur].b.t = 0;
+      lab[prev].x.t = -dir * 10; lab[prev].o.t = 0; lab[prev].b.t = 5;
+    }
+    curIdx = i; prevCx = cx;
+  }
+
+  function leave() {
+    if (curIdx === -1 && !shown) return;
+    if (leaveT) cancel(leaveT);
+    leaveT = after(0.14, () => {
+      shown = false; curIdx = -1;
+      hlO.t = 0; tipO.t = 0; tipY.t = 6;
+    });
+  }
+
+  btns.forEach((b, i) => {
+    b.addEventListener('pointerenter', () => aim(i));
+    b.addEventListener('focus', () => aim(i));
+    b.addEventListener('click', () => { btnScales[i].x = 0.92; btnScales[i].t = 1; });
+  });
+  bar.addEventListener('pointerleave', leave);
+  bar.addEventListener('focusout', e => { if (!bar.contains(e.relatedTarget)) leave(); });
+
+  const all = [hlL, hlR, hlT, hlH, hlO, tipL, tipR, tipT, tipO, tipY, tailX, tailT,
+    ...lab.flatMap(l => [l.x, l.o, l.b]), ...btnScales];
+
+  register({
+    frame: dt => all.forEach(s => step(s, dt)),
+    render: () => {
+      const active = shown || hlO.x > 0.002 || tipO.x > 0.002;
+      if (active) {
+        hl.style.width = `${Math.max(0, hlR.x - hlL.x).toFixed(2)}px`;
+        hl.style.height = `${Math.max(0, hlH.x).toFixed(2)}px`;
+        hl.style.transform = `translate3d(${hlL.x.toFixed(2)}px,${hlT.x.toFixed(2)}px,0)`;
+        hl.style.opacity = hlO.x.toFixed(3);
+
+        tip.style.width = `${Math.max(0, tipR.x - tipL.x).toFixed(2)}px`;
+        tip.style.transform = `translate3d(${tipL.x.toFixed(2)}px,${(tipT.x + tipY.x).toFixed(2)}px,0)`;
+        tip.style.opacity = tipO.x.toFixed(3);
+
+        tail.style.transform = `translate3d(${(tailX.x - 4).toFixed(2)}px,${(tailT.x + tipY.x).toFixed(2)}px,0) rotate(45deg)`;
+        tail.style.opacity = tipO.x.toFixed(3);
+
+        labs.forEach((el, k) => {
+          el.style.transform = `translate3d(${lab[k].x.x.toFixed(2)}px,0,0)`;
+          el.style.opacity = lab[k].o.x.toFixed(3);
+          el.style.filter = `blur(${Math.max(0, lab[k].b.x).toFixed(2)}px)`;
+        });
+      }
+      btnScales.forEach((s, k) => {
+        if (Math.abs(s.x - 1) > 0.001 || Math.abs(s.v) > 0.01) {
+          btns[k].style.transform = `scale(${s.x.toFixed(3)})`;
+        } else if (btns[k].style.transform) {
+          btns[k].style.transform = '';
+        }
+      });
+    }
+  });
+}
+
+if (typeof document !== 'undefined') {
+  const _bindExploreMorph = () => attachMorphTooltipBar(document.getElementById('explore-filter-pills'), '.f-pill');
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', _bindExploreMorph);
+  else _bindExploreMorph();
+}
+
+function mountSpringSpark(el, normPts, color) {
+  if (!el || el.dataset.dbMounted) return;
+  el.dataset.dbMounted = '1';
+  const gid = 'db_area_' + (++_favSparkUid);
+  el.innerHTML = `<svg class="db-chart" aria-hidden="true">
+    <defs><linearGradient id="${gid}" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="${color}" stop-opacity=".32"/>
+      <stop offset="100%" stop-color="${color}" stop-opacity="0"/>
+    </linearGradient></defs>
+    <path class="db-fill" fill="url(#${gid})"/>
+    <path class="db-line" fill="none" stroke="${color}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+  </svg><span class="db-dot" style="background:${color}"></span>`;
+
+  const svg = el.querySelector('.db-chart');
+  const line = el.querySelector('.db-line');
+  const fill = el.querySelector('.db-fill');
+  const dot = el.querySelector('.db-dot');
+  const { S, step, clamp, after, register } = window.Motion;
+  const pts = normPts.map(() => S(0, 200, 17));
+  const trigger = () => {
+    pts.forEach((p, k) => after(k * 0.03, () => { p.t = normPts[k]; }));
+  };
+  trigger();
+
+  const card = el.closest('.stat-card');
+  if (card && !card.dataset.dbHover) {
+    card.dataset.dbHover = '1';
+    card.addEventListener('mouseenter', () => {
+      pts.forEach((p, k) => { p.v += (k % 2 === 0 ? 1.8 : -1.2); });
+    });
+  }
+
+  register({
+    frame(dt) { pts.forEach(p => step(p, dt)); },
+    render() {
+      const W = svg.clientWidth || 94, H = svg.clientHeight || 36, n = pts.length;
+      if (n < 2) return;
+      svg.setAttribute('viewBox', `0 0 ${W} ${H}`);
+      const xy = pts.map((p, i) => [3 + (i / (n - 1)) * (W - 6), 4 + (1 - clamp(p.x, -0.05, 1.05)) * (H - 8)]);
+      let d = `M${xy[0][0].toFixed(2)} ${xy[0][1].toFixed(2)}`;
+      for (let i = 0; i < n - 1; i++) {
+        const p0 = xy[i - 1] || xy[i], p1 = xy[i], p2 = xy[i + 1], p3 = xy[i + 2] || p2;
+        d += ` C${(p1[0] + (p2[0] - p0[0]) / 6).toFixed(2)} ${(p1[1] + (p2[1] - p0[1]) / 6).toFixed(2)} ${(p2[0] - (p3[0] - p1[0]) / 6).toFixed(2)} ${(p2[1] - (p3[1] - p1[1]) / 6).toFixed(2)} ${p2[0].toFixed(2)} ${p2[1].toFixed(2)}`;
+      }
+      line.setAttribute('d', d);
+      fill.setAttribute('d', `${d} L${xy[n - 1][0].toFixed(2)} ${H} L${xy[0][0].toFixed(2)} ${H} Z`);
+      const [lx, ly] = xy[n - 1];
+      dot.style.transform = `translate(${(lx - 3.5).toFixed(2)}px,${(ly - 3.5).toFixed(2)}px)`;
+    }
+  });
+}
+
 function _favSparkSvg(ticker, h = 30, customPts = null, customColor = null) {
   let seed = 0;
   for (let i = 0; i < ticker.length; i++) seed = (seed * 31 + ticker.charCodeAt(i)) % 997;
-  const pts = customPts || Array.from({ length: 8 }, (_, i) => {
-    const base = 24 - i * 1.4;
-    const wave = Math.sin((i + seed) * 0.8) * 6;
+  const pts = customPts || Array.from({ length: 10 }, (_, i) => {
+    const base = 24 - i * 1.1;
+    const wave = Math.sin((i + seed) * 0.75) * 6;
     return Math.max(4, Math.min(28, base + wave));
   });
   const isUp = pts[pts.length - 1] <= pts[0];
   const color = customColor || (isUp ? 'var(--up)' : 'var(--down)');
   const w = 180, pad = 5;
-  const step = (w - pad * 2) / (pts.length - 1);
-  const mapped = pts.map((y, i) => ({ x: pad + i * step, y: Math.max(3, Math.min(h - 3, y * (h / 32))) }));
-  let d = `M ${mapped[0].x.toFixed(1)},${mapped[0].y.toFixed(1)}`;
-  for (let i = 1; i < mapped.length; i++) {
-    const cx = ((mapped[i - 1].x + mapped[i].x) / 2).toFixed(1);
-    d += ` C ${cx},${mapped[i - 1].y.toFixed(1)} ${cx},${mapped[i].y.toFixed(1)} ${mapped[i].x.toFixed(1)},${mapped[i].y.toFixed(1)}`;
+  const stepX = (w - pad * 2) / (pts.length - 1);
+  const mapped = pts.map((y, i) => [pad + i * stepX, Math.max(4, Math.min(h - 4, y * (h / 32)))]);
+  let d = `M${mapped[0][0].toFixed(2)} ${mapped[0][1].toFixed(2)}`;
+  for (let i = 0; i < mapped.length - 1; i++) {
+    const p0 = mapped[i - 1] || mapped[i], p1 = mapped[i], p2 = mapped[i + 1], p3 = mapped[i + 2] || p2;
+    d += ` C${(p1[0] + (p2[0] - p0[0]) / 6).toFixed(2)} ${(p1[1] + (p2[1] - p0[1]) / 6).toFixed(2)} ${(p2[0] - (p3[0] - p1[0]) / 6).toFixed(2)} ${(p2[1] - (p3[1] - p1[1]) / 6).toFixed(2)} ${p2[0].toFixed(2)} ${p2[1].toFixed(2)}`;
   }
-  const areaD = `${d} L ${mapped[mapped.length - 1].x.toFixed(1)},${h} L ${mapped[0].x.toFixed(1)},${h} Z`;
+  const areaD = `${d} L${mapped[mapped.length - 1][0].toFixed(2)} ${h} L${mapped[0][0].toFixed(2)} ${h} Z`;
   const last = mapped[mapped.length - 1];
   const gid = 'fsg_' + (++_favSparkUid);
   return `<svg viewBox="0 0 ${w} ${h}" width="100%" height="${h}" style="display:block;overflow:visible">
-    <defs><linearGradient id="${gid}" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="${color}" stop-opacity="0.25"/><stop offset="100%" stop-color="${color}" stop-opacity="0"/></linearGradient></defs>
+    <defs><linearGradient id="${gid}" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="${color}" stop-opacity="0.30"/><stop offset="100%" stop-color="${color}" stop-opacity="0"/></linearGradient></defs>
     <path class="sig-spark-area" d="${areaD}" fill="url(#${gid})"/>
     <path class="sig-spark-line" d="${d}" stroke="${color}"/>
-    <circle class="sig-beacon" cx="${last.x.toFixed(1)}" cy="${last.y.toFixed(1)}" r="3.5" fill="${color}"/>
-    <circle cx="${last.x.toFixed(1)}" cy="${last.y.toFixed(1)}" r="2.8" fill="${color}" stroke="var(--card)" stroke-width="1.2"/>
+    <circle class="sig-beacon" cx="${last[0].toFixed(2)}" cy="${last[1].toFixed(2)}" r="3.5" fill="${color}"/>
+    <circle cx="${last[0].toFixed(2)}" cy="${last[1].toFixed(2)}" r="2.8" fill="${color}" stroke="var(--card)" stroke-width="1.2"/>
   </svg>`;
 }
 
@@ -2385,14 +2658,18 @@ function toggleFav() {
     favCollapsed = false;
     if (body) body.style.display = '';
     if (stats) stats.style.display = 'grid';
-    if (btn) btn.innerHTML = _CHEV_UP + '접기';
+    if (btn) { btn.innerHTML = _CHEV_UP; btn.title = '피드 접기'; btn.setAttribute('aria-label', '피드 접기'); }
     window.scrollTo({ top: 0, behavior: 'smooth' });
     return;
   }
   favCollapsed = !favCollapsed;
   if (body) body.style.display = favCollapsed ? 'none' : '';
   if (stats) stats.style.display = 'grid';
-  if (btn) btn.innerHTML = favCollapsed ? (_CHEV_DN + '펼치기') : (_CHEV_UP + '접기');
+  if (btn) {
+    btn.innerHTML = favCollapsed ? _CHEV_DN : _CHEV_UP;
+    const lbl = favCollapsed ? '피드 펼치기' : '피드 접기';
+    btn.title = lbl; btn.setAttribute('aria-label', lbl);
+  }
 }
 
 function renderExploreStats(enrichedList = []) {
@@ -2427,15 +2704,15 @@ function renderExploreStats(enrichedList = []) {
   if (ic) ic.textContent = `${ippCnt} 종목`;
 
   [
-    ['stat-spark-4', 'BUY_RATIO_UP', [28, 25, 27, 21, 18, 13, 10, 6],  'var(--up)'],
-    ['stat-spark-5', 'AVG_CONF_7L',  [24, 22, 18, 19, 14, 13, 11, 9],  'var(--green)'],
-    ['stat-spark-6', 'IPP_DETECT',   [11, 15, 23, 27, 24, 17, 12, 8],  'var(--blue)'],
-    ['stat-spark-1', 'EXPLORE_1',    [26, 26, 20, 20, 15, 15, 10, 8],  'var(--green)'],
-    ['stat-spark-2', 'EXPLORE_2',    [14, 22, 12, 24, 15, 20, 11, 13], 'var(--blue)'],
-    ['stat-spark-3', 'EXPLORE_3',    [22, 10, 24, 12, 25, 11, 18, 7],  'var(--purple)']
-  ].forEach(([id, key, pts, col]) => {
+    ['stat-spark-4', [.22, .28, .40, .34, .48, .44, .60, .56, .66, .74, .70, .86], 'var(--up)'],
+    ['stat-spark-5', [.30, .42, .36, .50, .46, .58, .52, .64, .60, .70, .66, .78], 'var(--green)'],
+    ['stat-spark-6', [.62, .50, .32, .20, .28, .45, .58, .72, .66, .78, .84, .92], 'var(--blue)'],
+    ['stat-spark-1', [.20, .22, .35, .38, .48, .52, .60, .64, .68, .75, .79, .88], 'var(--green)'],
+    ['stat-spark-2', [.48, .30, .55, .26, .46, .34, .62, .48, .70, .58, .76, .84], 'var(--blue)'],
+    ['stat-spark-3', [.32, .66, .28, .62, .24, .68, .42, .74, .52, .80, .66, .90], 'var(--purple)']
+  ].forEach(([id, normPts, col]) => {
     const el = document.getElementById(id);
-    if (el && !el.innerHTML) el.innerHTML = _favSparkSvg(key, 34, pts, col);
+    if (el) mountSpringSpark(el, normPts, col);
   });
 }
 
@@ -2829,7 +3106,7 @@ function selectFavStock(ticker) {
   const stats = document.getElementById('explore-stats');
   if (stats) stats.style.display = 'none';
   const btn = document.querySelector('.fav-toggle');
-  if (btn) btn.innerHTML = _CHEV_DN + '피드 펼치기';
+  if (btn) { btn.innerHTML = _CHEV_DN; btn.title = '피드 펼치기'; btn.setAttribute('aria-label', '피드 펼치기'); }
   setTickerAndRun(ticker);
   setTimeout(() => {
     document.getElementById('dashboard')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
@@ -2848,8 +3125,11 @@ function updateFavBtn(ticker) {
   const btn = document.getElementById('fav-btn');
   if (!btn) return;
   const starred = isFaved(ticker);
-  btn.className = 'btn-fav' + (starred ? ' starred' : '');
-  btn.innerHTML = starred ? '⭐ 즐겨찾기 해제' : '☆ 즐겨찾기 추가';
+  btn.className = 'btn-pill-sm icon-pill' + (starred ? ' active starred' : '');
+  btn.innerHTML = skIcon('star', 15);
+  const tip = starred ? '즐겨찾기됨 (해제)' : '즐겨찾기 추가';
+  btn.dataset.morphTip = tip;
+  btn.setAttribute('aria-label', tip);
 }
 
 // ── 검색 기록 ──────────────────────────────────────────
@@ -4312,11 +4592,11 @@ async function runAnalysis(forceRefresh = false) {
         renderDashboard({ ...updatedPayload, fromCache: true, quoteChecking: false, quoteUpdated: true });
       } else {
         const cBtn = document.getElementById('cache-refresh-btn');
-        if (cBtn) cBtn.innerHTML = `${skIcon('bolt', 13)}캐시 · 재분석`;
+        if (cBtn) { cBtn.innerHTML = skIcon('bolt', 15); cBtn.dataset.morphTip = '캐시 · 재분석'; }
       }
     }).catch(() => {
       const cBtn = document.getElementById('cache-refresh-btn');
-      if (cBtn) cBtn.innerHTML = `${skIcon('bolt', 13)}캐시 · 재분석`;
+      if (cBtn) { cBtn.innerHTML = skIcon('bolt', 15); cBtn.dataset.morphTip = '캐시 · 재분석'; }
     });
 
     btn.disabled = false;
@@ -4652,15 +4932,15 @@ function renderDashboard({ ticker, bars, ind, tech, fund, decision: d, price, is
       <span style="font-weight:700">${fmt(price,isKr)} ${currency}</span>
       <span class="sig-badge ${d.action==='BUY'?'sig-buy':d.action==='SELL'?'sig-sell':'sig-hold'}">${badgeLbl}</span>
     </div>
-    <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
-      ${fromCache ? `<button id="cache-refresh-btn" class="btn-pill-sm" onclick="refreshCurrentAnalysis('${ticker}')" title="캐시된 결과를 무시하고 전체 다시 분석">${quoteChecking ? `${skIcon('bolt', 13)}캐시 · 시세 확인 중…` : quoteUpdated ? `${skIcon('refresh', 13)}시세 반영됨 · 재분석` : `${skIcon('bolt', 13)}캐시 · 재분석`}</button>` : ''}
-      <button id="fav-btn" class="btn-pill-sm${isFaved(ticker)?' starred':''}">${isFaved(ticker) ? `${skIcon('star', 13)}즐겨찾기됨` : `${skIcon('star', 13)}즐겨찾기`}</button>
-      <button class="btn-pill-sm" id="report-btn" onclick="openReport('${ticker}')">${skIcon('doc', 13)}리포트</button>
-      <button class="btn-pill-sm" id="newsfinder-btn" onclick="openNewsFinder()">${skIcon('news', 13)}뉴스</button>
-      <button class="btn-pill-sm" id="equisense-btn" onclick="openEquiSense()">${skIcon('bulb', 13)}EquiSense</button>
-      <button class="btn-pill-sm" id="buythedip-btn" onclick="openBuyTheDip()">${skIcon('chart', 13)}BuyTheDip</button>
-      <button class="btn-pill-sm" id="chartdeepdive-btn" onclick="openChartDeepDive()">${skIcon('compass', 13)}ChartDeepDive</button>
-      <button class="btn-pill-sm" onclick="closeDetailDash()">✕ 닫기</button>
+    <div id="detail-action-pills" style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+      ${fromCache ? `<button id="cache-refresh-btn" class="btn-pill-sm icon-pill" aria-label="캐시 · 재분석" data-morph-tip="${quoteChecking ? '캐시 · 시세 확인 중…' : quoteUpdated ? '시세 반영됨 · 재분석' : '캐시 · 재분석'}" onclick="refreshCurrentAnalysis('${ticker}')">${quoteChecking ? skIcon('bolt', 15) : quoteUpdated ? skIcon('refresh', 15) : skIcon('bolt', 15)}</button>` : ''}
+      <button id="fav-btn" class="btn-pill-sm icon-pill${isFaved(ticker)?' active starred':''}" aria-label="${isFaved(ticker)?'즐겨찾기됨 (해제)':'즐겨찾기 추가'}" data-morph-tip="${isFaved(ticker)?'즐겨찾기됨 (해제)':'즐겨찾기 추가'}">${skIcon('star', 15)}</button>
+      <button class="btn-pill-sm icon-pill" id="report-btn" aria-label="리포트" data-morph-tip="리포트" onclick="openReport('${ticker}')">${skIcon('doc', 15)}</button>
+      <button class="btn-pill-sm icon-pill" id="newsfinder-btn" aria-label="뉴스" data-morph-tip="뉴스" onclick="openNewsFinder()">${skIcon('news', 15)}</button>
+      <button class="btn-pill-sm icon-pill" id="equisense-btn" aria-label="EquiSense" data-morph-tip="EquiSense" onclick="openEquiSense()">${skIcon('bulb', 15)}</button>
+      <button class="btn-pill-sm icon-pill" id="buythedip-btn" aria-label="BuyTheDip" data-morph-tip="BuyTheDip" onclick="openBuyTheDip()">${skIcon('chart', 15)}</button>
+      <button class="btn-pill-sm icon-pill" id="chartdeepdive-btn" aria-label="ChartDeepDive" data-morph-tip="ChartDeepDive" onclick="openChartDeepDive()">${skIcon('compass', 15)}</button>
+      <button class="btn-pill-sm icon-pill" aria-label="닫기" data-morph-tip="닫기" onclick="closeDetailDash()"><svg class="sk-ico" width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><path d="M4.5 4.5l7 7M11.5 4.5l-7 7"/></svg></button>
     </div>
   </div>
 
@@ -5252,7 +5532,7 @@ function renderDashboard({ ticker, bars, ind, tech, fund, decision: d, price, is
     const st = document.getElementById('explore-stats');
     if (st) st.style.display = 'grid';
     const btn = document.querySelector('.fav-toggle');
-    if (btn) btn.innerHTML = _CHEV_UP + '접기';
+    if (btn) { btn.innerHTML = _CHEV_UP; btn.title = '피드 접기'; btn.setAttribute('aria-label', '피드 접기'); }
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
   setTimeout(() => window.switchDashTab?.('summary'), 60);
@@ -5262,6 +5542,7 @@ function renderDashboard({ ticker, bars, ind, tech, fund, decision: d, price, is
     const _favBtn = document.getElementById('fav-btn');
     if (_favBtn) _favBtn.onclick = () =>
       toggleFavFromResult(ticker, companyName || ticker, isKr ? '' : guessExchange(ticker));
+    attachMorphTooltipBar(document.getElementById('detail-action-pills'), '.btn-pill-sm');
   }
 
   // Uniswap-style 실시간 SVG 차트 바인딩

@@ -520,6 +520,53 @@
     background: var(--card);
     color: var(--text);
   }
+  /* ── Kokonut UI Undo Button (#run-btn) ── */
+  .undo-wrap { position: relative; display: inline-flex; vertical-align: middle; }
+  .undo-btn {
+    position: relative; display: inline-flex; height: 38px; align-items: center; justify-content: center;
+    overflow: hidden; white-space: nowrap; border-radius: 999px;
+    border: 1px solid var(--border2); background: var(--card); color: var(--text);
+    font-family: inherit; font-size: 0.84rem; font-weight: 600; cursor: pointer; outline: none;
+    user-select: none; -webkit-user-select: none;
+    transition: width .22s cubic-bezier(.23,1,.32,1), background-color .15s, border-color .15s, color .15s;
+  }
+  .undo-btn:hover:not([aria-disabled="true"]) { background: var(--card2); border-color: var(--text); }
+  .undo-btn[data-phase="done"] { cursor: default; color: var(--muted); background: var(--card2); }
+  .undo-btn-in { display: inline-flex; align-items: center; padding: 0 16px; }
+  .undo-phase {
+    display: inline-flex; align-items: center; gap: 7px;
+    animation: undoSwap .22s cubic-bezier(.23,1,.32,1);
+  }
+  @keyframes undoSwap {
+    from { opacity: 0; transform: translateY(7px); filter: blur(2px); }
+    to   { opacity: 1; transform: translateY(0); filter: blur(0); }
+  }
+  .undo-muted { color: var(--muted); }
+  .undo-sep { width: 1px; height: 14px; background: var(--border2); flex-shrink: 0; }
+  .undo-kbd {
+    display: inline-flex; align-items: center; justify-content: center;
+    height: 18px; padding: 0 5px; border-radius: 5px;
+    border: 1px solid var(--border2); font-family: inherit; font-size: 11px; font-weight: 600;
+    color: var(--muted); line-height: 1;
+  }
+  .undo-cd {
+    position: relative; display: inline-flex; height: 18px; min-width: 1ch;
+    justify-content: center; overflow: hidden; font-variant-numeric: tabular-nums; color: var(--muted);
+  }
+  .undo-cd > span { display: inline-block; line-height: 18px; animation: undoDigit .2s cubic-bezier(.23,1,.32,1); }
+  @keyframes undoDigit {
+    from { opacity: 0; transform: translateY(8px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  .undo-svg {
+    position: absolute; inset: 0; width: 100%; height: 100%;
+    pointer-events: none; overflow: visible;
+  }
+  .undo-svg path {
+    fill: none; stroke: var(--text); stroke-width: 1.5; stroke-linecap: round;
+    opacity: 0; transition: opacity .18s ease;
+  }
+  .undo-wrap[data-pending="true"] .undo-svg path { opacity: 1; }
   .btn-run {
     position: relative;
     display: inline-flex;
@@ -1461,7 +1508,17 @@
         <option value="short_term">단기</option>
         <option value="long_term">장기</option>
       </select>
-      <button class="btn-run" id="run-btn" onclick="runAnalysis()" style="height:38px;border-radius:999px;padding:0 20px;font-size:0.84rem">분석 시작</button>
+      <span class="undo-wrap" id="run-undo-wrap" data-pending="false">
+        <button type="button" class="undo-btn" id="run-btn" aria-label="분석 시작">
+          <span class="undo-btn-in" id="run-btn-in">
+            <span class="undo-phase">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polygon points="6 3 20 12 6 21 6 3"/></svg>
+              <span>분석 시작</span>
+            </span>
+          </span>
+        </button>
+        <svg class="undo-svg" aria-hidden="true"><title>실행 취소 남은 시간</title><path id="run-undo-path"/></svg>
+      </span>
     </div>
   </section>
 
@@ -3519,6 +3576,139 @@ function selectFavStock(ticker) {
     render() {
       pill.style.width = `${Math.max(96, wS.x).toFixed(2)}px`;
       pill.style.transform = Math.abs(scS.x - 1) > 0.001 ? `scale(${scS.x.toFixed(4)})` : '';
+    }
+  });
+})();
+
+// Kokonut UI Undo Button (#run-btn)
+(() => {
+  const wrap = document.getElementById('run-undo-wrap');
+  const btn = document.getElementById('run-btn');
+  const inner = document.getElementById('run-btn-in');
+  const path = document.getElementById('run-undo-path');
+  if (!wrap || !btn || !inner || !path) return;
+
+  const STROKE = 1.5;
+  const DURATION = 3200;
+  const RESET_AFTER = 2000;
+  const isMac = /Mac|iPhone|iPad/i.test(navigator.platform || '');
+  let phase = 'idle', seconds = Math.ceil(DURATION / 1000);
+  let hovered = false, elapsed = 0, remaining = 1, raf = 0, last = 0, resetTimer = null;
+
+  const pillPath = (w, h) => {
+    const s = STROKE / 2, r = h / 2 - s, left = s + r, right = w - s - r;
+    return `M ${w / 2} ${s} H ${right} A ${r} ${r} 0 0 1 ${right} ${h - s} H ${left} A ${r} ${r} 0 0 1 ${left} ${s} Z`;
+  };
+  const paint = () => {
+    try {
+      const len = path.getTotalLength();
+      path.style.strokeDasharray = `${len * remaining} ${len}`;
+    } catch {}
+  };
+  const syncPath = () => {
+    if (!btn.offsetWidth || !btn.offsetHeight) return;
+    path.setAttribute('d', pillPath(btn.offsetWidth, btn.offsetHeight));
+    paint();
+  };
+
+  if (typeof ResizeObserver !== 'undefined') {
+    new ResizeObserver(() => {
+      if (inner.offsetWidth) btn.style.width = `${inner.offsetWidth + 2}px`;
+    }).observe(inner);
+    new ResizeObserver(syncPath).observe(btn);
+  }
+
+  function renderPhase() {
+    wrap.dataset.pending = phase === 'pending' ? 'true' : 'false';
+    btn.dataset.phase = phase;
+    btn.setAttribute('aria-disabled', phase === 'done' ? 'true' : 'false');
+    if (phase === 'idle') {
+      inner.innerHTML = `<span class="undo-phase">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polygon points="6 3 20 12 6 21 6 3"/></svg>
+        <span>분석 시작</span>
+      </span>`;
+      btn.setAttribute('aria-label', '분석 시작');
+    } else if (phase === 'pending') {
+      inner.innerHTML = `<span class="undo-phase">
+        <span class="undo-muted">분석 예약</span>
+        <span class="undo-sep" aria-hidden="true"></span>
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 14 4 9l5-5"/><path d="M4 9h10.5a5.5 5.5 0 0 1 5.5 5.5a5.5 5.5 0 0 1-5.5 5.5H11"/></svg>
+        <span>취소</span>
+        <span class="undo-cd"><span id="run-undo-sec">${seconds}</span></span>
+        <kbd class="undo-kbd">${isMac ? '⌘Z' : 'Ctrl Z'}</kbd>
+      </span>`;
+      btn.setAttribute('aria-label', `분석 예약됨. 취소까지 ${seconds}초`);
+    } else {
+      inner.innerHTML = `<span class="undo-phase">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>
+        <span>분석 실행</span>
+      </span>`;
+      btn.setAttribute('aria-label', '분석 실행');
+    }
+    requestAnimationFrame(syncPath);
+  }
+
+  function undo() {
+    cancelAnimationFrame(raf);
+    phase = 'idle';
+    renderPhase();
+  }
+
+  function startPending() {
+    const raw = document.getElementById('ticker-input')?.value.trim() || '';
+    if (!raw) {
+      if (typeof window.openCmdSearch === 'function') window.openCmdSearch();
+      return;
+    }
+    clearTimeout(resetTimer);
+    phase = 'pending';
+    elapsed = 0;
+    remaining = 1;
+    seconds = Math.ceil(DURATION / 1000);
+    renderPhase();
+    last = performance.now();
+
+    const tick = now => {
+      if (phase !== 'pending') return;
+      if (!(hovered || document.hidden)) elapsed += now - last;
+      last = now;
+      const left = Math.max(0, DURATION - elapsed);
+      remaining = left / DURATION;
+      paint();
+      const nextSec = Math.ceil(left / 1000);
+      if (nextSec !== seconds) {
+        seconds = nextSec;
+        const cd = document.querySelector('#run-undo-wrap .undo-cd');
+        if (cd) cd.innerHTML = `<span>${seconds}</span>`;
+        btn.setAttribute('aria-label', `분석 예약됨. 취소까지 ${seconds}초`);
+      }
+      if (left === 0) {
+        phase = 'done';
+        renderPhase();
+        if (typeof runAnalysis === 'function') runAnalysis();
+        resetTimer = setTimeout(() => { phase = 'idle'; renderPhase(); }, RESET_AFTER);
+        return;
+      }
+      raf = requestAnimationFrame(tick);
+    };
+    raf = requestAnimationFrame(tick);
+  }
+
+  btn.addEventListener('click', () => {
+    if (phase === 'idle') startPending();
+    else if (phase === 'pending') undo();
+  });
+  btn.addEventListener('pointerenter', e => { if (e.pointerType === 'mouse') hovered = true; });
+  btn.addEventListener('pointerleave', e => { if (e.pointerType === 'mouse') hovered = false; });
+
+  window.addEventListener('keydown', e => {
+    if (phase !== 'pending') return;
+    const mod = e.metaKey || e.ctrlKey;
+    const t = e.target;
+    const editable = t instanceof HTMLElement && (t.isContentEditable || /^(INPUT|TEXTAREA|SELECT)$/.test(t.tagName));
+    if (mod && !e.shiftKey && e.key.toLowerCase() === 'z' && !editable) {
+      e.preventDefault();
+      undo();
     }
   });
 })();

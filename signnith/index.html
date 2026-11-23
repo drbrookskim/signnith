@@ -209,13 +209,14 @@
     display: inline-block; width: 0.45em; height: 1em; margin-left: 1px; vertical-align: -0.15em;
     background: var(--text); border-radius: 1.5px; opacity: 0;
   }
+  .page-head > div:first-child { width: 100%; min-width: 0; }
   .page-head p { font-size: 0.86rem; color: var(--muted); margin-top: 4px; }
   .market-strip-row {
-    display: flex; align-items: center; gap: 8px; flex-wrap: nowrap;
-    margin-top: 8px; max-width: 100%; overflow-x: auto; scrollbar-width: none;
+    display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: nowrap;
+    margin-top: 8px; width: 100%; max-width: 100%; overflow-x: auto; scrollbar-width: none;
   }
   .market-strip-row::-webkit-scrollbar { display: none; }
-  .cmd-controls { display: inline-flex; align-items: center; gap: 5px; flex-wrap: nowrap; flex-shrink: 0; }
+  .cmd-controls { display: inline-flex; align-items: center; gap: 6px; flex-wrap: nowrap; flex-shrink: 0; margin-left: auto; }
   .icon-select-wrap {
     position: relative; width: 30px; height: 30px; border-radius: 999px;
     border: 1px solid var(--border); background: transparent; color: var(--muted);

@@ -8016,9 +8016,10 @@ function _showOk(id, msg) {
 
 async function authGoogleLogin() {
   if (!_sb) { alert('인증 서비스 연결 실패. 잠시 후 다시 시도해주세요.'); return; }
+  const redirectTo = location.protocol.startsWith('http') ? (location.origin + location.pathname) : 'https://drbrookskim.github.io/signnith/';
   const { error } = await _sb.auth.signInWithOAuth({
     provider: 'google',
-    options: { redirectTo: 'https://drbrookskim.github.io/signnith/' }
+    options: { redirectTo }
   });
   if (error) { _showErr('auth-error-login', 'Google 로그인 실패: ' + error.message); }
 }
@@ -8072,9 +8073,10 @@ async function authSignup() {
   const archiveWin = window.open('', '_blank');
   _setBtnLoading('btn-signup', true, '가입하기');
 
+  const emailRedirectTo = location.protocol.startsWith('http') ? (location.origin + location.pathname) : 'https://drbrookskim.github.io/signnith/';
   const { data, error } = await _sb.auth.signUp({
     email, password: pw,
-    options: { emailRedirectTo: 'https://drbrookskim.github.io/signnith/' }
+    options: { emailRedirectTo }
   });
   _setBtnLoading('btn-signup', false, '가입하기');
 
@@ -8103,8 +8105,9 @@ async function authReset() {
   if (!email) { _showErr('auth-error-reset', '이메일을 입력하세요.'); return; }
 
   _setBtnLoading('btn-reset', true, '재설정 링크 전송');
+  const redirectTo = location.protocol.startsWith('http') ? (location.origin + location.pathname) : 'https://drbrookskim.github.io/signnith/';
   const { error } = await _sb.auth.resetPasswordForEmail(email, {
-    redirectTo: 'https://drbrookskim.github.io/signnith/'
+    redirectTo
   });
   _setBtnLoading('btn-reset', false, '재설정 링크 전송');
 

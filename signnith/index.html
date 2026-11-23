@@ -210,6 +210,17 @@
   }
   .page-head p { font-size: 0.86rem; color: var(--muted); margin-top: 4px; }
   .cmd-controls { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+  .icon-select-wrap {
+    position: relative; width: 36px; height: 36px; border-radius: 999px;
+    border: 1px solid var(--border); background: transparent; color: var(--muted);
+    display: inline-flex; align-items: center; justify-content: center;
+    cursor: pointer; transition: color .15s, border-color .15s, background .15s;
+  }
+  .icon-select-wrap:hover { color: var(--text); border-color: var(--border2); background: var(--card2); }
+  .icon-select-wrap select {
+    position: absolute; inset: 0; width: 100%; height: 100%;
+    opacity: 0; cursor: pointer; appearance: none; -webkit-appearance: none;
+  }
   .stats-grid {
     display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 18px;
   }
@@ -1472,18 +1483,24 @@
       <div class="db-scr-strip" id="market-scramble-strip" aria-label="주요 시장 지수"></div>
     </div>
     <div class="cmd-controls">
-      <select id="period-select" class="select-box" style="height:38px;border-radius:999px;font-size:0.82rem">
-        <option value="1mo">1개월</option>
-        <option value="3mo">3개월</option>
-        <option value="6mo" selected>6개월</option>
-        <option value="1y">1년</option>
-        <option value="2y">2년</option>
-      </select>
-      <select id="style-select" class="select-box" style="height:38px;border-radius:999px;font-size:0.82rem">
-        <option value="balanced" selected>균형</option>
-        <option value="short_term">단기</option>
-        <option value="long_term">장기</option>
-      </select>
+      <div class="icon-select-wrap" id="period-select-wrap" title="분석 기간: 6개월">
+        <svg class="sk-ico" role="img" aria-label="분석 기간" width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><title>분석 기간</title><rect x="2" y="3" width="12" height="11" rx="2"/><path d="M5 1.8v2.4M11 1.8v2.4M2 6.5h12"/></svg>
+        <select id="period-select" aria-label="분석 기간">
+          <option value="1mo">1개월</option>
+          <option value="3mo">3개월</option>
+          <option value="6mo" selected>6개월</option>
+          <option value="1y">1년</option>
+          <option value="2y">2년</option>
+        </select>
+      </div>
+      <div class="icon-select-wrap" id="style-select-wrap" title="투자 전략: 균형">
+        <svg class="sk-ico" role="img" aria-label="투자 전략" width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><title>투자 전략</title><path d="M2.5 4.5h11M2.5 8h11M2.5 11.5h11"/><circle cx="5.5" cy="4.5" r="1.4" fill="var(--bg)"/><circle cx="10.5" cy="8" r="1.4" fill="var(--bg)"/><circle cx="6.5" cy="11.5" r="1.4" fill="var(--bg)"/></svg>
+        <select id="style-select" aria-label="투자 전략">
+          <option value="balanced" selected>균형</option>
+          <option value="short_term">단기</option>
+          <option value="long_term">장기</option>
+        </select>
+      </div>
     </div>
   </section>
 
@@ -2891,6 +2908,23 @@ if (typeof document !== 'undefined') {
   }
   setTimeout(refreshMarketStrip, 350);
   setInterval(refreshMarketStrip, 60000);
+})();
+
+// 기간/전략 아이콘 셀렉트 툴팁 동기화
+(() => {
+  const sync = (id, wrapId, prefix) => {
+    const sel = document.getElementById(id);
+    const wrap = document.getElementById(wrapId);
+    if (!sel || !wrap) return;
+    const upd = () => {
+      const txt = sel.options[sel.selectedIndex]?.text || '';
+      wrap.title = `${prefix}: ${txt}`;
+    };
+    sel.addEventListener('change', upd);
+    upd();
+  };
+  sync('period-select', 'period-select-wrap', '분석 기간');
+  sync('style-select', 'style-select-wrap', '투자 전략');
 })();
 
 function mountSpringSpark(el, normPts, color) {

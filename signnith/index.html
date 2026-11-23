@@ -23,7 +23,7 @@
 <meta name="apple-mobile-web-app-title" content="SIGNNITH"/>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Noto+Sans+KR:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Noto+Sans+KR:wght@400;500;600;700;800&family=Geist+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/d3@7/dist/d3.min.js"></script>
@@ -186,6 +186,28 @@
   }
   .db-roll-word { position: absolute; left: 0; top: 0; display: flex; }
   .db-roll-ch { display: inline-block; white-space: pre; will-change: transform, opacity; }
+  /* ── Scramble Text Market Strip (DesignBookmark) ── */
+  .db-scr-strip {
+    display: flex; flex-wrap: wrap; align-items: center; gap: 6px 14px;
+    margin-top: 8px;
+    font-family: "Geist Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+    font-size: 12px; font-weight: 500; letter-spacing: -0.01em; line-height: 1.4;
+  }
+  .db-scr-item {
+    display: inline-flex; align-items: center; gap: 5px;
+    white-space: pre; cursor: default; color: var(--muted2);
+    padding: 2px 0;
+  }
+  .db-scr-lbl { color: var(--muted); font-weight: 600; }
+  .db-scr-val { display: inline-flex; align-items: center; }
+  .db-scr-c { color: var(--muted2); opacity: 0.65; }
+  .db-scr-c.ok { color: var(--text); opacity: 1; }
+  .db-scr-item.is-up .db-scr-c.ok.is-chg { color: var(--up); }
+  .db-scr-item.is-down .db-scr-c.ok.is-chg { color: var(--down); }
+  .db-scr-caret {
+    display: inline-block; width: 0.5em; height: 1em; margin-left: 2px; vertical-align: -0.15em;
+    background: var(--text); border-radius: 1.5px; opacity: 0;
+  }
   .page-head p { font-size: 0.86rem; color: var(--muted); margin-top: 4px; }
   .cmd-controls { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
   .stats-grid {
@@ -1447,6 +1469,7 @@
         <span class="db-roll-slot" id="explore-roll-slot" aria-hidden="true"></span>
       </h1>
       <p>종목을 선택하면 피드가 컴팩트하게 정리되고, 바로 아래에 실시간 퀀트 분석이 펼쳐집니다.</p>
+      <div class="db-scr-strip" id="market-scramble-strip" aria-label="주요 시장 지수"></div>
     </div>
     <div class="cmd-controls">
       <select id="period-select" class="select-box" style="height:38px;border-radius:999px;font-size:0.82rem">
@@ -2725,6 +2748,150 @@ if (typeof document !== 'undefined') {
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', _bindExploreMorph);
   else _bindExploreMorph();
 }
+
+// Scramble Text Market Strip (KOSPI, KOSDAQ, NASDAQ, NEWYORK, 환율, BITCOIN, 공포/탐욕지수)
+(() => {
+  const strip = document.getElementById('market-scramble-strip');
+  if (!strip || !window.Motion) return;
+
+  const GLYPHS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789#%&*+=/<>';
+  const glyph = () => GLYPHS[(Math.random() * GLYPHS.length) | 0];
+  const FLICKER = 0.055;
+
+  const ITEMS = [
+    { id: 'kospi',  label: 'KOSPI',    symbol: '^KS11',   text: '2,501.24 +0.42%', dir: 1 },
+    { id: 'kosdaq', label: 'KOSDAQ',   symbol: '^KQ11',   text: '684.15 -0.28%',   dir: -1 },
+    { id: 'nasdaq', label: 'NASDAQ',   symbol: '^IXIC',   text: '19,280.10 +0.65%', dir: 1 },
+    { id: 'nyse',   label: 'NEWYORK',  symbol: '^GSPC',   text: '5,969.34 +0.31%',  dir: 1 },
+    { id: 'fx',     label: '환율',     symbol: 'KRW=X',   text: '1,398.40 +0.14%',  dir: 1 },
+    { id: 'btc',    label: 'BITCOIN',  symbol: 'BTC-USD', text: '$98,420 +1.85%',   dir: 1 },
+    { id: 'fng',    label: '공포/탐욕', symbol: null,      text: '68 탐욕',          dir: 1 },
+  ];
+
+  let clock = 0;
+  const slots = ITEMS.map((it, idx) => {
+    const row = document.createElement('span');
+    row.className = `db-scr-item ${it.dir >= 0 ? 'is-up' : 'is-down'}`;
+    const lbl = document.createElement('span');
+    lbl.className = 'db-scr-lbl';
+    lbl.textContent = it.label;
+    const val = document.createElement('span');
+    val.className = 'db-scr-val';
+    const caret = document.createElement('span');
+    caret.className = 'db-scr-caret';
+    caret.setAttribute('aria-hidden', 'true');
+    val.appendChild(caret);
+    row.append(lbl, val);
+    strip.appendChild(row);
+
+    const state = { it, row, val, caret, cells: [], running: false, text: it.text };
+    row.addEventListener('pointerenter', () => {
+      if (!state.running) decodeSlot(state, state.text, 0);
+    });
+    return state;
+  });
+
+  function decodeSlot(st, text, delay = 0) {
+    st.text = text;
+    const chgStart = text.search(/[+\-]\d/);
+    const n = Math.max(text.length, st.cells.length);
+    while (st.cells.length < n) {
+      const el = document.createElement('span');
+      el.className = 'db-scr-c';
+      el.setAttribute('aria-hidden', 'true');
+      st.val.insertBefore(el, st.caret);
+      st.cells.push({ el });
+    }
+    st.cells.forEach((c, i) => {
+      c.to = text[i] ?? '';
+      c.isChg = chgStart >= 0 && i >= chgStart;
+      c.at = clock + delay + 0.14 + i * 0.032 + Math.random() * 0.22;
+      c.tick = 0;
+      c.done = false;
+      c.el.classList.remove('ok', 'is-chg');
+    });
+    st.running = true;
+    st.row.setAttribute('aria-label', `${st.it.label} ${text}`);
+  }
+
+  slots.forEach((st, idx) => decodeSlot(st, st.text, idx * 0.07));
+
+  window.Motion.register({
+    frame(dt) { clock += dt; },
+    render() {
+      slots.forEach(st => {
+        if (st.running) {
+          let left = 0;
+          st.cells.forEach(c => {
+            if (c.done) return;
+            if (clock >= c.at) {
+              c.done = true;
+              if (c.to === '') c.el.remove();
+              else {
+                c.el.textContent = c.to;
+                c.el.classList.add('ok');
+                if (c.isChg) c.el.classList.add('is-chg');
+              }
+            } else {
+              left++;
+              if (c.to === ' ') { c.el.textContent = ' '; c.el.classList.add('ok'); }
+              else if (clock >= c.tick) { c.el.textContent = glyph(); c.tick = clock + FLICKER; }
+            }
+          });
+          if (!left) {
+            st.cells = st.cells.filter(c => c.to !== '');
+            st.running = false;
+          }
+        }
+        st.caret.style.opacity = st.running ? ((clock * 1.8) % 2 < 1 ? '1' : '0.25') : '0';
+      });
+    }
+  });
+
+  async function refreshMarketStrip() {
+    if (typeof fetchWithProxy !== 'function') return;
+    await Promise.allSettled(slots.map(async st => {
+      if (st.it.symbol) {
+        try {
+          const url = `https://query1.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(st.it.symbol)}?interval=1d&range=5d`;
+          const resp = await fetchWithProxy(url);
+          const data = await resp.json();
+          const meta = data?.chart?.result?.[0]?.meta;
+          const p = meta?.regularMarketPrice;
+          const prev = meta?.chartPreviousClose ?? meta?.previousClose;
+          if (typeof p === 'number' && typeof prev === 'number' && prev > 0) {
+            const pct = ((p - prev) / prev) * 100;
+            const sign = pct >= 0 ? '+' : '';
+            const priceStr = st.it.id === 'btc'
+              ? '$' + Math.round(p).toLocaleString('en-US')
+              : p.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+            const nextText = `${priceStr} ${sign}${pct.toFixed(2)}%`;
+            st.row.classList.toggle('is-up', pct >= 0);
+            st.row.classList.toggle('is-down', pct < 0);
+            if (nextText !== st.text) decodeSlot(st, nextText, 0);
+          }
+        } catch {}
+      } else if (st.it.id === 'fng') {
+        try {
+          const r = await fetch('https://api.alternative.me/fng/?limit=1');
+          if (r.ok) {
+            const d = await r.json();
+            const v = Number(d?.data?.[0]?.value);
+            if (Number.isFinite(v)) {
+              const ko = v <= 24 ? '극단공포' : v <= 44 ? '공포' : v <= 55 ? '중립' : v <= 74 ? '탐욕' : '극단탐욕';
+              const nextText = `${v} ${ko}`;
+              st.row.classList.toggle('is-up', v >= 50);
+              st.row.classList.toggle('is-down', v < 50);
+              if (nextText !== st.text) decodeSlot(st, nextText, 0);
+            }
+          }
+        } catch {}
+      }
+    }));
+  }
+  setTimeout(refreshMarketStrip, 350);
+  setInterval(refreshMarketStrip, 60000);
+})();
 
 function mountSpringSpark(el, normPts, color) {
   if (!el || el.dataset.dbMounted) return;

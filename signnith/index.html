@@ -1480,26 +1480,28 @@
         <span class="db-roll-slot" id="explore-roll-slot" aria-hidden="true"></span>
       </h1>
       <p>종목을 선택하면 피드가 컴팩트하게 정리되고, 바로 아래에 실시간 퀀트 분석이 펼쳐집니다.</p>
-      <div class="db-scr-strip" id="market-scramble-strip" aria-label="주요 시장 지수"></div>
-    </div>
-    <div class="cmd-controls">
-      <div class="icon-select-wrap" id="period-select-wrap" title="분석 기간: 6개월">
-        <svg class="sk-ico" role="img" aria-label="분석 기간" width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><title>분석 기간</title><rect x="2" y="3" width="12" height="11" rx="2"/><path d="M5 1.8v2.4M11 1.8v2.4M2 6.5h12"/></svg>
-        <select id="period-select" aria-label="분석 기간">
-          <option value="1mo">1개월</option>
-          <option value="3mo">3개월</option>
-          <option value="6mo" selected>6개월</option>
-          <option value="1y">1년</option>
-          <option value="2y">2년</option>
-        </select>
-      </div>
-      <div class="icon-select-wrap" id="style-select-wrap" title="투자 전략: 균형">
-        <svg class="sk-ico" role="img" aria-label="투자 전략" width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><title>투자 전략</title><path d="M2.5 4.5h11M2.5 8h11M2.5 11.5h11"/><circle cx="5.5" cy="4.5" r="1.4" fill="var(--bg)"/><circle cx="10.5" cy="8" r="1.4" fill="var(--bg)"/><circle cx="6.5" cy="11.5" r="1.4" fill="var(--bg)"/></svg>
-        <select id="style-select" aria-label="투자 전략">
-          <option value="balanced" selected>균형</option>
-          <option value="short_term">단기</option>
-          <option value="long_term">장기</option>
-        </select>
+      <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-top:8px">
+        <div class="db-scr-strip" id="market-scramble-strip" aria-label="주요 시장 지수" style="margin-top:0"></div>
+        <div class="cmd-controls">
+          <div class="icon-select-wrap" id="period-select-wrap" title="분석 기간: 6개월">
+            <svg class="sk-ico" role="img" aria-label="분석 기간" width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><title>분석 기간</title><rect x="2" y="3" width="12" height="11" rx="2"/><path d="M5 1.8v2.4M11 1.8v2.4M2 6.5h12"/></svg>
+            <select id="period-select" aria-label="분석 기간">
+              <option value="1mo">1개월</option>
+              <option value="3mo">3개월</option>
+              <option value="6mo" selected>6개월</option>
+              <option value="1y">1년</option>
+              <option value="2y">2년</option>
+            </select>
+          </div>
+          <div class="icon-select-wrap" id="style-select-wrap" title="투자 전략: 균형">
+            <svg class="sk-ico" role="img" aria-label="투자 전략" width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><title>투자 전략</title><path d="M2.5 4.5h11M2.5 8h11M2.5 11.5h11"/><circle cx="5.5" cy="4.5" r="1.4" fill="var(--bg)"/><circle cx="10.5" cy="8" r="1.4" fill="var(--bg)"/><circle cx="6.5" cy="11.5" r="1.4" fill="var(--bg)"/></svg>
+            <select id="style-select" aria-label="투자 전략">
+              <option value="balanced" selected>균형</option>
+              <option value="short_term">단기</option>
+              <option value="long_term">장기</option>
+            </select>
+          </div>
+        </div>
       </div>
     </div>
   </section>

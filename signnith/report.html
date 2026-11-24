@@ -2478,6 +2478,96 @@ function createTimeDetentDial(container, { minSec = 0, maxSec = 15, avgSec = nul
 
   document.title = `${ticker} 리포트 — SIGNNITH`;
 
+  // ── 당일 로컬 캐시 조회 (종목 분석 캐시 + 리포트 캐시 공유) ──
+  const _todayKey = (() => {
+    const d = new Date();
+    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+  })();
+  const _reportCacheKey = `signnith_report_${_todayKey}`;
+  const _analysisCacheKey = `signnith_analysis_${_todayKey}`;
+  const _baseKey = `${ticker.toUpperCase()}|${period}`;
+
+  const _loadCachedReportBase = () => {
+    if (params.get('refresh') === '1') return null;
+    try {
+      const rMap = JSON.parse(localStorage.getItem(_reportCacheKey) || '{}');
+      if (rMap[_baseKey]?.bars?.length && rMap[_baseKey]?.fundInfo) {
+        return rMap[_baseKey];
+      }
+      const aMap = JSON.parse(localStorage.getItem(_analysisCacheKey) || '{}');
+      const exactKey = `${_baseKey}|${style}`;
+      const hit = aMap[exactKey] || Object.entries(aMap).find(([k]) => k.startsWith(`${_baseKey}|`))?.[1];
+      if (hit?.bars?.length && hit?.fundInfo) {
+        return hit;
+      }
+    } catch {}
+    return null;
+  };
+
+  const _saveCachedReportBase = (entry) => {
+    try {
+      const rMap = JSON.parse(localStorage.getItem(_reportCacheKey) || '{}');
+      rMap[_baseKey] = { ...entry, cachedAt: Date.now() };
+      const entries = Object.entries(rMap).sort((a, b) => (b[1]?.cachedAt || 0) - (a[1]?.cachedAt || 0)).slice(0, 15);
+      localStorage.setItem(_reportCacheKey, JSON.stringify(Object.fromEntries(entries)));
+    } catch {
+      try {
+        localStorage.setItem(_reportCacheKey, JSON.stringify({ [_baseKey]: { ...entry, cachedAt: Date.now() } }));
+      } catch {}
+    }
+  };
+
+  const _renderFromBase = (base) => {
+    const bars = base.bars.map(b => ({ ...b, date: b.date instanceof Date ? b.date : new Date(b.date) }));
+    const fundInfo = base.fundInfo || {};
+    const currency = base.currency || (base.isKr ? 'KRW' : 'USD');
+    const isKr = currency === 'KRW';
+    const price = base.price || bars[bars.length - 1].close;
+    const prevClose = base.prevClose || bars[bars.length - 2]?.close || price;
+    const ind = computeIndicators(bars);
+    const tech = scoreTechnical(ind, price);
+    const fund = scoreFundamental(fundInfo, price);
+    const cs = computeCandlestick(bars);
+    const ew = computeElliottWave(bars);
+    const ichi = computeIchimoku(bars);
+    const smc = computeSMC(bars);
+    const quant = computeQuantFactors(bars, ind);
+    const ipp = computeIPP(bars, ind);
+    const advanced = fuseAdvancedSignals(cs, ew, ichi, smc, quant, ipp);
+    const d = makeDecision(tech, fund, style, price, advanced);
+    const companyName = base.companyName || ticker;
+    const waccResult = computeWACCR(fundInfo, isKr);
+    const exchangeName = base.exchangeName || (isKr ? '' : (fundInfo.exchange || (ticker.includes('.') ? '' : (ticker.length <= 4 ? 'NYSE' : 'NASDAQ'))));
+    document.title = `${companyName} (${ticker}) 리포트 — SIGNNITH`;
+    renderReport({
+      ticker, price, prevClose, isKr, currency, ind, tech, fund, d, cs, ew, ichi, smc, quant, advanced, ipp,
+      companyName, bars,
+      sector: base.sector || fundInfo.sector || '-',
+      waccResult,
+      exchangeName,
+    });
+    initReportTocAndTop();
+  };
+
+  const _cachedBase = _loadCachedReportBase();
+  if (_cachedBase) {
+    _renderFromBase(_cachedBase);
+    // 백그라운드에서 최신 시세만 가볍게 확인 후 변동 시 갱신 (SWR)
+    fetchQuote(ticker).then(quote => {
+      const nextPrice = quote?.regularMarketPrice;
+      if (nextPrice && Math.abs(nextPrice - (_cachedBase.price || 0)) > 1e-6) {
+        const updated = {
+          ..._cachedBase,
+          price: nextPrice,
+          prevClose: quote?.regularMarketPreviousClose || _cachedBase.prevClose,
+        };
+        _saveCachedReportBase(updated);
+        _renderFromBase(updated);
+      }
+    }).catch(() => {});
+    return;
+  }
+
   // 평균 소요시간 계산 (리포트 기록 우선, 없으면 종목 분석 기록 fallback)
   const _avgSecNum = (() => {
     try {
@@ -2631,6 +2721,13 @@ function createTimeDetentDial(container, { minSec = 0, maxSec = 15, avgSec = nul
         localStorage.setItem('signnith_avg_report_ms', JSON.stringify(arr.slice(-10)));
       }
     } catch {}
+
+    _saveCachedReportBase({
+      ticker, price, prevClose, isKr, currency,
+      companyName, bars, fundInfo,
+      sector: fundInfo.sector || '-',
+      exchangeName,
+    });
 
     renderReport({
       ticker, price, prevClose, isKr, currency, ind, tech, fund, d, cs, ew, ichi, smc, quant, advanced, ipp,

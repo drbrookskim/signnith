@@ -3499,6 +3499,7 @@ function _saveReadySummary(ticker, summary) {
 // ── 종목 분석 결과 로컬 캐시 (당일 기준 localStorage + 메모리) ──
 window._analysisMemCache = window._analysisMemCache || {};
 function _analysisCacheStorageKey() { return `signnith_analysis_${_todayKey()}`; }
+function _searchCacheStorageKey() { return `signnith_search_${_todayKey()}`; }
 function _analysisCacheKey(ticker, period, style) {
   return `${String(ticker || '').toUpperCase()}|${period || '6mo'}|${style || 'balanced'}`;
 }
@@ -3506,11 +3507,15 @@ function _analysisCacheKey(ticker, period, style) {
   try {
     const keepReady = _readyStorageKey();
     const keepAnalysis = _analysisCacheStorageKey();
+    const keepSearch = _searchCacheStorageKey();
+    const keepReport = `signnith_report_${_todayKey()}`;
     for (let i = localStorage.length - 1; i >= 0; i--) {
       const k = localStorage.key(i);
       if (!k) continue;
       if ((k.startsWith('signnith_ready_') && k !== keepReady) ||
-          (k.startsWith('signnith_analysis_') && k !== keepAnalysis)) {
+          (k.startsWith('signnith_analysis_') && k !== keepAnalysis) ||
+          (k.startsWith('signnith_search_') && k !== keepSearch) ||
+          (k.startsWith('signnith_report_') && k !== keepReport)) {
         localStorage.removeItem(k);
       }
     }
@@ -3539,10 +3544,22 @@ function getCachedAnalysis(ticker, period, style) {
   const key = _analysisCacheKey(ticker, period, style);
   if (window._analysisMemCache[key]) return window._analysisMemCache[key];
   const map = _loadAnalysisCacheMap();
-  if (!map[key]) return null;
-  const revived = _reviveAnalysisPayload(map[key]);
-  if (revived) window._analysisMemCache[key] = revived;
-  return revived;
+  if (map[key]) {
+    const revived = _reviveAnalysisPayload(map[key]);
+    if (revived) window._analysisMemCache[key] = revived;
+    return revived;
+  }
+  // 동일 종목·기간의 다른 투자성향 캐시가 있으면 지표·데이터 재활용 후 판정만 재계산
+  const prefix = `${String(ticker || '').toUpperCase()}|${period || '6mo'}|`;
+  const altKey = Object.keys(map).find(k => k.startsWith(prefix))
+    || Object.keys(window._analysisMemCache).find(k => k.startsWith(prefix));
+  if (!altKey) return null;
+  const base = window._analysisMemCache[altKey] || _reviveAnalysisPayload(map[altKey]);
+  if (!base || !base.tech || !base.fund || !base.advanced) return null;
+  const decision = makeDecision(base.tech, base.fund, style, base.price, base.advanced);
+  const adapted = { ...base, decision };
+  window._analysisMemCache[key] = adapted;
+  return adapted;
 }
 function saveCachedAnalysis(ticker, period, style, payload) {
   const key = _analysisCacheKey(ticker, period, style);
@@ -5128,6 +5145,17 @@ async function resolveTicker(input) {
   // 1) 내장 사전 (한국어·영어 종목명 → 티커)
   const dictHit = krDictSearch(q);
   if (dictHit.length) return dictHit[0].symbol;
+  const enHit = typeof enDictSearch === 'function' ? enDictSearch(q) : [];
+  if (enHit.length) return enHit[0].symbol;
+
+  // 1.5) 최근 검색/분석 기록에서 즉시 매칭
+  if (typeof loadHistory === 'function') {
+    const ql = q.toLowerCase();
+    const histHit = loadHistory().find(h =>
+      h.ticker?.toLowerCase() === ql || h.name?.toLowerCase() === ql
+    );
+    if (histHit) return histHit.ticker;
+  }
 
   // 2) 티커 형식이면 바로 반환
   if (looksLikeTicker(q)) return q.toUpperCase();
@@ -7922,18 +7950,61 @@ async function fetchWithProxy(url, signal) {
   throw new Error('모든 프록시 실패');
 }
 
+window._searchMemCache = window._searchMemCache || {};
+function _getCachedSearch(q) {
+  const k = q.trim().toLowerCase();
+  if (!k) return null;
+  if (window._searchMemCache[k]) return window._searchMemCache[k];
+  try {
+    const map = JSON.parse(localStorage.getItem(_searchCacheStorageKey()) || '{}');
+    if (Array.isArray(map[k])) {
+      window._searchMemCache[k] = map[k];
+      return map[k];
+    }
+  } catch {}
+  return null;
+}
+function _saveCachedSearch(q, results) {
+  const k = q.trim().toLowerCase();
+  if (!k || !Array.isArray(results) || !results.length) return;
+  window._searchMemCache[k] = results;
+  try {
+    const map = JSON.parse(localStorage.getItem(_searchCacheStorageKey()) || '{}');
+    map[k] = results;
+    const entries = Object.entries(map).slice(-50);
+    localStorage.setItem(_searchCacheStorageKey(), JSON.stringify(Object.fromEntries(entries)));
+  } catch {}
+}
+
 async function searchTickers(q) {
   const isKorean = /[ㄱ-ㅎㅏ-ㅣ가-힣]/.test(q);
+  const ql = q.trim().toLowerCase();
+
+  // 0) 최근 검색·분석 기록 우선 매칭
+  const histHits = (typeof loadHistory === 'function' ? loadHistory() : [])
+    .filter(h => h.ticker?.toLowerCase().includes(ql) || h.name?.toLowerCase().includes(ql))
+    .slice(0, 4)
+    .map(h => ({ symbol: h.ticker, shortname: h.name, exchange: /\.(KS|KQ)$/i.test(h.ticker) ? 'KSC' : '' }));
 
   // 1) 내장 한국 사전
   const dictHits = krDictSearch(q);
   // 2) 내장 영어 사전
   const enHits = enDictSearch(q);
 
-  // 한글 검색: 로컬 사전 결과 즉시 반환 (API 대기 없음)
+  // 한글 검색: 로컬 사전 + 기록 즉시 반환 (API 대기 없음)
   if (isKorean) {
     const seen = new Set();
-    return [...dictHits, ...enHits].filter(r => {
+    return [...histHits, ...dictHits, ...enHits].filter(r => {
+      if (seen.has(r.symbol)) return false;
+      seen.add(r.symbol); return true;
+    });
+  }
+
+  // 영문 검색: 당일 검색 캐시 히트 시 API 대기 없이 즉시 반환
+  const cachedApi = _getCachedSearch(q);
+  if (cachedApi) {
+    const seen = new Set();
+    return [...histHits, ...dictHits, ...enHits, ...cachedApi].filter(r => {
       if (seen.has(r.symbol)) return false;
       seen.add(r.symbol); return true;
     });
@@ -7949,11 +8020,12 @@ async function searchTickers(q) {
     clearTimeout(timer);
     const json = await resp.json();
     apiHits = (json.quotes || []).filter(r => r.symbol && r.quoteType !== 'OPTION');
+    if (apiHits.length) _saveCachedSearch(q, apiHits);
   } catch { /* API 실패·타임아웃 시 사전 결과만 사용 */ }
 
   // 합치기 (중복 제거)
   const seen = new Set();
-  return [...dictHits, ...enHits, ...apiHits].filter(r => {
+  return [...histHits, ...dictHits, ...enHits, ...apiHits].filter(r => {
     if (seen.has(r.symbol)) return false;
     seen.add(r.symbol); return true;
   });

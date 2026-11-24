@@ -271,7 +271,56 @@
     box-shadow:0 4px 24px var(--shadow);
     backdrop-filter:blur(16px);
     -webkit-backdrop-filter:blur(16px);
+    scroll-margin-top: 80px;
   }
+  .rpt-toc {
+    position: fixed;
+    top: 84px;
+    left: max(16px, calc(50% - 640px));
+    width: 210px;
+    max-height: calc(100vh - 108px);
+    overflow-y: auto;
+    padding: 12px 10px;
+    border-radius: 14px;
+    background: var(--card);
+    border: 1px solid var(--border);
+    box-shadow: 0 6px 24px var(--shadow);
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+    z-index: 40;
+    display: none;
+  }
+  .rpt-toc.ready { display: block; }
+  @media (max-width: 1360px) { .rpt-toc.ready { display: none; } }
+  .rpt-toc-head {
+    font-size: 0.68rem; font-weight: 700; letter-spacing: .08em; text-transform: uppercase;
+    color: var(--muted2); padding: 2px 8px 8px; border-bottom: 1px solid var(--border); margin-bottom: 6px;
+  }
+  .rpt-toc-link {
+    display: flex; align-items: center; gap: 7px;
+    padding: 6px 8px; border-radius: 8px; font-size: 0.76rem; font-weight: 500;
+    color: var(--muted); text-decoration: none; line-height: 1.35;
+    transition: background .15s, color .15s;
+  }
+  .rpt-toc-link:hover { color: var(--text); background: var(--card2); }
+  .rpt-toc-link.active { color: var(--text); background: var(--card2); font-weight: 700; }
+  .rpt-toc-dot {
+    width: 5px; height: 5px; border-radius: 50%; background: var(--border2); flex-shrink: 0;
+    transition: background .15s, transform .15s;
+  }
+  .rpt-toc-link.active .rpt-toc-dot { background: var(--green); transform: scale(1.35); }
+  .rpt-top-btn {
+    position: fixed; right: 24px; bottom: 28px; z-index: 50;
+    display: inline-flex; align-items: center; gap: 6px;
+    height: 38px; padding: 0 14px; border-radius: 999px;
+    border: 1px solid var(--border2); background: var(--card); color: var(--text);
+    font-family: inherit; font-size: 0.78rem; font-weight: 700; cursor: pointer;
+    box-shadow: 0 8px 24px var(--shadow); backdrop-filter: blur(12px);
+    opacity: 0; pointer-events: none; transform: translateY(10px);
+    transition: opacity .2s, transform .2s, border-color .15s;
+  }
+  .rpt-top-btn:hover { border-color: var(--text); }
+  .rpt-top-btn.show { opacity: 1; pointer-events: auto; transform: translateY(0); }
   .section-title{
     font-size:1.1rem;
     font-weight:700;
@@ -447,6 +496,11 @@
   </div>
 </header>
 
+<nav class="rpt-toc" id="rpt-toc" aria-label="리포트 목차"></nav>
+<button type="button" class="rpt-top-btn" id="rpt-top-btn" aria-label="맨 위로 이동">
+  <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 13V3M3.5 7.5L8 3l4.5 4.5"/></svg>
+  <span>Top</span>
+</button>
 <div class="page">
   <div id="report-content">
     <!-- 로딩 스켈레톤: JS가 실제 콘텐츠로 교체 -->
@@ -2077,6 +2131,7 @@ function renderReport(data) {
       waccResult,
       exchangeName,
     });
+    initReportTocAndTop();
 
   } catch(e) {
     document.getElementById('report-content').innerHTML = `
@@ -2356,6 +2411,59 @@ applyThemeR(_qThemeR || localStorage.getItem(THEME_KEY) || 'dark');
 
   requestAnimationFrame(draw);
 })();
+
+function initReportTocAndTop() {
+  const toc = document.getElementById('rpt-toc');
+  const topBtn = document.getElementById('rpt-top-btn');
+  const cards = [...document.querySelectorAll('#report-content .section-card')];
+  if (toc && cards.length) {
+    const items = [];
+    cards.forEach((card, idx) => {
+      const titleEl = card.querySelector('.section-title');
+      if (!titleEl) return;
+      const id = card.id || `rpt-sec-${idx}`;
+      card.id = id;
+      const text = titleEl.textContent.trim();
+      items.push({ id, text, card });
+    });
+    if (items.length) {
+      toc.innerHTML = `<div class="rpt-toc-head">Contents</div>` +
+        items.map((it, i) =>
+          `<a href="#${it.id}" class="rpt-toc-link${i === 0 ? ' active' : ''}" data-toc-id="${it.id}"><span class="rpt-toc-dot"></span><span>${it.text}</span></a>`
+        ).join('');
+      toc.classList.add('ready');
+      const links = [...toc.querySelectorAll('.rpt-toc-link')];
+      const setActive = id => {
+        links.forEach(a => a.classList.toggle('active', a.dataset.tocId === id));
+      };
+      links.forEach(a => {
+        a.addEventListener('click', e => {
+          e.preventDefault();
+          const target = document.getElementById(a.dataset.tocId);
+          if (target) target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          setActive(a.dataset.tocId);
+        });
+      });
+      const updateScrollSpy = () => {
+        const y = window.scrollY + 130;
+        let cur = items[0].id;
+        for (const it of items) {
+          if (it.card.offsetTop <= y) cur = it.id;
+        }
+        setActive(cur);
+      };
+      window.addEventListener('scroll', updateScrollSpy, { passive: true });
+      updateScrollSpy();
+    }
+  }
+  if (topBtn && !topBtn.dataset.bound) {
+    topBtn.dataset.bound = '1';
+    const syncTop = () => topBtn.classList.toggle('show', window.scrollY > 240);
+    window.addEventListener('scroll', syncTop, { passive: true });
+    topBtn.addEventListener('click', () => window.scrollTo({ top: 0, behavior: 'smooth' }));
+    syncTop();
+  }
+}
 </script>
 </body>
 </html>

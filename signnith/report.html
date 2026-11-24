@@ -61,6 +61,7 @@
   }
 
   *{ box-sizing:border-box; margin:0; padding:0; }
+  .sk-ico { display:inline-block; vertical-align:-2px; flex-shrink:0; }
   body{
     font-family:'Space Grotesk','Noto Sans KR',-apple-system,sans-serif;
     background: var(--bg);
@@ -745,7 +746,7 @@ const KR_NAME_MAP = {
   '018670.KS':'SK가스','036460.KS':'한국가스공사','010130.KS':'고려아연',
   '000670.KS':'영풍','103140.KS':'풍산','006260.KS':'LS',
   '003490.KS':'대한항공','020560.KS':'아시아나항공','000720.KS':'현대건설',
-  '006360.KS':'GS건설','047040.KS':'대우건설','028050.KS':'삼성엔지니어링',
+  '006360.KS':'GS건설','047040.KS':'대우건설','028050.KS':'삼성E&A',
   '069960.KS':'현대백화점','004170.KS':'신세계','023530.KS':'롯데쇼핑',
   '139480.KS':'이마트','008770.KS':'호텔신라','035250.KS':'강원랜드',
   '032830.KS':'삼성생명','000810.KS':'삼성화재','088350.KS':'한화생명',
@@ -753,14 +754,23 @@ const KR_NAME_MAP = {
   '006800.KS':'미래에셋증권','039490.KS':'키움증권','018260.KS':'삼성SDS',
   '267250.KS':'HD현대','036570.KS':'엔씨소프트','259960.KS':'크래프톤',
   '204320.KS':'HL만도','307950.KS':'현대오토에버','375500.KS':'DL이앤씨',
-  '294870.KS':'HDC현대산업개발','383220.KS':'F&F','081660.KS':'휠라홀딩스',
+  '294870.KS':'HDC현대산업개발','383220.KS':'F&F','081660.KS':'미스토홀딩스',
+  // 2024~2026 주요 신규 상장 (KOSPI)
+  '443060.KS':'HD현대마린솔루션','278470.KS':'에이피알','450080.KS':'에코프로머티',
+  '064400.KS':'LG씨엔에스','462870.KS':'시프트업','489790.KS':'한화비전',
+  '475150.KS':'SK이터닉스','484870.KS':'엠앤씨솔루션','460860.KS':'전진건설로봇',
+  '487570.KS':'달바글로벌','457190.KS':'이수스페셜티케미컬',
   // KOSDAQ
   '086520.KQ':'에코프로','247540.KQ':'에코프로비엠','196170.KQ':'알테오젠',
-  '091990.KQ':'셀트리온헬스케어','028300.KQ':'HLB','141080.KQ':'리가켐바이오',
+  '028300.KQ':'HLB','141080.KQ':'리가켐바이오',
   '214150.KQ':'클래시스','214450.KQ':'파마리서치','145020.KQ':'휴젤',
   '263750.KQ':'펄어비스','293490.KQ':'카카오게임즈','277810.KQ':'레인보우로보틱스',
   '058470.KQ':'리노공업','039030.KQ':'이오테크닉스','403870.KQ':'HPSP',
   '357780.KQ':'솔브레인','432720.KQ':'퀄리타스반도체','094360.KQ':'칩스앤미디어',
+  '417200.KQ':'LS머트리얼즈','440110.KQ':'파두','347850.KQ':'디앤디파마텍',
+  '475830.KQ':'오름테라퓨틱','475960.KQ':'토모큐브','462510.KQ':'쓰리빌리언',
+  '468530.KQ':'넥스트바이오메디컬','483650.KQ':'클로봇','474170.KQ':'루미르',
+  '419530.KQ':'SAMG엔터',
 };
 
 // 미국 티커 → 회사명 (index.html EN_TICKER_NAME과 동기화)
@@ -802,7 +812,49 @@ const EN_TICKER_NAME_R = {
   'AMBA':'Ambarella','MTSI':'MACOM Technology','AAOI':'Applied Optoelectronics',
   'LITE':'Lumentum','COHR':'Coherent','GLW':'Corning','FN':'Fabrinet',
   'CIEN':'Ciena',
+  'WBD':'Warner Bros Discovery','PSKY':'Paramount Skydance',
+  'XYZ':'Block','RDDT':'Reddit','ALAB':'Astera Labs','CRWV':'CoreWeave',
+  'FIG':'Figma','KLAR':'Klarna','CHYM':'Chime Financial','ETOR':'eToro',
+  'BULL':'Webull','SAIL':'SailPoint','GEV':'GE Vernova','SOLV':'Solventum',
+  'SNDK':'SanDisk','VIK':'Viking Holdings','TEM':'Tempus AI','RBRK':'Rubrik',
+  'OKLO':'Oklo','SMR':'NuScale Power','SERV':'Serve Robotics','NBIS':'Nebius Group',
+  'CRDO':'Credo Technology','APP':'AppLovin','NET':'Cloudflare','ZS':'Zscaler',
+  'DUOL':'Duolingo','CVNA':'Carvana','APLD':'Applied Digital','IREN':'IREN',
 };
+
+// ══════════════════════════════════════════════════════
+//  스케치 아이콘 (index.html skIcon 동기화)
+// ══════════════════════════════════════════════════════
+function skIcon(name, size = 14) {
+  const paths = {
+    bolt: '<path d="M9 1.5L4 9h4l-1 5.5L12 7H8l1-5.5z"/>',
+    refresh: '<path d="M13.5 8a5.5 5.5 0 1 1-1.6-3.9L13.5 5.5"/><path d="M13.5 2.5v3h-3"/>',
+    star: '<path d="M8 1.8l1.9 3.9 4.3.6-3.1 3 .7 4.3L8 11.6l-3.8 2 .7-4.3-3.1-3 4.3-.6z"/>',
+    doc: '<rect x="3" y="2" width="10" height="12" rx="1.5"/><path d="M5.5 6h5M5.5 8.5h5M5.5 11h3"/>',
+    news: '<rect x="2" y="3" width="12" height="10" rx="1.5"/><path d="M5 6.5h4M5 9h6M5 11h4"/>',
+    chart: '<path d="M2 12.5h12"/><path d="M3.5 9.5L6.5 6.5L9 8.5L12.5 4"/>',
+    bar: '<path d="M2 13h12"/><path d="M4.5 13V8.5M8 13V5M11.5 13V6.5"/>',
+    cpu: '<rect x="4" y="4" width="8" height="8" rx="1.2"/><path d="M6.5 2v2M9.5 2v2M6.5 12v2M9.5 12v2M2 6.5h2M2 9.5h2M12 6.5h2M12 9.5h2"/>',
+    compass: '<circle cx="8" cy="8" r="5.5"/><path d="M10.2 5.8l-1.4 3.4-3.4 1.4 1.4-3.4z"/>',
+    graph: '<circle cx="4" cy="5" r="1.5"/><circle cx="12" cy="5" r="1.5"/><circle cx="8" cy="12" r="1.5"/><path d="M5.3 5.8l2 5M10.7 5.8l-2 5M5.5 5h5"/>',
+    check: '<path d="M3 8.5l3.2 3.2L13 4.8"/>',
+    target: '<circle cx="8" cy="8" r="5.5"/><circle cx="8" cy="8" r="2.2"/>',
+    shield: '<path d="M8 2l5 2v4c0 3.2-2.1 5.3-5 6-2.9-.7-5-2.8-5-6V4l5-2z"/>',
+    alert: '<path d="M8 2L1.5 13.5h13L8 2z"/><path d="M8 6.5v3.5M8 11.8v.2"/>',
+    eye: '<path d="M1.5 8s2.5-4 6.5-4 6.5 4 6.5 4-2.5 4-6.5 4-6.5-4-6.5-4z"/><circle cx="8" cy="8" r="1.6"/>',
+    ban: '<circle cx="8" cy="8" r="5.5"/><path d="M4.2 4.2l7.6 7.6"/>',
+    sparkle: '<path d="M8 2v2M8 12v2M2 8h2M12 8h2"/><circle cx="8" cy="8" r="2.5"/>',
+    bulb: '<path d="M6 11.5h4M6.5 13.5h3M5.5 9.5c-.9-.7-1.5-1.8-1.5-3a4 4 0 1 1 8 0c0 1.2-.6 2.3-1.5 3l-.5 1H6l-.5-1z"/>',
+    pin: '<path d="M8 14s4.5-4.2 4.5-7.5a4.5 4.5 0 1 0-9 0C3.5 9.8 8 14 8 14z"/><circle cx="8" cy="6.5" r="1.4"/>',
+    up: '<path d="M3 10l5-5 5 5"/>',
+    down: '<path d="M3 6l5 5 5-5"/>',
+    candle: '<path d="M5 2.5v2M5 11.5v2"/><rect x="3.5" y="4.5" width="3" height="7" rx="0.6"/><path d="M11 3.5v2.5M11 10.5v2.5"/><rect x="9.5" y="6" width="3" height="4.5" rx="0.6"/>',
+    layers: '<path d="M8 2.5L2 5.8l6 3.2 6-3.2L8 2.5z"/><path d="M2 8.8l6 3.2 6-3.2"/><path d="M2 11.5l6 3.2 6-3.2"/>',
+    pause: '<path d="M5.5 3.5v9M10.5 3.5v9"/>',
+    clock: '<circle cx="8" cy="8" r="5.5"/><path d="M8 4.8v3.4l2.4 1.4"/>',
+  };
+  return `<svg class="sk-ico" width="${size}" height="${size}" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="margin-right:4px">${paths[name] || paths.bolt}</svg>`;
+}
 
 // ══════════════════════════════════════════════════════
 //  유틸
@@ -1275,7 +1327,7 @@ function renderChartPatternV2R(patterns) {
       : '명확한 방향성 확인 전까지 신규 진입 보류.';
     conflictHtml = `<div style="width:100%;flex-basis:100%;flex-shrink:0;background:rgba(184,134,11,0.08);border:1px solid rgba(184,134,11,0.25);border-radius:10px;padding:12px 14px;margin-bottom:12px">
       <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px">
-        <span style="font-size:0.7rem;font-weight:700;background:rgba(184,134,11,0.2);color:#B8860B;padding:2px 10px;border-radius:20px">⚡ 상충 신호 감지</span>
+        <span style="font-size:0.7rem;font-weight:700;background:rgba(184,134,11,0.2);color:#B8860B;padding:2px 10px;border-radius:20px">${skIcon('bolt', 12)}상충 신호 감지</span>
         <span style="font-size:0.7rem;color:#94a3b8">매수 ${bullish.length}개 · 매도 ${bearish.length}개</span>
         <span style="margin-left:auto;font-size:0.7rem;font-weight:700;color:${biasColor}">${bias}</span>
       </div>
@@ -1404,48 +1456,48 @@ function computeIPP(bars, ind) {
 
   // RSI 과매도/과매수
   const rsi = last(ind.rsi);
-  if (rsi != null && rsi < 30)  { rule_score += 20; signals.push('🔴 RSI 과매도 (' + rsi.toFixed(1) + ')'); }
-  if (rsi != null && rsi > 70)  { rule_score -= 20; signals.push('🔵 RSI 과매수 (' + rsi.toFixed(1) + ')'); }
+  if (rsi != null && rsi < 30)  { rule_score += 20; signals.push(skIcon('up', 12) + 'RSI 과매도 (' + rsi.toFixed(1) + ')'); }
+  if (rsi != null && rsi > 70)  { rule_score -= 20; signals.push(skIcon('down', 12) + 'RSI 과매수 (' + rsi.toFixed(1) + ')'); }
 
   // 연속 하락 4일+ + 긴 아래꼬리
   let consec_down = 0;
   for (let i = li; i >= Math.max(0, li-5); i--) { if (C[i] < C[i-1]) consec_down++; else break; }
   const body = Math.abs(C[li] - bars[li].open);
   const lower_shadow = Math.min(C[li], bars[li].open) - L[li];
-  if (consec_down >= 4 && lower_shadow > body * 1.5) { rule_score += 25; signals.push('🔨 ' + consec_down + '일 연속하락 + 긴 아래꼬리'); }
+  if (consec_down >= 4 && lower_shadow > body * 1.5) { rule_score += 25; signals.push(skIcon('candle', 12) + consec_down + '일 연속하락 + 긴 아래꼬리'); }
 
   // 연속 상승 4일+ + 긴 윗꼬리
   let consec_up = 0;
   for (let i = li; i >= Math.max(0, li-5); i--) { if (C[i] > C[i-1]) consec_up++; else break; }
   const upper_shadow = H[li] - Math.max(C[li], bars[li].open);
-  if (consec_up >= 4 && upper_shadow > body * 1.5) { rule_score -= 25; signals.push('⚡ ' + consec_up + '일 연속상승 + 긴 윗꼬리'); }
+  if (consec_up >= 4 && upper_shadow > body * 1.5) { rule_score -= 25; signals.push(skIcon('candle', 12) + consec_up + '일 연속상승 + 긴 윗꼬리'); }
 
   // OBV 다이버전스
   let obv = 0; const obvArr = [];
   for (let i = 0; i < n; i++) { obv += (i === 0 ? 0 : C[i] > C[i-1] ? V[i] : C[i] < C[i-1] ? -V[i] : 0); obvArr.push(obv); }
   const obvSlope = n >= 10 ? obvArr[li] - obvArr[li-10] : 0;
   const priceSlope = n >= 10 ? C[li] - C[li-10] : 0;
-  if (obvSlope > 0 && priceSlope < 0) { rule_score += 20; signals.push('📈 OBV↑ + 주가↓ (강세 다이버전스)'); }
-  if (obvSlope < 0 && priceSlope > 0) { rule_score -= 20; signals.push('📉 OBV↓ + 주가↑ (약세 다이버전스)'); }
+  if (obvSlope > 0 && priceSlope < 0) { rule_score += 20; signals.push(skIcon('chart', 12) + 'OBV↑ + 주가↓ (강세 다이버전스)'); }
+  if (obvSlope < 0 && priceSlope > 0) { rule_score -= 20; signals.push(skIcon('down', 12) + 'OBV↓ + 주가↑ (약세 다이버전스)'); }
 
   // 거래량 수렴/급증
   if (n >= 21) {
     const vol20avg = V.slice(li-19, li+1).reduce((a,b) => a+b, 0) / 20;
     const vol5avg  = V.slice(li-4,  li+1).reduce((a,b) => a+b, 0) / 5;
     const volRatio = vol20avg > 0 ? vol5avg / vol20avg : 1;
-    if (volRatio < 0.5) { rule_score += 10; signals.push('📊 거래량 바닥 수렴 (' + volRatio.toFixed(2) + 'x)'); }
-    if (volRatio > 2.0 && Math.abs(priceSlope) / C[li-10] < 0.01) { rule_score -= 15; signals.push('💥 거래량 급증 + 가격 미반응'); }
+    if (volRatio < 0.5) { rule_score += 10; signals.push(skIcon('bar', 12) + '거래량 바닥 수렴 (' + volRatio.toFixed(2) + 'x)'); }
+    if (volRatio > 2.0 && Math.abs(priceSlope) / C[li-10] < 0.01) { rule_score -= 15; signals.push(skIcon('alert', 12) + '거래량 급증 + 가격 미반응'); }
   }
 
   // 볼린저밴드 수축 (밴드폭 / 중심선)
   const bbUv = last(ind.bbU), bbLv = last(ind.bbL), sma20v = last(ind.sma20);
   const bbW = (bbUv != null && bbLv != null && sma20v != null && sma20v > 0) ? (bbUv - bbLv) / sma20v : null;
-  if (bbW != null && bbW < 0.05) { rule_score += 12; signals.push('🎯 BB 수축 (에너지 축적)'); }
+  if (bbW != null && bbW < 0.05) { rule_score += 12; signals.push(skIcon('target', 12) + 'BB 수축 (에너지 축적)'); }
 
   // ATR 수축
   const atr = last(ind.atr);
   const atrMA = n >= 30 ? ind.atr.slice(li-29, li+1).filter(v=>v!=null).reduce((a,b)=>a+b,0)/30 : null;
-  if (atr != null && atrMA != null && atr < atrMA * 0.7) { rule_score += 10; signals.push('🔇 ATR 수축 (<0.7배, 변동성 소진)'); }
+  if (atr != null && atrMA != null && atr < atrMA * 0.7) { rule_score += 10; signals.push(skIcon('eye', 12) + 'ATR 수축 (<0.7배, 변동성 소진)'); }
 
   // 앙상블: 규칙 기반만 사용 (ML·뉴스는 브라우저 환경 불가)
   const ipp_score = Math.max(-100, Math.min(100, rule_score));
@@ -1612,7 +1664,7 @@ function computeBacktest(bars) {
 function renderBacktest(stats, bars) {
   if (!stats) return `
     <div style="color:var(--muted2);font-size:0.75rem;text-align:center;padding:10px 0">
-      📉 데이터 부족 — 백테스트 최소 80거래일 필요
+      ${skIcon('down', 13)}데이터 부족 — 백테스트 최소 80거래일 필요
     </div>`;
 
   const months   = Math.round(bars.length / 21);
@@ -1648,7 +1700,7 @@ function renderBacktest(stats, bars) {
   return `
   <div style="margin-top:16px">
     <div style="font-size:0.68rem;font-weight:700;color:var(--muted2);letter-spacing:.08em;text-transform:uppercase;margin-bottom:8px">
-      📊 과거 신호 적중률 — 최근 ${months}개월 백테스트
+      ${skIcon('bar', 13)}과거 신호 적중률 — 최근 ${months}개월 백테스트
     </div>
     <div style="overflow-x:auto;border-radius:8px;border:1px solid var(--border)">
       <table style="width:100%;border-collapse:collapse">
@@ -1697,7 +1749,7 @@ function renderReport(data) {
 
   const sec1 = `
   <div class="section-card">
-    <div class="section-title">📊 종합 투자 판단</div>
+    <div class="section-title">${skIcon('bar', 15)}종합 투자 판단</div>
 
     ${metricBlock({
       subTitle: '통합 신호 강도',
@@ -1782,7 +1834,7 @@ function renderReport(data) {
   const I = tech.indicators;
   const sec2 = `
   <div class="section-card">
-    <div class="section-title">📈 기술적 분석</div>
+    <div class="section-title">${skIcon('chart', 15)}기술적 분석</div>
 
     ${metricBlock({
       subTitle: 'RSI — 상대강도지수 (14일)',
@@ -1841,7 +1893,7 @@ function renderReport(data) {
   });
   const sec2b = cpv2R.length ? `
   <div class="section-card">
-    <div class="section-title">🕯️ 차트 패턴 분석 (캔들·이평·Gap·추세)</div>
+    <div class="section-title">${skIcon('candle', 15)}차트 패턴 분석 (캔들·이평·Gap·추세)</div>
     <div style="font-size:0.72rem;color:#64748b;margin-bottom:12px">chart_patterns_analysis_v2 기반 자동 감지 — 골든/데드크로스 · 갭 · 쌍봉/쌍바닥 · 장악형 · 도지 등 17종</div>
     ${renderChartPatternV2R(cpv2R)}
   </div>` : '';
@@ -1850,7 +1902,7 @@ function renderReport(data) {
   const csScore = cs.cs_score/Math.max(1,Math.abs(cs.cs_score));
   const sec3 = `
   <div class="section-card">
-    <div class="section-title">🔬 고급 기술 분석 (Layer 2~5)</div>
+    <div class="section-title">${skIcon('cpu', 15)}고급 기술 분석 (Layer 2~5)</div>
 
     ${metricBlock({
       subTitle: '캔들스틱 패턴 분석',
@@ -1912,11 +1964,15 @@ function renderReport(data) {
   </div>`;
 
   // ── 섹션 3-B: 변곡점 예측 (IPP) ──
-  const ippDirLabel = { BULLISH_REVERSAL: '🟢 상승전환 임박', BEARISH_REVERSAL: '🔴 하락전환 임박', NEUTRAL: '🟡 중립' };
+  const ippDirLabel = {
+    BULLISH_REVERSAL: `<span style="color:var(--green)">${skIcon('up', 13)}상승전환 임박</span>`,
+    BEARISH_REVERSAL: `<span style="color:var(--red)">${skIcon('down', 13)}하락전환 임박</span>`,
+    NEUTRAL: `<span style="color:var(--yellow)">${skIcon('eye', 13)}중립</span>`,
+  };
   const ippBarScore = Math.max(-1, Math.min(1, (ipp?.ipp_score ?? 0) / 100));
   const sec3b = `
   <div class="section-card">
-    <div class="section-title">🔮 변곡점 예측 (IPP)</div>
+    <div class="section-title">${skIcon('compass', 15)}변곡점 예측 (IPP)</div>
     ${metricBlock({
       subTitle: 'IPP Score — 방향 전환 가능성',
       barPct: scoreToPct(ippBarScore),
@@ -1940,7 +1996,7 @@ function renderReport(data) {
   const M = fund.metrics;
   const sec4 = `
   <div class="section-card">
-    <div class="section-title">💼 기본적 분석 (Fundamentals)</div>
+    <div class="section-title">${skIcon('doc', 15)}기본적 분석 (Fundamentals)</div>
 
     ${metricBlock({
       subTitle: 'PER — 주가수익비율',
@@ -2031,7 +2087,7 @@ function renderReport(data) {
     }).join('');
     sec6 = `
   <div class="section-card">
-    <div class="section-title">📦 관련 ETF</div>
+    <div class="section-title">${skIcon('layers', 15)}관련 ETF</div>
     <div style="margin-bottom:14px;padding:10px 14px;background:var(--card2);border-radius:10px;border:1px solid var(--border);display:flex;align-items:center;gap:12px">
       <div>
         <div style="font-size:0.68rem;color:var(--muted);margin-bottom:2px">섹터 분류</div>
@@ -2044,7 +2100,7 @@ function renderReport(data) {
     <div style="font-size:0.68rem;font-weight:700;color:var(--muted2);letter-spacing:.08em;text-transform:uppercase;margin-bottom:4px">ETF · 관련도</div>
     ${relBars}
     <div style="margin-top:10px;font-size:0.68rem;color:var(--muted);padding:6px 10px;background:rgba(59,130,246,.06);border-radius:6px;line-height:1.6">
-      💡 관련도(%)는 동일 섹터 ETF 내 편입 비중·유사도를 기준으로 산출한 추정치입니다. 실제 편입 여부는 ETF 운용사 페이지에서 확인하세요.
+      ${skIcon('bulb', 13)}관련도(%)는 동일 섹터 ETF 내 편입 비중·유사도를 기준으로 산출한 추정치입니다. 실제 편입 여부는 ETF 운용사 페이지에서 확인하세요.
     </div>
   </div>`;
   } else if (vcMatch) {
@@ -2074,7 +2130,7 @@ function renderReport(data) {
     }).join('');
     sec6 = `
   <div class="section-card">
-    <div class="section-title">🔗 밸류체인 분석</div>
+    <div class="section-title">${skIcon('graph', 15)}밸류체인 분석</div>
     <div style="margin-bottom:14px;padding:10px 14px;background:var(--card2);border-radius:10px;border:1px solid var(--border)">
       <div style="font-size:0.7rem;color:var(--muted);margin-bottom:2px">산업군</div>
       <div style="font-size:0.9rem;font-weight:700;color:var(--text)">${industry.industry}</div>
@@ -2083,13 +2139,13 @@ function renderReport(data) {
     <div style="font-size:0.7rem;font-weight:700;color:var(--muted2);letter-spacing:.08em;text-transform:uppercase;margin-bottom:8px">공급망 전체 구조</div>
     ${sectorRows}
     <div style="margin-top:8px;font-size:0.68rem;color:var(--muted);padding:6px 10px;background:rgba(59,130,246,.06);border-radius:6px;line-height:1.6">
-      💡 동일 산업군 내 섹터별 포지셔닝을 확인하세요. <span style="color:var(--green)">● 현재 섹터</span>의 상·하류 업체 동향이 주가에 영향을 줄 수 있습니다.
+      ${skIcon('bulb', 13)}동일 산업군 내 섹터별 포지셔닝을 확인하세요. <span style="color:var(--green)">● 현재 섹터</span>의 상·하류 업체 동향이 주가에 영향을 줄 수 있습니다.
     </div>
   </div>`;
   } else {
     sec6 = `
   <div class="section-card">
-    <div class="section-title">🔗 밸류체인 분석</div>
+    <div class="section-title">${skIcon('graph', 15)}밸류체인 분석</div>
     <div style="color:var(--muted);font-size:0.85rem;padding:16px 0;text-align:center">
       해당 종목의 밸류체인 데이터가 등록되어 있지 않습니다.<br>
       <span style="font-size:0.75rem;color:var(--muted2)">(현재 한국 주요 산업군 지원)</span>
@@ -2101,7 +2157,7 @@ function renderReport(data) {
   const W = waccResult;
   const sec5 = `
   <div class="section-card">
-    <div class="section-title">📐 WACC 할인율 분석 (가중평균자본비용)</div>
+    <div class="section-title">${skIcon('compass', 15)}WACC 할인율 분석 (가중평균자본비용)</div>
 
     ${metricBlock({
       subTitle: 'WACC — 최종 할인율',
@@ -2193,48 +2249,48 @@ function renderReport(data) {
     // Action Steps
     const steps = [];
     if (isBuy && highConf && goodRR) {
-      steps.push(`<li>✅ <b>진입 실행</b>: 현재가 <b>${fmt(price,isKr)} ${currency}</b> 부근에서 매수 진입 검토</li>`);
-      steps.push(`<li>🎯 <b>목표가</b>: <b>${fmt(d.targetPrice,isKr)} ${currency}</b> 도달 시 분할 차익실현</li>`);
-      steps.push(`<li>🛡️ <b>손절가</b>: <b>${fmt(d.stopLoss,isKr)} ${currency}</b> 이탈 시 즉시 손절 (R:R ${d.rr.toFixed(1)}:1)</li>`);
-      steps.push(`<li>📐 <b>포지션 크기</b>: 신뢰도 ${Math.round(d.confidence*100)}% → ${highConf?'최대 포지션 가능':'분할 진입 권장'}</li>`);
+      steps.push(`<li>${skIcon('check', 13)}<b>진입 실행</b>: 현재가 <b>${fmt(price,isKr)} ${currency}</b> 부근에서 매수 진입 검토</li>`);
+      steps.push(`<li>${skIcon('target', 13)}<b>목표가</b>: <b>${fmt(d.targetPrice,isKr)} ${currency}</b> 도달 시 분할 차익실현</li>`);
+      steps.push(`<li>${skIcon('shield', 13)}<b>손절가</b>: <b>${fmt(d.stopLoss,isKr)} ${currency}</b> 이탈 시 즉시 손절 (R:R ${d.rr.toFixed(1)}:1)</li>`);
+      steps.push(`<li>${skIcon('compass', 13)}<b>포지션 크기</b>: 신뢰도 ${Math.round(d.confidence*100)}% → ${highConf?'최대 포지션 가능':'분할 진입 권장'}</li>`);
     } else if (isBuy && !highConf) {
-      steps.push(`<li>⚠️ <b>분할 진입</b>: 신뢰도 ${Math.round(d.confidence*100)}% — 3분할 이상 나눠서 진입 (1/3씩)</li>`);
-      steps.push(`<li>🎯 <b>목표가</b>: <b>${fmt(d.targetPrice,isKr)} ${currency}</b></li>`);
-      steps.push(`<li>🛡️ <b>손절가</b>: <b>${fmt(d.stopLoss,isKr)} ${currency}</b> 이탈 시 전량 손절</li>`);
+      steps.push(`<li>${skIcon('alert', 13)}<b>분할 진입</b>: 신뢰도 ${Math.round(d.confidence*100)}% — 3분할 이상 나눠서 진입 (1/3씩)</li>`);
+      steps.push(`<li>${skIcon('target', 13)}<b>목표가</b>: <b>${fmt(d.targetPrice,isKr)} ${currency}</b></li>`);
+      steps.push(`<li>${skIcon('shield', 13)}<b>손절가</b>: <b>${fmt(d.stopLoss,isKr)} ${currency}</b> 이탈 시 전량 손절</li>`);
     } else if (isSell) {
-      steps.push(`<li>📤 <b>매도/차익실현</b>: 보유 중이라면 목표가 <b>${fmt(d.targetPrice,isKr)} ${currency}</b> 근처에서 분할 매도 검토</li>`);
-      steps.push(`<li>🛡️ <b>신규 매수 금지</b>: 하락 모멘텀 확인, 반전 신호 출현 전까지 진입 자제</li>`);
-      steps.push(`<li>👀 <b>모니터링</b>: RSI 30 이하 + MACD 골든크로스 동시 출현 시 재진입 검토</li>`);
+      steps.push(`<li>${skIcon('up', 13)}<b>매도/차익실현</b>: 보유 중이라면 목표가 <b>${fmt(d.targetPrice,isKr)} ${currency}</b> 근처에서 분할 매도 검토</li>`);
+      steps.push(`<li>${skIcon('shield', 13)}<b>신규 매수 금지</b>: 하락 모멘텀 확인, 반전 신호 출현 전까지 진입 자제</li>`);
+      steps.push(`<li>${skIcon('eye', 13)}<b>모니터링</b>: RSI 30 이하 + MACD 골든크로스 동시 출현 시 재진입 검토</li>`);
     } else {
-      steps.push(`<li>⏸️ <b>현금 대기</b>: 명확한 추세 방향 확인 전까지 신규 진입 보류</li>`);
-      steps.push(`<li>👀 <b>모니터링 조건</b>: 통합 신호 ±0.25 돌파 + 신뢰도 50% 이상 시 재분석</li>`);
-      steps.push(`<li>📉 <b>지지/저항 확인</b>: 볼린저밴드 하단(${fmt(I.bbLower,isKr)}) 지지 여부 주시</li>`);
+      steps.push(`<li>${skIcon('pause', 13)}<b>현금 대기</b>: 명확한 추세 방향 확인 전까지 신규 진입 보류</li>`);
+      steps.push(`<li>${skIcon('eye', 13)}<b>모니터링 조건</b>: 통합 신호 ±0.25 돌파 + 신뢰도 50% 이상 시 재분석</li>`);
+      steps.push(`<li>${skIcon('down', 13)}<b>지지/저항 확인</b>: 볼린저밴드 하단(${fmt(I.bbLower,isKr)}) 지지 여부 주시</li>`);
     }
     // 공통 체크리스트
-    steps.push(`<li>📊 <b>ETF 흐름 확인</b>: ${isKr?'동일 산업군 종목 동향 및 섹터 ETF 방향 체크':'관련 ETF 섹션의 핵심 ETF 방향성 먼저 확인'}</li>`);
-    steps.push(`<li>💰 <b>WACC 점검</b>: 할인율 ${(W.wacc*100).toFixed(2)}% — ${W.wacc>0.12?'내재가치 보수적 산정 필요':W.wacc<0.08?'기업가치 계산 시 유리한 조건':'적정 수준, 내재가치 참고 가능'}</li>`);
-    steps.push(`<li>⏰ <b>분석 유효기간</b>: 본 리포트는 <b>단기(1~4주)</b> 기준 분석입니다. 시장 상황 변화 시 재실행 권장</li>`);
+    steps.push(`<li>${skIcon('bar', 13)}<b>ETF 흐름 확인</b>: ${isKr?'동일 산업군 종목 동향 및 섹터 ETF 방향 체크':'관련 ETF 섹션의 핵심 ETF 방향성 먼저 확인'}</li>`);
+    steps.push(`<li>${skIcon('bulb', 13)}<b>WACC 점검</b>: 할인율 ${(W.wacc*100).toFixed(2)}% — ${W.wacc>0.12?'내재가치 보수적 산정 필요':W.wacc<0.08?'기업가치 계산 시 유리한 조건':'적정 수준, 내재가치 참고 가능'}</li>`);
+    steps.push(`<li>${skIcon('clock', 13)}<b>분석 유효기간</b>: 본 리포트는 <b>단기(1~4주)</b> 기준 분석입니다. 시장 상황 변화 시 재실행 권장</li>`);
 
     const condHtml = conditions.map(c=>`<div style="padding:4px 0;border-bottom:1px solid var(--border);font-size:0.78rem;color:var(--text2)">· ${c.text}</div>`).join('');
 
     return `
   <div class="section-card" style="border:1px solid rgba(0,212,170,.25);background:linear-gradient(135deg,rgba(0,212,170,.04),rgba(59,130,246,.04))">
-    <div class="section-title">🎯 Action Item (투자자 행동 가이드)</div>
+    <div class="section-title">${skIcon('target', 15)}Action Item (투자자 행동 가이드)</div>
 
     <div style="display:flex;align-items:center;gap:14px;padding:14px 16px;border-radius:12px;background:${isBuy?'rgba(0,212,170,.1)':isSell?'rgba(255,75,110,.1)':'rgba(251,191,36,.1)'};margin-bottom:16px;border:1px solid ${isBuy?'rgba(0,212,170,.3)':isSell?'rgba(255,75,110,.3)':'rgba(251,191,36,.3)'}">
-      <div style="font-size:2rem">${isBuy?'📈':isSell?'📉':'⏸️'}</div>
+      <div style="display:flex;align-items:center;justify-content:center;color:${isBuy?'var(--green)':isSell?'var(--red)':'var(--yellow)'}">${skIcon(isBuy?'chart':isSell?'down':'pause', 28)}</div>
       <div>
         <div style="font-size:1.05rem;font-weight:800;color:${isBuy?'var(--green)':isSell?'var(--red)':'var(--yellow)'}">${isBuy?'매수 진입 검토':isSell?'매도 / 차익실현':'관망 유지'}</div>
         <div style="font-size:0.75rem;color:var(--muted);margin-top:2px">신뢰도 ${Math.round(d.confidence*100)}% &nbsp;·&nbsp; R:R ${d.rr.toFixed(1)}:1 &nbsp;·&nbsp; 목표 ${fmt(d.targetPrice,isKr)} / 손절 ${fmt(d.stopLoss,isKr)}</div>
       </div>
     </div>
 
-    <div style="font-size:0.7rem;font-weight:700;color:var(--muted2);letter-spacing:.08em;text-transform:uppercase;margin-bottom:6px">📋 근거 체크리스트</div>
+    <div style="font-size:0.7rem;font-weight:700;color:var(--muted2);letter-spacing:.08em;text-transform:uppercase;margin-bottom:6px">${skIcon('doc', 12)}근거 체크리스트</div>
     <div style="margin-bottom:16px;padding:10px 12px;background:var(--card2);border-radius:8px;border:1px solid var(--border)">
       ${condHtml}
     </div>
 
-    <div style="font-size:0.7rem;font-weight:700;color:var(--muted2);letter-spacing:.08em;text-transform:uppercase;margin-bottom:8px">✅ 실행 단계</div>
+    <div style="font-size:0.7rem;font-weight:700;color:var(--muted2);letter-spacing:.08em;text-transform:uppercase;margin-bottom:8px">${skIcon('check', 12)}실행 단계</div>
     <ol style="padding-left:0;list-style:none;display:flex;flex-direction:column;gap:8px;font-size:0.82rem;line-height:1.55">
       ${steps.join('')}
     </ol>
@@ -2242,7 +2298,7 @@ function renderReport(data) {
     ${renderBacktest(btStats, bars)}
 
     <div style="margin-top:14px;font-size:0.68rem;color:var(--muted);padding:8px 12px;background:rgba(251,191,36,.06);border-radius:6px;border-left:3px solid var(--yellow);line-height:1.7">
-      ⚠️ 본 리포트는 <b>참고용 정보</b>로, 투자 결정의 최종 책임은 본인에게 있습니다. 과거 신호가 미래 수익을 보장하지 않으며, 항상 분산투자 및 리스크 관리를 병행하세요.
+      ${skIcon('alert', 13)}본 리포트는 <b>참고용 정보</b>로, 투자 결정의 최종 책임은 본인에게 있습니다. 과거 신호가 미래 수익을 보장하지 않으며, 항상 분산투자 및 리스크 관리를 병행하세요.
     </div>
   </div>`;
   })()}
@@ -2743,7 +2799,7 @@ function createTimeDetentDial(container, { minSec = 0, maxSec = 15, avgSec = nul
     cancelAnimationFrame(_rafId);
     document.getElementById('report-content').innerHTML = `
       <div class="center-msg">
-        <div style="font-size:2rem;margin-bottom:12px">⚠️</div>
+        <div style="margin-bottom:12px;color:var(--red)">${skIcon('alert', 28)}</div>
         <div style="color:#be123c;font-weight:600;margin-bottom:8px">분석 실패</div>
         <div style="color:var(--muted2)">${e.message}</div>
       </div>`;

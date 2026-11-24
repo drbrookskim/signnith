@@ -126,15 +126,13 @@ export function Stat({
   )
 }
 
-/* ── Card shell — glass ── */
+/* ── Card shell — solid surface (Signnith style) ── */
 const cardGlassStyle: React.CSSProperties = {
-  background: 'rgba(var(--surface-rgb), 0.47)',
-  border: '1px solid rgba(var(--glow-tone), 0.35)',
+  background: 'var(--surface)',
+  border: '1px solid var(--line)',
   borderRadius: 12,
   padding: 22,
-  backdropFilter: 'blur(18px) saturate(160%)',
-  WebkitBackdropFilter: 'blur(18px) saturate(160%)',
-  boxShadow: '0 14px 34px rgba(0, 0, 0, 0.14), inset 0 1px 0 rgba(var(--glow-tone), 0.4)',
+  boxShadow: '0 4px 20px rgba(0, 0, 0, 0.06)',
 }
 
 export function Card({ children, style }: { children: React.ReactNode; style?: React.CSSProperties }) {

@@ -66,7 +66,18 @@ export default function MoatCharts({ data }: { data: MoatAnalysis }) {
                   fill="#6366f1"
                   fillOpacity={0.35}
                 />
-                <Tooltip formatter={(v) => (typeof v === 'number' ? `${v.toFixed(1)}점` : v)} />
+                <Tooltip
+                  contentStyle={{
+                    background: 'var(--surface)',
+                    border: '1px solid var(--line-2)',
+                    borderRadius: 10,
+                    boxShadow: '0 10px 28px rgba(0, 0, 0, 0.28)',
+                    color: 'var(--ink)',
+                    fontSize: 12,
+                  }}
+                  labelStyle={{ color: 'var(--ink)', fontWeight: 600, marginBottom: 4 }}
+                  formatter={(v) => (typeof v === 'number' ? `${v.toFixed(1)}점` : v)}
+                />
                 <Legend />
               </RadarChart>
             </ResponsiveContainer>

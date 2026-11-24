@@ -41,8 +41,7 @@ export default function Header() {
   return (
     <header style={{
       position: 'sticky', top: 0, zIndex: 40,
-      background: 'color-mix(in srgb, var(--bg) 86%, transparent)',
-      backdropFilter: 'blur(12px)',
+      background: 'var(--bg)',
       borderBottom: '1px solid var(--line)',
     }}>
       <div style={{
@@ -98,15 +97,13 @@ export default function Header() {
             <>
               {/* 아바타 버튼 */}
               <button
+                className="eq-pill-btn"
                 onClick={() => setUserOpen(v => !v)}
                 title={user.email}
                 style={{
-                  all: 'unset', cursor: 'pointer',
                   display: 'inline-flex', alignItems: 'center', gap: 7,
                   padding: '5px 10px 5px 6px',
-                  border: '1px solid var(--line-2)',
-                  borderRadius: 999,
-                  background: 'var(--surface)',
+                  fontFamily: 'var(--font-ui)',
                 }}
               >
                 {/* 프로필 아바타 */}
@@ -187,13 +184,13 @@ export default function Header() {
           ) : (
             /* 비로그인 상태 — 로그인 버튼 */
             <button
+              className="eq-pill-btn"
               onClick={() => router.push('/login')}
               style={{
-                all: 'unset', cursor: 'pointer',
                 display: 'inline-flex', alignItems: 'center', gap: 6,
                 padding: '6px 14px',
-                background: 'var(--accent)', color: '#fff',
-                borderRadius: 999,
+                background: 'var(--accent)', color: 'var(--bg)',
+                borderColor: 'var(--accent)',
                 fontSize: 13, fontWeight: 600,
                 fontFamily: 'var(--font-ui)',
               }}
@@ -217,16 +214,14 @@ export default function Header() {
             {/* Favorites */}
             <div ref={favRef} style={{ position: 'relative' }}>
               <button
+                className={`eq-icon-pill${hasFavs ? ' active' : ''}`}
                 onClick={() => setFavOpen(v => !v)}
                 title="즐겨찾기"
-                style={{
-                  all: 'unset', cursor: 'pointer',
-                  display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
-                  fontSize: 17, lineHeight: 1,
-                  color: hasFavs ? 'var(--accent)' : 'var(--ink-3)',
-                }}
+                aria-label="즐겨찾기"
               >
-                {hasFavs ? '★' : '☆'}
+                <svg width="15" height="15" viewBox="0 0 16 16" fill={hasFavs ? 'currentColor' : 'none'} stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M8 1.8l1.9 3.9 4.3.6-3.1 3 .7 4.3L8 11.6l-3.8 2 .7-4.3-3.1-3 4.3-.6z"/>
+                </svg>
               </button>
               {favOpen && (
                 <div className="eq-glass" style={{
@@ -256,13 +251,24 @@ export default function Header() {
               )}
             </div>
 
-            {/* Theme toggle */}
+            {/* Theme toggle (Signnith pill switch) */}
             <button
+              className="eq-theme-switch"
               onClick={toggleTheme}
               title={theme === 'dark' ? '라이트 모드로 전환' : '다크 모드로 전환'}
-              style={{ all: 'unset', cursor: 'pointer', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', fontSize: 17, lineHeight: 1 }}
+              aria-label={theme === 'dark' ? '라이트 모드로 전환' : '다크 모드로 전환'}
             >
-              {theme === 'dark' ? '☀' : '🌙'}
+              <span className="eq-theme-knob">
+                {theme === 'dark' ? (
+                  <svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M13.5 9.8A5.5 5.5 0 0 1 6.2 2.5a5.5 5.5 0 1 0 7.3 7.3z"/>
+                  </svg>
+                ) : (
+                  <svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
+                    <circle cx="8" cy="8" r="3"/><path d="M8 1.5v1.5M8 13v1.5M1.5 8H3M13 8h1.5M3.4 3.4l1 1M11.6 11.6l1 1M12.6 3.4l-1 1M4.4 11.6l-1 1"/>
+                  </svg>
+                )}
+              </span>
             </button>
 
             <div style={{

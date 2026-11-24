@@ -1,20 +1,19 @@
 import type { Metadata, Viewport } from 'next'
-import { Geist_Mono, Noto_Serif_KR, Space_Grotesk } from 'next/font/google'
+import { Geist_Mono, Noto_Sans_KR, Space_Grotesk } from 'next/font/google'
 import AuthProvider from '@/components/layout/AuthProvider'
 import SpaRedirectScript from '@/components/layout/SpaRedirectScript'
-import MouseGlow from '@/components/layout/MouseGlow'
 import './globals.css'
 
 const spaceGrotesk = Space_Grotesk({
   variable: '--font-space-grotesk',
   subsets: ['latin'],
-  weight: ['400', '500', '600', '700'],
+  weight: ['300', '400', '500', '600', '700'],
   display: 'swap',
 })
-const notoSerifKR = Noto_Serif_KR({
-  variable: '--font-noto-serif-kr',
+const notoSansKR = Noto_Sans_KR({
+  variable: '--font-noto-sans-kr',
   subsets: ['latin'],
-  weight: ['400', '600', '700'],
+  weight: ['400', '500', '600', '700'],
   display: 'swap',
 })
 const geistMono = Geist_Mono({ variable: '--font-geist-mono', subsets: ['latin'] })
@@ -28,12 +27,12 @@ export const metadata: Metadata = {
 }
 
 export const viewport: Viewport = {
-  themeColor: '#1b1a15',
+  themeColor: '#080a0f',
 }
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="ko" suppressHydrationWarning className={`${spaceGrotesk.variable} ${notoSerifKR.variable} ${geistMono.variable} h-full`}>
+    <html lang="ko" suppressHydrationWarning className={`${spaceGrotesk.variable} ${notoSansKR.variable} ${geistMono.variable} h-full`}>
       <head>
         <link rel="manifest" href={`${basePath}/manifest.webmanifest`} />
         <link rel="apple-touch-icon" href={`${basePath}/icons/apple-touch-icon.png`} />
@@ -48,7 +47,6 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       </head>
       <body style={{ minHeight: '100vh', background: 'var(--bg)', color: 'var(--ink)' }}>
         <SpaRedirectScript />
-        <MouseGlow />
         <AuthProvider>{children}</AuthProvider>
       </body>
     </html>

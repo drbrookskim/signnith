@@ -19,12 +19,12 @@ export default function QuickSuggestions() {
       {items.map((s) => (
         <a
           key={s.ticker}
+          className="eq-pill-btn"
           href={`${BASE_PATH}/companies/_/analysis?ticker=${s.ticker}&market=${s.market}&name=${encodeURIComponent(s.name)}`}
           style={{
             textDecoration: 'none',
             background: 'transparent',
-            border: '1px solid var(--line-2)',
-            borderRadius: 999, padding: '6px 14px',
+            padding: '6px 14px',
             display: 'flex', alignItems: 'center', gap: 8,
           }}
         >

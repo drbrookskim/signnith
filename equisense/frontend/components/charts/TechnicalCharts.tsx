@@ -252,6 +252,15 @@ export default function TechnicalCharts({
               domain={['auto', 'auto']}
             />
             <Tooltip
+              contentStyle={{
+                background: 'var(--surface)',
+                border: '1px solid var(--line-2)',
+                borderRadius: 10,
+                boxShadow: '0 10px 28px rgba(0, 0, 0, 0.28)',
+                color: 'var(--ink)',
+                fontSize: 12,
+              }}
+              labelStyle={{ color: 'var(--ink)', fontWeight: 600, marginBottom: 4 }}
               formatter={(v, name) => {
                 if (typeof v !== 'number') return [v, name]
                 const labelMap: Record<string, string> = {
@@ -319,7 +328,19 @@ export default function TechnicalCharts({
               <CartesianGrid strokeDasharray="3 3" stroke="#3f3f46" strokeOpacity={0.2} />
               <XAxis dataKey="date" tickFormatter={(v) => formatDateTick(v, currentPeriod)} tick={{ fontSize: 11 }} interval="preserveStartEnd" />
               <YAxis domain={[0, 100]} ticks={[0, 30, 50, 70, 100]} tick={{ fontSize: 11 }} width={32} />
-              <Tooltip formatter={(v) => [typeof v === 'number' ? v.toFixed(1) : v, 'RSI']} labelFormatter={(l) => l} />
+              <Tooltip
+                contentStyle={{
+                  background: 'var(--surface)',
+                  border: '1px solid var(--line-2)',
+                  borderRadius: 10,
+                  boxShadow: '0 10px 28px rgba(0, 0, 0, 0.28)',
+                  color: 'var(--ink)',
+                  fontSize: 12,
+                }}
+                labelStyle={{ color: 'var(--ink)', fontWeight: 600, marginBottom: 4 }}
+                formatter={(v) => [typeof v === 'number' ? v.toFixed(1) : v, 'RSI']}
+                labelFormatter={(l) => l}
+              />
               <ReferenceLine y={70} stroke="#ef4444" strokeDasharray="4 3" strokeOpacity={0.6} />
               <ReferenceLine y={30} stroke="#22c55e" strokeDasharray="4 3" strokeOpacity={0.6} />
               <ReferenceLine y={50} stroke="#3f3f46" strokeOpacity={0.5} />
@@ -353,6 +374,15 @@ export default function TechnicalCharts({
               <XAxis dataKey="date" tickFormatter={(v) => formatDateTick(v, currentPeriod)} tick={{ fontSize: 11 }} interval="preserveStartEnd" />
               <YAxis tick={{ fontSize: 11 }} width={44} />
               <Tooltip
+                contentStyle={{
+                  background: 'var(--surface)',
+                  border: '1px solid var(--line-2)',
+                  borderRadius: 10,
+                  boxShadow: '0 10px 28px rgba(0, 0, 0, 0.28)',
+                  color: 'var(--ink)',
+                  fontSize: 12,
+                }}
+                labelStyle={{ color: 'var(--ink)', fontWeight: 600, marginBottom: 4 }}
                 formatter={(v, name) => {
                   if (typeof v !== 'number') return [v, name]
                   const m: Record<string, string> = { macdHistogram: '히스토그램', macd: 'MACD', macdSignal: 'Signal' }

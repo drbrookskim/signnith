@@ -66,32 +66,15 @@ export default function Home() {
           </div>
         </div>
 
-        {/* Module cards — glass blobs sit behind the grid so the blur has something to catch */}
+        {/* Module cards */}
         <div style={{ position: 'relative' }}>
-          <div aria-hidden style={{
-            position: 'absolute', top: -50, left: '4%', width: 220, height: 220,
-            borderRadius: '50%', background: 'var(--accent)', opacity: 0.5,
-            filter: 'blur(50px)', pointerEvents: 'none',
-          }} />
-          <div aria-hidden style={{
-            position: 'absolute', bottom: -70, right: '6%', width: 260, height: 260,
-            borderRadius: '50%', background: 'var(--ink-3)', opacity: 0.45,
-            filter: 'blur(50px)', pointerEvents: 'none',
-          }} />
-          <div aria-hidden style={{
-            position: 'absolute', top: '40%', left: '55%', width: 160, height: 160,
-            borderRadius: '50%', background: 'var(--ink-2)', opacity: 0.3,
-            filter: 'blur(50px)', pointerEvents: 'none',
-          }} />
           <div className="eq-module-grid" style={{ position: 'relative' }}>
           {MODULES.map((m) => (
             <div key={m.n} className="eq-lift eq-card-glass" style={{
-              background: 'rgba(var(--surface-rgb), 0.47)', border: '1px solid rgba(var(--glow-tone), 0.35)',
+              background: 'var(--surface)', border: '1px solid var(--line)',
               borderRadius: 12, padding: '22px 20px',
               position: 'relative', overflow: 'hidden',
-              backdropFilter: 'blur(18px) saturate(160%)',
-              WebkitBackdropFilter: 'blur(18px) saturate(160%)',
-              boxShadow: '0 14px 34px rgba(0, 0, 0, 0.14), inset 0 1px 0 rgba(var(--glow-tone), 0.4)',
+              boxShadow: '0 4px 20px rgba(0, 0, 0, 0.06)',
             }}>
               <div style={{ position: 'absolute', top: 14, right: 16, fontFamily: 'var(--font-mono)', fontSize: 11, color: 'var(--ink-3)' }}>
                 {m.n}

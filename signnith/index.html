@@ -330,7 +330,7 @@
     .explore-wrap { padding: 18px 14px 0; }
     .top-search { max-width: none; }
     .fav-tiles {
-      display: flex !important; overflow-x: auto; scroll-snap-type: x mandatory; gap: 10px; padding-bottom: 6px;
+      display: flex !important; overflow-x: auto; scroll-snap-type: x mandatory; gap: 10px; padding: 8px 4px 10px;
     }
     .fav-tile { min-width: 220px; scroll-snap-align: start; flex-shrink: 0; }
   }
@@ -735,13 +735,13 @@
   }
   .view-sw-btn.active { background: var(--card); color: var(--text); box-shadow: 0 1px 3px rgba(0,0,0,.2); }
   .fav-tiles {
-    columns: 3 310px;
-    column-gap: 16px;
-    display: block;
-    padding-top: 6px;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(310px, 1fr));
+    gap: 16px;
+    padding: 6px 2px 10px;
+    align-items: start;
   }
   .fav-card.compact .fav-tiles {
-    columns: unset;
     display: flex; overflow-x: auto; gap: 10px; padding: 8px 6px 12px;
   }
   .fav-card.compact .fav-tile { min-width: 210px; margin-bottom: 0; flex-shrink: 0; border-radius: 14px; }
@@ -749,8 +749,7 @@
   .fav-card.compact .case-thesis,
   .fav-card.compact .tag-row { display: none; }
   .fav-tile {
-    break-inside: avoid;
-    margin-bottom: 16px;
+    margin-bottom: 0;
     background: var(--card);
     border: 1.5px solid var(--border);
     border-radius: 18px;

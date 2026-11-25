@@ -262,6 +262,7 @@ function FundamentalsContent() {
   const [data, setData] = useState<FundamentalAnalysis | null>(null)
   const [errorMsg, setErrorMsg] = useState<string | null>(null)
   const [isLoading, setIsLoading] = useState(true)
+  const [retryKey, setRetryKey] = useState(0)
   const [quarterlyInsights, setQuarterlyInsights] = useState<QuarterlyInsightMap | null>(null)
   const [quarterlyLoading, setQuarterlyLoading] = useState(false)
   const [qPrices, setQPrices] = useState<{ quarter: string; close: number }[]>([])
@@ -277,12 +278,18 @@ function FundamentalsContent() {
   }, [data?.profile?.description])
 
   useEffect(() => {
+    if (!ticker) {
+      setIsLoading(false) // eslint-disable-line react-hooks/set-state-in-effect
+      setErrorMsg('종목 코드가 지정되지 않았습니다.') // eslint-disable-line react-hooks/set-state-in-effect
+      return
+    }
     let cancelled = false
     setIsLoading(true) // eslint-disable-line react-hooks/set-state-in-effect
     setErrorMsg(null) // eslint-disable-line react-hooks/set-state-in-effect
     getFundamentals(ticker, market)
       .then((d) => { if (!cancelled) setData(d) })
-      .catch((err: { status?: number }) => {
+      .catch((err: { status?: number; message?: string }) => {
+        console.error('[FundamentalsPage] getFundamentals failed:', err)
         if (!cancelled) setErrorMsg(
           err?.status === 404
             ? `${ticker} 종목의 재무 데이터를 찾을 수 없습니다.`
@@ -291,7 +298,7 @@ function FundamentalsContent() {
       })
       .finally(() => { if (!cancelled) setIsLoading(false) })
     return () => { cancelled = true }
-  }, [ticker, market])
+  }, [ticker, market, retryKey])
 
   useEffect(() => {
     if (!data) return
@@ -322,8 +329,18 @@ function FundamentalsContent() {
 
   if (isLoading) return <LoadingSkeleton />
   if (errorMsg) return (
-    <div style={{ display: 'flex', height: 240, alignItems: 'center', justifyContent: 'center', border: '1px solid var(--line)', borderRadius: 12 }}>
-      <p style={{ fontSize: 13.5, color: 'var(--ink-3)' }}>{errorMsg}</p>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 12, height: 240, alignItems: 'center', justifyContent: 'center', border: '1px solid var(--line)', borderRadius: 12 }}>
+      <p style={{ fontSize: 13.5, color: 'var(--ink-3)', margin: 0 }}>{errorMsg}</p>
+      {ticker && (
+        <button
+          type="button"
+          className="eq-pill-btn"
+          onClick={() => setRetryKey((k) => k + 1)}
+          style={{ padding: '6px 14px', fontSize: 12.5, cursor: 'pointer' }}
+        >
+          다시 시도
+        </button>
+      )}
     </div>
   )
   if (!data) return null

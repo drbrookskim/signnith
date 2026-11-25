@@ -1,3 +1,4 @@
+import { ApiError } from '@/lib/api-error'
 import type {
   BusinessOutlook,
   CompanyProfile,
@@ -186,7 +187,11 @@ export function parseTimeseries(raw: unknown): Map<number, TsEntry> {
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function transformYahooToFundamentals(data: any, ticker: string, market: Market, tsMap?: Map<number, TsEntry>): FundamentalAnalysis {
   const result = data?.quoteSummary?.result?.[0]
-  if (!result) throw new Error(`Yahoo Finance: 데이터 없음 (${ticker})`)
+  if (!result) {
+    const errCode = data?.quoteSummary?.error?.code ?? data?.finance?.error?.code
+    const status = errCode && errCode !== 'Not Found' ? 502 : 404
+    throw new ApiError(`Yahoo Finance: 데이터 없음 (${ticker})`, status)
+  }
 
   const incomeList: unknown[] = result.incomeStatementHistory?.incomeStatementHistory ?? []
   const balanceList: unknown[] = result.balanceSheetHistory?.balanceSheetStatements ?? []
@@ -376,7 +381,11 @@ export function transformYahooToTechnical(
   period: TechnicalPeriod,
 ): TechnicalAnalysis {
   const result = data?.chart?.result?.[0]
-  if (!result) throw new Error(`Yahoo Finance: 차트 데이터 없음 (${ticker})`)
+  if (!result) {
+    const errCode = data?.chart?.error?.code
+    const status = errCode && errCode !== 'Not Found' ? 502 : 404
+    throw new ApiError(`Yahoo Finance: 차트 데이터 없음 (${ticker})`, status)
+  }
 
   const timestamps: number[] = result.timestamp ?? []
   const q = result.indicators?.quote?.[0] ?? {}

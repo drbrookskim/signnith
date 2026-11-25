@@ -1,3 +1,4 @@
+import { ApiError } from '@/lib/api-error'
 import type {
   FundamentalAnalysis,
   FundamentalMetrics,
@@ -79,7 +80,7 @@ export function transformDartToFundamentals(
 ): FundamentalAnalysis {
   const market: Market = 'KR'
   const recentList: DartAccount[] = (dartDataRecent as { list?: DartAccount[] })?.list ?? []
-  if (recentList.length === 0) throw new Error(`DART: 재무제표 데이터 없음 (${ticker})`)
+  if (recentList.length === 0) throw new ApiError(`DART: 재무제표 데이터 없음 (${ticker})`, 404)
 
   const oldList: DartAccount[] = (dartDataOld as { list?: DartAccount[] } | null)?.list ?? []
 

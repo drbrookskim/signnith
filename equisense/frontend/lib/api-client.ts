@@ -20,6 +20,7 @@ import type {
   TechnicalAnalysis,
   TechnicalPeriod,
 } from '@/types'
+import { ApiError } from '@/lib/api-error'
 import { transformDartToFundamentals } from '@/lib/adapters/dart'
 import { extractOutlook, extractOwnershipSignals, extractProfile, transformYahooToFundamentals, transformYahooToTechnical, parseTimeseries } from '@/lib/adapters/yahoo'
 import { computeQuarterlyInsights } from '@/lib/adapters/quarterly'
@@ -45,11 +46,29 @@ const SUMMARY_MODULES = [
   'earningsTrend',
 ].join(',')
 
-async function proxyFetch<T>(path: string): Promise<T> {
-  if (!PROXY) throw new Error('NEXT_PUBLIC_PROXY_URL이 설정되지 않았습니다.')
-  const res = await fetch(`${PROXY}${path}`)
-  if (!res.ok) throw new Error(`Proxy ${res.status}: ${path}`)
-  return res.json() as Promise<T>
+async function proxyFetch<T>(path: string, retries = 1): Promise<T> {
+  if (!PROXY) throw new ApiError('NEXT_PUBLIC_PROXY_URL이 설정되지 않았습니다.')
+  let lastErr: unknown
+  for (let attempt = 0; attempt <= retries; attempt++) {
+    try {
+      const res = await fetch(`${PROXY}${path}`)
+      if (res.ok) return res.json() as Promise<T>
+      lastErr = new ApiError(`Proxy ${res.status}: ${path}`, res.status)
+      if (res.status < 500 && res.status !== 429) throw lastErr
+    } catch (err) {
+      if (err instanceof ApiError && err.status && err.status < 500 && err.status !== 429) throw err
+      lastErr = err
+    }
+    if (attempt < retries) await new Promise((r) => setTimeout(r, 350 * (attempt + 1)))
+  }
+  throw lastErr
+}
+
+function normalizeYahooSymbol(ticker: string, market: Market): string {
+  if (market === 'US' && /^[A-Z]+\.[A-Z]$/.test(ticker)) {
+    return ticker.replace('.', '-')
+  }
+  return ticker
 }
 
 // corp-codes.json / corp-names.json은 GitHub Pages 정적 파일로 제공
@@ -63,7 +82,7 @@ async function getCorpCode(stockCode: string): Promise<string> {
     _corpCodeMap = await res.json() as Record<string, string>
   }
   const corpCode = _corpCodeMap[stockCode]
-  if (!corpCode) throw new Error(`DART: 기업코드 없음 (${stockCode})`)
+  if (!corpCode) throw new ApiError(`DART: 기업코드 없음 (${stockCode})`, 404)
   return corpCode
 }
 
@@ -109,11 +128,13 @@ export async function getFundamentals(ticker: string, market: Market): Promise<F
     return fundamentals
   }
 
+  const symbol = normalizeYahooSymbol(ticker, market)
   const [summaryResult, tsResult] = await Promise.allSettled([
-    proxyFetch<unknown>(`/yahoo/summary?symbol=${ticker}&modules=${SUMMARY_MODULES}`),
-    proxyFetch<unknown>(`/yahoo/timeseries?symbol=${ticker}`),
+    proxyFetch<unknown>(`/yahoo/summary?symbol=${encodeURIComponent(symbol)}&modules=${SUMMARY_MODULES}`),
+    proxyFetch<unknown>(`/yahoo/timeseries?symbol=${encodeURIComponent(symbol)}`),
   ])
-  const data = summaryResult.status === 'fulfilled' ? summaryResult.value : null
+  if (summaryResult.status === 'rejected') throw summaryResult.reason
+  const data = summaryResult.value
   const tsMap = tsResult.status === 'fulfilled' ? parseTimeseries(tsResult.value) : undefined
   return transformYahooToFundamentals(data, ticker, market, tsMap)
 }
@@ -168,8 +189,9 @@ export async function getTechnicalData(
     '1y': '1y',
     '3y': '3y',
   }
+  const symbol = normalizeYahooSymbol(ticker, market)
   const data = await proxyFetch<unknown>(
-    `/yahoo/chart?symbol=${ticker}&market=${market}&range=${rangeMap[period]}&interval=1d`,
+    `/yahoo/chart?symbol=${encodeURIComponent(symbol)}&market=${market}&range=${rangeMap[period]}&interval=1d`,
   )
   return transformYahooToTechnical(data, ticker, market, period)
 }
@@ -178,9 +200,10 @@ export async function getQuarterlyPrices(
   ticker: string,
   market: Market,
 ): Promise<{ quarter: string; close: number }[]> {
+  const symbol = normalizeYahooSymbol(ticker, market)
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const raw = await proxyFetch<any>(
-    `/yahoo/chart?symbol=${ticker}&market=${market}&range=2y&interval=3mo`,
+    `/yahoo/chart?symbol=${encodeURIComponent(symbol)}&market=${market}&range=2y&interval=3mo`,
   )
   const result = raw?.chart?.result?.[0]
   if (!result) return []
@@ -234,8 +257,9 @@ export async function getQuarterlyInsights(
     'cashflowStatementHistoryQuarterly',
   ].join(',')
 
+  const symbol = normalizeYahooSymbol(ticker, market)
   const data = await proxyFetch<unknown>(
-    `/yahoo/summary?symbol=${ticker}&market=${market}&modules=${QUARTERLY_MODULES}`,
+    `/yahoo/summary?symbol=${encodeURIComponent(symbol)}&market=${market}&modules=${QUARTERLY_MODULES}`,
   )
   return computeQuarterlyInsights(data)
 }
@@ -263,9 +287,10 @@ export async function fetchSentimentData(
     'earningsTrend',
   ].join(',')
 
+  const symbol = normalizeYahooSymbol(ticker, market)
   const [yahooRes, dartRes] = await Promise.allSettled([
     proxyFetch<unknown>(
-      `/yahoo/summary?symbol=${ticker}&market=${market}&modules=${SENTIMENT_MODULES}`,
+      `/yahoo/summary?symbol=${encodeURIComponent(symbol)}&market=${market}&modules=${SENTIMENT_MODULES}`,
     ),
     market === 'KR'
       ? getCorpCode(ticker).then(corpCode =>

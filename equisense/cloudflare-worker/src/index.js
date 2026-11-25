@@ -358,6 +358,76 @@ export default {
         }
       }
 
+      // ── AI: 기업 개요 생성 (Workers AI) ──────────────────────────────────────
+      if (url.pathname === '/ai/company-overview') {
+        const ticker = (p.get('ticker') ?? '').trim().slice(0, 20)
+        const name = (p.get('name') ?? '').trim().slice(0, 120)
+        const market = (p.get('market') ?? 'US').trim().slice(0, 10)
+        const sector = (p.get('sector') ?? '').trim().slice(0, 80)
+        const industry = (p.get('industry') ?? '').trim().slice(0, 80)
+        const summary = (p.get('summary') ?? '').trim().slice(0, 1500)
+
+        if (!ticker || !env.AI) {
+          return new Response(JSON.stringify({ overview: null }), {
+            status: 200,
+            headers: { ...CORS, 'Content-Type': 'application/json; charset=utf-8' },
+          })
+        }
+
+        const cache = caches.default
+        const cacheKey = new Request(url.toString(), { method: 'GET' })
+        const cached = await cache.match(cacheKey)
+        if (cached) return cached
+
+        const model = '@cf/meta/llama-3.3-70b-instruct-fp8-fast'
+        const contextLines = [
+          `종목코드: ${ticker} (${market})`,
+          name ? `기업명: ${name}` : null,
+          sector ? `섹터: ${sector}` : null,
+          industry ? `산업: ${industry}` : null,
+          summary ? `영문 사업 개요:\n${summary}` : null,
+        ].filter(Boolean).join('\n')
+
+        try {
+          const aiRes = await env.AI.run(model, {
+            messages: [
+              {
+                role: 'system',
+                content:
+                  '당신은 한국어 주식 리서치 애널리스트입니다. 제공된 기업 정보만을 바탕으로 핵심 사업, 주요 제품/서비스, 수익 구조를 3~4문장의 자연스러운 한국어 한 단락으로 요약하세요. 제공되지 않은 수치나 사실은 지어내지 말고, 마크다운/불릿/제목 없이 본문만 출력하세요.',
+              },
+              {
+                role: 'user',
+                content: contextLines,
+              },
+            ],
+            max_tokens: 320,
+            temperature: 0.2,
+          })
+
+          const raw =
+            typeof aiRes?.response === 'string'
+              ? aiRes.response.trim()
+              : typeof aiRes?.choices?.[0]?.message?.content === 'string'
+                ? aiRes.choices[0].message.content.trim()
+                : ''
+          const overview = raw || null
+          const headers = {
+            ...CORS,
+            'Content-Type': 'application/json; charset=utf-8',
+            ...(overview ? { 'Cache-Control': 'public, max-age=604800' } : {}),
+          }
+          const resp = new Response(JSON.stringify({ overview, model }), { status: 200, headers })
+          if (overview) await cache.put(cacheKey, resp.clone())
+          return resp
+        } catch {
+          return new Response(JSON.stringify({ overview: null }), {
+            status: 200,
+            headers: { ...CORS, 'Content-Type': 'application/json; charset=utf-8' },
+          })
+        }
+      }
+
       return new Response('Not found', { status: 404, headers: CORS })
     } catch (err) {
       return new Response(JSON.stringify({ error: String(err) }), {

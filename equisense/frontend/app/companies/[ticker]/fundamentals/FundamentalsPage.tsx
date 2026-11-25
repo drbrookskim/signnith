@@ -5,7 +5,7 @@ import { useSearchParams } from 'next/navigation'
 import {
   Area, AreaChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis,
 } from 'recharts'
-import { getFundamentals, getQuarterlyInsights, getQuarterlyPrices, translateToKo } from '@/lib/api-client'
+import { getCompanyOverview, getFundamentals, getQuarterlyInsights, getQuarterlyPrices, translateToKo } from '@/lib/api-client'
 import type { FundamentalAnalysis, FundamentalMetrics, Market, QuarterlyInsightMap } from '@/types'
 import FundamentalsCharts from '@/components/charts/FundamentalsCharts'
 import { useCompanyScores } from '@/contexts/CompanyScoresContext'
@@ -266,16 +266,31 @@ function FundamentalsContent() {
   const [quarterlyInsights, setQuarterlyInsights] = useState<QuarterlyInsightMap | null>(null)
   const [quarterlyLoading, setQuarterlyLoading] = useState(false)
   const [qPrices, setQPrices] = useState<{ quarter: string; close: number }[]>([])
-  const [translatedDescription, setTranslatedDescription] = useState<string | null>(null)
+  const [companyOverview, setCompanyOverview] = useState<string | null>(null)
 
   useEffect(() => {
-    const description = data?.profile?.description
-    if (!description) { setTranslatedDescription(null); return }
+    if (!data) { setCompanyOverview(null); return } // eslint-disable-line react-hooks/set-state-in-effect
+    const description = data.profile?.description
     let cancelled = false
-    setTranslatedDescription(null) // eslint-disable-line react-hooks/set-state-in-effect
-    translateToKo(description).then((ko) => { if (!cancelled) setTranslatedDescription(ko) })
+    setCompanyOverview(null) // eslint-disable-line react-hooks/set-state-in-effect
+    getCompanyOverview({
+      ticker,
+      name: data.profile?.name ?? data.name,
+      market,
+      sector: data.profile?.sector,
+      industry: data.profile?.industry,
+      summary: description,
+    }).then(async (aiOverview) => {
+      if (cancelled) return
+      if (aiOverview) {
+        setCompanyOverview(aiOverview)
+      } else if (description) {
+        const ko = await translateToKo(description)
+        if (!cancelled) setCompanyOverview(ko)
+      }
+    })
     return () => { cancelled = true }
-  }, [data?.profile?.description])
+  }, [data, ticker, market])
 
   useEffect(() => {
     if (!ticker) {
@@ -377,18 +392,18 @@ function FundamentalsContent() {
       </Card>
 
       {/* 기업 개요 */}
-      {data.profile?.description && (
+      {(companyOverview || data.profile?.description) && (
         <Card style={{ marginTop: 16 }}>
           <div style={{ fontFamily: 'var(--font-mono)', fontSize: 10, letterSpacing: '.12em', textTransform: 'uppercase', color: 'var(--ink-3)' }}>
             기업 개요
           </div>
           <p style={{ fontSize: 13, color: 'var(--ink-2)', marginTop: 8, lineHeight: 1.65 }}>
-            {translatedDescription ?? data.profile.description}
+            {companyOverview ?? data.profile?.description}
           </p>
           <div style={{ display: 'flex', flexWrap: 'wrap', gap: 16, marginTop: 12, fontSize: 12.5, color: 'var(--ink-2)' }}>
-            {data.profile.ceo && <span><strong style={{ color: 'var(--ink-3)' }}>CEO</strong> &nbsp;{data.profile.ceo}</span>}
-            {data.profile.sector && <span><strong style={{ color: 'var(--ink-3)' }}>섹터</strong> &nbsp;{data.profile.sector}</span>}
-            {data.profile.industry && <span><strong style={{ color: 'var(--ink-3)' }}>산업</strong> &nbsp;{data.profile.industry}</span>}
+            {data.profile?.ceo && <span><strong style={{ color: 'var(--ink-3)' }}>CEO</strong> &nbsp;{data.profile.ceo}</span>}
+            {data.profile?.sector && <span><strong style={{ color: 'var(--ink-3)' }}>섹터</strong> &nbsp;{data.profile.sector}</span>}
+            {data.profile?.industry && <span><strong style={{ color: 'var(--ink-3)' }}>산업</strong> &nbsp;{data.profile.industry}</span>}
           </div>
         </Card>
       )}

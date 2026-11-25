@@ -151,6 +151,33 @@ export async function translateToKo(text: string): Promise<string> {
   }
 }
 
+export async function getCompanyOverview(params: {
+  ticker: string
+  name?: string | null
+  market: Market
+  sector?: string | null
+  industry?: string | null
+  summary?: string | null
+}): Promise<string | null> {
+  if (!PROXY || !params.ticker) return null
+  try {
+    const qs = new URLSearchParams({
+      ticker: params.ticker,
+      market: params.market,
+    })
+    if (params.name) qs.set('name', params.name)
+    if (params.sector) qs.set('sector', params.sector)
+    if (params.industry) qs.set('industry', params.industry)
+    if (params.summary) qs.set('summary', params.summary.slice(0, 1500))
+    const res = await fetch(`${PROXY}/ai/company-overview?${qs.toString()}`)
+    if (!res.ok) return null
+    const data = await res.json() as { overview?: string | null }
+    return data.overview ?? null
+  } catch {
+    return null
+  }
+}
+
 async function getPeerComparison(ticker: string, companyMargin: number | null): Promise<PeerComparison | null> {
   if (!PROXY) return null
   try {

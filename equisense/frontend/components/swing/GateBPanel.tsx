@@ -302,7 +302,7 @@ function Toggle3Way<T extends string>({
             onClick={() => onChange(opt)}
             style={{
               all: 'unset', boxSizing: 'border-box', flex: 1, textAlign: 'center',
-              padding: '5px 8px', borderRadius: 5, cursor: 'pointer',
+              padding: '5px 10px', borderRadius: 999, cursor: 'pointer',
               fontSize: 12, fontWeight: 500, transition: 'background-color .15s, color .15s',
               background: value === opt ? 'var(--accent)' : 'var(--surface-2)',
               color: value === opt ? 'var(--bg)' : 'var(--ink-2)',

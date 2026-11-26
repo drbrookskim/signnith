@@ -226,6 +226,11 @@ body::before {
   box-shadow: 0 6px 20px -8px rgba(0, 0, 0, 0.18);
 }
 
+/* ── Pill button default ── */
+button:not([data-no-pill]) {
+  border-radius: 999px;
+}
+
 /* ── Tab ribbon — hide scrollbar on mobile ── */
 .eq-ribbon-scroll::-webkit-scrollbar { display: none; }
 .eq-ribbon-scroll { scrollbar-width: none; }

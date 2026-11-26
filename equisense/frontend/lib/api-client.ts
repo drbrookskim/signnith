@@ -7,6 +7,7 @@
 
 import type {
   AnalysisJob,
+  BusinessMoatInsight,
   DocType,
   DualQualitativeResult,
   FundamentalAnalysis,
@@ -24,7 +25,7 @@ import { ApiError } from '@/lib/api-error'
 import { transformDartToFundamentals } from '@/lib/adapters/dart'
 import { extractOutlook, extractOwnershipSignals, extractProfile, transformYahooToFundamentals, transformYahooToTechnical, parseTimeseries } from '@/lib/adapters/yahoo'
 import { computeQuarterlyInsights } from '@/lib/adapters/quarterly'
-import { applyPeerComparisonToMoat, calculateMoat } from '@/lib/adapters/moat'
+import { applyBusinessMoatToMoat, applyPeerComparisonToMoat, calculateMoat } from '@/lib/adapters/moat'
 import { calculateQualitative, lookupJob } from '@/lib/adapters/qualitative'
 import { parseSentimentData } from '@/lib/adapters/sentiment'
 import { MACRO_CONSTANTS } from '@/lib/adapters/swingPipeline'
@@ -197,6 +198,33 @@ async function getPeerComparison(ticker: string, companyMargin: number | null): 
   }
 }
 
+async function getBusinessMoat(params: {
+  ticker: string
+  name?: string | null
+  market: Market
+  sector?: string | null
+  industry?: string | null
+  summary?: string | null
+}): Promise<BusinessMoatInsight | null> {
+  if (!PROXY || !params.ticker) return null
+  try {
+    const qs = new URLSearchParams({
+      ticker: params.ticker,
+      market: params.market,
+    })
+    if (params.name) qs.set('name', params.name)
+    if (params.sector) qs.set('sector', params.sector)
+    if (params.industry) qs.set('industry', params.industry)
+    if (params.summary) qs.set('summary', params.summary.slice(0, 1500))
+    const res = await fetch(`${PROXY}/ai/moat-business?${qs.toString()}`)
+    if (!res.ok) return null
+    const data = (await res.json()) as { business_moat?: BusinessMoatInsight | null }
+    return data.business_moat ?? null
+  } catch {
+    return null
+  }
+}
+
 export async function getMoatScore(
   ticker: string,
   market: Market,
@@ -204,10 +232,27 @@ export async function getMoatScore(
 ): Promise<MoatAnalysis> {
   const fundamentals = existingFundamentals ?? (await getFundamentals(ticker, market))
   let moat = calculateMoat(fundamentals)
-  if (market === 'US') {
-    const companyMargin = fundamentals.metrics_by_year.at(-1)?.operating_margin ?? null
-    const peerComparison = await getPeerComparison(ticker, companyMargin)
-    moat = applyPeerComparisonToMoat(moat, peerComparison, fundamentals.name ?? ticker, fundamentals.profile?.sector)
+  const companyMargin = fundamentals.metrics_by_year.at(-1)?.operating_margin ?? null
+  const displayName = fundamentals.name ?? ticker
+  const sector = fundamentals.profile?.sector
+
+  const [peerRes, bizRes] = await Promise.allSettled([
+    market === 'US' ? getPeerComparison(ticker, companyMargin) : Promise.resolve(null),
+    getBusinessMoat({
+      ticker,
+      name: fundamentals.name,
+      market,
+      sector,
+      industry: fundamentals.profile?.industry,
+      summary: fundamentals.profile?.description,
+    }),
+  ])
+
+  if (peerRes.status === 'fulfilled' && peerRes.value) {
+    moat = applyPeerComparisonToMoat(moat, peerRes.value, displayName, sector)
+  }
+  if (bizRes.status === 'fulfilled' && bizRes.value) {
+    moat = applyBusinessMoatToMoat(moat, bizRes.value, displayName, sector)
   }
   return moat
 }

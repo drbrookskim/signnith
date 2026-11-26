@@ -449,6 +449,99 @@ export default {
         }
       }
 
+      // ── AI: 사업적 해자(Business Moat) 평가 (오픈웨이트 Llama 3.3 70B) ────────
+      if (url.pathname === '/ai/moat-business') {
+        const ticker = (p.get('ticker') ?? '').trim().slice(0, 20)
+        const name = (p.get('name') ?? '').trim().slice(0, 120)
+        const market = (p.get('market') ?? 'US').trim().slice(0, 10)
+        const sector = (p.get('sector') ?? '').trim().slice(0, 80)
+        const industry = (p.get('industry') ?? '').trim().slice(0, 80)
+        const summary = (p.get('summary') ?? '').trim().slice(0, 1500)
+
+        if (!ticker || !env.AI) {
+          return new Response(JSON.stringify({ business_moat: null }), {
+            status: 200,
+            headers: { ...CORS, 'Content-Type': 'application/json; charset=utf-8' },
+          })
+        }
+
+        const cache = caches.default
+        const cacheKey = new Request(url.toString(), { method: 'GET' })
+        const cached = await cache.match(cacheKey)
+        if (cached) return cached
+
+        const model = '@cf/meta/llama-3.3-70b-instruct-fp8-fast'
+        const contextLines = [
+          `종목코드: ${ticker} (${market})`,
+          name ? `기업명: ${name}` : null,
+          sector ? `섹터: ${sector}` : null,
+          industry ? `산업: ${industry}` : null,
+          summary ? `사업 개요:\n${summary}` : null,
+        ].filter(Boolean).join('\n')
+
+        try {
+          const aiRes = await env.AI.run(model, {
+            messages: [
+              {
+                role: 'system',
+                content:
+                  '당신은 Morningstar 경제적 해자(Economic Moat) 전문 애널리스트입니다. 제공된 기업의 사업 모델과 산업 구조만을 바탕으로 5개 해자 차원의 사업적 경쟁우위(0~10점)와 한국어 근거, 해자 침식 리스크를 평가하세요. 반드시 순수 JSON만 출력하세요(코드블록/설명 금지). 스키마: {"business_summary":"2문장 한국어 요약","dimensions":{"cost_advantage":{"score":0-10,"rationale":"1문장"},"intangible_assets":{"score":0-10,"rationale":"1문장"},"switching_costs":{"score":0-10,"rationale":"1문장"},"network_effects":{"score":0-10,"rationale":"1문장"},"efficient_scale":{"score":0-10,"rationale":"1문장"}},"erosion_risks":["리스크1","리스크2","리스크3"]}',
+              },
+              {
+                role: 'user',
+                content: contextLines,
+              },
+            ],
+            max_tokens: 700,
+            temperature: 0.2,
+          })
+
+          const rawText =
+            typeof aiRes?.response === 'string'
+              ? aiRes.response.trim()
+              : typeof aiRes?.choices?.[0]?.message?.content === 'string'
+                ? aiRes.choices[0].message.content.trim()
+                : ''
+
+          const jsonStr = rawText.replace(/^```(?:json)?\s*/i, '').replace(/\s*```$/i, '').trim()
+          const parsed = JSON.parse(jsonStr)
+
+          const dimKeys = ['cost_advantage', 'intangible_assets', 'switching_costs', 'network_effects', 'efficient_scale']
+          const dims = {}
+          for (const k of dimKeys) {
+            const entry = parsed?.dimensions?.[k]
+            const rawScore = Number(entry?.score)
+            dims[k] = {
+              score: Number.isFinite(rawScore) ? Math.max(0, Math.min(10, Math.round(rawScore * 10) / 10)) : 5,
+              rationale: typeof entry?.rationale === 'string' ? entry.rationale.trim() : '',
+            }
+          }
+
+          const business_moat = {
+            business_summary: typeof parsed?.business_summary === 'string' ? parsed.business_summary.trim() : '',
+            dimensions: dims,
+            erosion_risks: Array.isArray(parsed?.erosion_risks)
+              ? parsed.erosion_risks.filter((r) => typeof r === 'string' && r.trim()).slice(0, 4)
+              : [],
+            model,
+          }
+
+          const headers = {
+            ...CORS,
+            'Content-Type': 'application/json; charset=utf-8',
+            'Cache-Control': 'public, max-age=86400',
+          }
+          const resp = new Response(JSON.stringify({ business_moat }), { status: 200, headers })
+          await cache.put(cacheKey, resp.clone())
+          return resp
+        } catch {
+          return new Response(JSON.stringify({ business_moat: null }), {
+            status: 200,
+            headers: { ...CORS, 'Content-Type': 'application/json; charset=utf-8' },
+          })
+        }
+      }
+
       return new Response('Not found', { status: 404, headers: CORS })
     } catch (err) {
       return new Response(JSON.stringify({ error: String(err) }), {

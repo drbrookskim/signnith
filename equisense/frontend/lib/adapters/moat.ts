@@ -1,4 +1,5 @@
 import type {
+  BusinessMoatInsight,
   CompoundMoat,
   CompoundMoatType,
   DimensionScore,
@@ -597,6 +598,52 @@ export function applyPeerComparisonToMoat(
     composite_score,
     grade,
     peer_comparison: peerComparison,
+    analyst_note: generateAnalystNote(
+      displayName ?? moat.ticker,
+      grade,
+      updatedDims,
+      compound_moats,
+    ),
+  }
+}
+
+/** 오픈웨이트 AI 모델이 평가한 사업 구조 해자를 재무 점수(70%)와 블렌딩(30%)하고 사업 근거·침식 리스크를 결합합니다. */
+export function applyBusinessMoatToMoat(
+  moat: MoatAnalysis,
+  businessMoat: BusinessMoatInsight | null | undefined,
+  displayName?: string,
+  sector?: string | null,
+): MoatAnalysis {
+  if (!businessMoat) return moat
+
+  const updatedDims = moat.dimension_scores.map((d) => {
+    const biz = businessMoat.dimensions?.[d.dimension]
+    if (!biz) return d
+    const blended = Math.round(Math.min(10, Math.max(0, d.score * 0.7 + biz.score * 0.3)) * 10) / 10
+    return {
+      ...d,
+      score: blended,
+      business_rationale: biz.rationale || null,
+    }
+  })
+
+  const scoreMap = Object.fromEntries(
+    updatedDims.map((d) => [d.dimension, d.score]),
+  ) as Record<MoatDimension, number>
+  const compound_moats = detectCompoundMoats(scoreMap)
+  const rawComposite = calcWeightedComposite(updatedDims, sector)
+  const compoundBonus = Math.min(0.6, compound_moats.length * 0.3)
+  const composite_score = Math.round(Math.min(10, rawComposite + compoundBonus) * 10) / 10
+  const grade: MoatGrade =
+    composite_score >= 7.5 ? 'wide' : composite_score >= 5.0 ? 'narrow' : 'none'
+
+  return {
+    ...moat,
+    dimension_scores: updatedDims,
+    compound_moats,
+    composite_score,
+    grade,
+    business_moat: businessMoat,
     analyst_note: generateAnalystNote(
       displayName ?? moat.ticker,
       grade,

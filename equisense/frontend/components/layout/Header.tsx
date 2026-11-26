@@ -45,7 +45,7 @@ export default function Header() {
       borderBottom: '1px solid var(--line)',
     }}>
       <div style={{
-        maxWidth: 1080, margin: '0 auto',
+        maxWidth: 1300, margin: '0 auto',
         padding: isMobile ? '0 16px' : '0 32px',
         height: 60,
         display: 'flex', alignItems: 'center', gap: isMobile ? 10 : 16,

@@ -46,7 +46,7 @@ const SUMMARY_MODULES = [
   'earningsTrend',
 ].join(',')
 
-async function proxyFetch<T>(path: string, retries = 1): Promise<T> {
+async function proxyFetch<T>(path: string, retries = 2): Promise<T> {
   if (!PROXY) throw new ApiError('NEXT_PUBLIC_PROXY_URL이 설정되지 않았습니다.')
   let lastErr: unknown
   for (let attempt = 0; attempt <= retries; attempt++) {
@@ -59,7 +59,10 @@ async function proxyFetch<T>(path: string, retries = 1): Promise<T> {
       if (err instanceof ApiError && err.status && err.status < 500 && err.status !== 429) throw err
       lastErr = err
     }
-    if (attempt < retries) await new Promise((r) => setTimeout(r, 350 * (attempt + 1)))
+    if (attempt < retries) {
+      const delay = 400 * Math.pow(2, attempt) + Math.floor(Math.random() * 150)
+      await new Promise((r) => setTimeout(r, delay))
+    }
   }
   throw lastErr
 }
@@ -194,8 +197,12 @@ async function getPeerComparison(ticker: string, companyMargin: number | null): 
   }
 }
 
-export async function getMoatScore(ticker: string, market: Market): Promise<MoatAnalysis> {
-  const fundamentals = await getFundamentals(ticker, market)
+export async function getMoatScore(
+  ticker: string,
+  market: Market,
+  existingFundamentals?: FundamentalAnalysis,
+): Promise<MoatAnalysis> {
+  const fundamentals = existingFundamentals ?? (await getFundamentals(ticker, market))
   let moat = calculateMoat(fundamentals)
   if (market === 'US') {
     const companyMargin = fundamentals.metrics_by_year.at(-1)?.operating_margin ?? null

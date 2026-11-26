@@ -37,44 +37,53 @@ const SUMMARY_MODULES = [
 
 let _crumb = null
 let _cookieStr = null
+let _crumbPromise = null
 
 async function refreshCrumb() {
-  const homeRes = await fetch('https://finance.yahoo.com/', {
-    headers: {
-      'User-Agent': YAHOO_UA,
-      Accept: 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
-      'Accept-Language': 'en-US,en;q=0.9',
-    },
-    redirect: 'follow',
-  })
+  if (_crumbPromise) return _crumbPromise
+  _crumbPromise = (async () => {
+    try {
+      const homeRes = await fetch('https://finance.yahoo.com/', {
+        headers: {
+          'User-Agent': YAHOO_UA,
+          Accept: 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+          'Accept-Language': 'en-US,en;q=0.9',
+        },
+        redirect: 'follow',
+      })
 
-  const setCookieHeaders = homeRes.headers.getAll
-    ? homeRes.headers.getAll('set-cookie')
-    : [homeRes.headers.get('set-cookie') ?? '']
+      const setCookieHeaders = homeRes.headers.getAll
+        ? homeRes.headers.getAll('set-cookie')
+        : [homeRes.headers.get('set-cookie') ?? '']
 
-  const cookies = setCookieHeaders
-    .flatMap((h) => h.split(','))
-    .map((c) => c.split(';')[0].trim())
-    .filter(Boolean)
+      const cookies = setCookieHeaders
+        .flatMap((h) => h.split(','))
+        .map((c) => c.split(';')[0].trim())
+        .filter(Boolean)
 
-  _cookieStr = cookies.join('; ')
+      _cookieStr = cookies.join('; ')
 
-  const crumbRes = await fetch('https://query1.finance.yahoo.com/v1/test/getcrumb', {
-    headers: {
-      'User-Agent': YAHOO_UA,
-      Accept: '*/*',
-      'Accept-Language': 'en-US,en;q=0.9',
-      Cookie: _cookieStr,
-    },
-  })
+      const crumbRes = await fetch('https://query1.finance.yahoo.com/v1/test/getcrumb', {
+        headers: {
+          'User-Agent': YAHOO_UA,
+          Accept: '*/*',
+          'Accept-Language': 'en-US,en;q=0.9',
+          Cookie: _cookieStr,
+        },
+      })
 
-  const crumbText = (await crumbRes.text()).trim()
-  if (!crumbText || crumbText.includes('<') || crumbText.includes('{') || crumbText.length > 40) {
-    _crumb = null
-    _cookieStr = null
-    throw new Error(`Yahoo crumb 취득 실패: ${crumbText.slice(0, 60)}`)
-  }
-  _crumb = crumbText
+      const crumbText = (await crumbRes.text()).trim()
+      if (!crumbText || crumbText.includes('<') || crumbText.includes('{') || crumbText.length > 40) {
+        _crumb = null
+        _cookieStr = null
+        throw new Error(`Yahoo crumb 취득 실패: ${crumbText.slice(0, 60)}`)
+      }
+      _crumb = crumbText
+    } finally {
+      _crumbPromise = null
+    }
+  })()
+  return _crumbPromise
 }
 
 async function yahooSummaryFetch(symbol, modules) {
@@ -85,7 +94,7 @@ async function yahooSummaryFetch(symbol, modules) {
   const body = await res.text()
 
   let parsed
-  try { parsed = JSON.parse(body) } catch { return body }
+  try { parsed = JSON.parse(body) } catch { return { status: res.ok ? 502 : res.status, body } }
 
   const isInvalidCrumb =
     parsed?.finance?.error?.code === 'Unauthorized' ||
@@ -96,10 +105,11 @@ async function yahooSummaryFetch(symbol, modules) {
     _cookieStr = null
     await refreshCrumb()
     const retryUrl = `https://query1.finance.yahoo.com/v10/finance/quoteSummary/${encodeURIComponent(symbol)}?modules=${encodeURIComponent(modules)}&formatted=false&lang=en-US&crumb=${encodeURIComponent(_crumb)}`
-    return (await fetch(retryUrl, { headers: { ...YAHOO_HEADERS, Cookie: _cookieStr } })).text()
+    const retryRes = await fetch(retryUrl, { headers: { ...YAHOO_HEADERS, Cookie: _cookieStr } })
+    return { status: retryRes.status, body: await retryRes.text() }
   }
 
-  return body
+  return { status: res.status, body }
 }
 
 const TS_TYPES = [
@@ -126,7 +136,7 @@ async function yahooTimeseriesFetch(symbol) {
   const body = await res.text()
 
   let parsed
-  try { parsed = JSON.parse(body) } catch { return body }
+  try { parsed = JSON.parse(body) } catch { return { status: res.ok ? 502 : res.status, body } }
 
   const isUnauth =
     parsed?.timeseries?.error?.code === 'Unauthorized' ||
@@ -136,10 +146,11 @@ async function yahooTimeseriesFetch(symbol) {
     _crumb = null
     _cookieStr = null
     await refreshCrumb()
-    return (await fetch(makeUrl(_crumb), { headers: { ...YAHOO_HEADERS, Cookie: _cookieStr } })).text()
+    const retryRes = await fetch(makeUrl(_crumb), { headers: { ...YAHOO_HEADERS, Cookie: _cookieStr } })
+    return { status: retryRes.status, body: await retryRes.text() }
   }
 
-  return body
+  return { status: res.status, body }
 }
 
 // ── 번역 (Google 비공식 우선, 실패 시 MyMemory 폴백) ────────────────────────────
@@ -236,20 +247,19 @@ export default {
         const modules = p.get('modules') ?? SUMMARY_MODULES
 
         if (p.get('market') === 'KR' && !/\.(KS|KQ)$/i.test(symbol)) {
-          const ksBody = await yahooSummaryFetch(symbol + '.KS', 'financialData')
+          const ksRes = await yahooSummaryFetch(symbol + '.KS', 'financialData')
           let ksData
-          try { ksData = JSON.parse(ksBody) } catch { ksData = null }
+          try { ksData = JSON.parse(ksRes.body) } catch { ksData = null }
           symbol = ksData?.quoteSummary?.result ? symbol + '.KS' : symbol + '.KQ'
         }
 
-        const body = await yahooSummaryFetch(symbol, modules)
-        // 재무제표 모듈(장기 데이터)은 15분 캐시, 주가 전용은 60초 캐시
+        const result = await yahooSummaryFetch(symbol, modules)
+        // 재무제표 모듈(장기 데이터)은 15분 캐시, 주가 전용은 60초 캐시 (단, 성공 응답만 캐싱)
         const isHeavy = modules.includes('incomeStatement') || modules.includes('balanceSheet') || modules.includes('cashflow')
         const ttl = isHeavy ? 900 : 60
-        return new Response(body, {
-          status: 200,
-          headers: { ...CORS, 'Content-Type': 'application/json; charset=utf-8', 'Cache-Control': `public, max-age=${ttl}` },
-        })
+        const headers = { ...CORS, 'Content-Type': 'application/json; charset=utf-8' }
+        if (result.status === 200) headers['Cache-Control'] = `public, max-age=${ttl}`
+        return new Response(result.body, { status: result.status, headers })
       }
 
       // ── Yahoo Finance: 종목 검색 자동완성 ────────────────────────────────────
@@ -279,16 +289,15 @@ export default {
       if (url.pathname === '/yahoo/timeseries') {
         let symbol = p.get('symbol') ?? ''
         if (p.get('market') === 'KR' && !/\.(KS|KQ)$/i.test(symbol)) {
-          const ksBody = await yahooSummaryFetch(symbol + '.KS', 'financialData')
+          const ksRes = await yahooSummaryFetch(symbol + '.KS', 'financialData')
           let ksData
-          try { ksData = JSON.parse(ksBody) } catch { ksData = null }
+          try { ksData = JSON.parse(ksRes.body) } catch { ksData = null }
           symbol = ksData?.quoteSummary?.result ? symbol + '.KS' : symbol + '.KQ'
         }
-        const body = await yahooTimeseriesFetch(symbol)
-        return new Response(body, {
-          status: 200,
-          headers: { ...CORS, 'Content-Type': 'application/json; charset=utf-8', 'Cache-Control': 'public, max-age=3600' },
-        })
+        const result = await yahooTimeseriesFetch(symbol)
+        const headers = { ...CORS, 'Content-Type': 'application/json; charset=utf-8' }
+        if (result.status === 200) headers['Cache-Control'] = 'public, max-age=3600'
+        return new Response(result.body, { status: result.status, headers })
       }
 
       // ── Yahoo Finance: price chart ──────────────────────────────────────────

@@ -6,12 +6,14 @@ import type {
   FiftyTwoWeek,
   InstitutionHolder,
   InsiderTransaction,
+  NewsItem,
   RecTrendPoint,
   SentimentData,
   ShortData,
   UpgradeDowngrade,
 } from '@/types'
 import { extractOutlook, extractOwnershipSignals } from '@/lib/adapters/yahoo'
+import { classifyNewsTitle } from './sentiment-scoring'
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type Raw = any
@@ -212,9 +214,26 @@ export function parseFiftyTwoWeek(raw: Raw): FiftyTwoWeek {
   return { low, high, current, position_pct }
 }
 
+// ── 뉴스 헤드라인 ──────────────────────────────────
+
+export function parseYahooNews(raw: Raw): NewsItem[] {
+  const list = raw?.news
+  if (!Array.isArray(list)) return []
+  return list
+    .filter((n: Raw) => typeof n?.title === 'string' && n.title.trim().length > 0)
+    .slice(0, 8)
+    .map((n: Raw): NewsItem => ({
+      title: n.title,
+      link: n.link ?? '',
+      publisher: n.publisher ?? '—',
+      published_at: tsToDate(n.providerPublishTime),
+      sentiment: classifyNewsTitle(n.title),
+    }))
+}
+
 // ── 통합 파서 ──────────────────────────────────────
 
-export function parseSentimentData(yahooRaw: Raw, dartRaw: Raw | null): SentimentData {
+export function parseSentimentData(yahooRaw: Raw, dartRaw: Raw | null, newsRaw: Raw | null = null): SentimentData {
   const result = yahooRaw?.quoteSummary?.result?.[0]
   const ownership = extractOwnershipSignals(result)
   return {
@@ -228,6 +247,10 @@ export function parseSentimentData(yahooRaw: Raw, dartRaw: Raw | null): Sentimen
     upgrade_downgrade:    parseUpgradeDowngrade(yahooRaw),
     short_data:           parseShortData(yahooRaw),
     fifty_two_week:       parseFiftyTwoWeek(yahooRaw),
+    news:                 newsRaw ? parseYahooNews(newsRaw) : [],
     ...ownership,
   }
 }
+
+export { computeFearGreed, computeManagementGrade } from './sentiment-scoring'
+export type { FearGreedResult } from './sentiment-scoring'

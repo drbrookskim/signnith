@@ -5,94 +5,13 @@ import { useSearchParams } from 'next/navigation'
 import {
   Area, AreaChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis,
 } from 'recharts'
-import type { Market, SentimentData } from '@/types'
+import type { GateAData, Market, SentimentData } from '@/types'
 import { fetchSentimentData, fetchGateAData } from '@/lib/api-client'
+import { computeFearGreed, computeManagementGrade } from '@/lib/adapters/sentiment'
 import { Card, Eyebrow, Reveal, TabHead } from '@/components/ui'
 import QualitativeAnalysisView from '@/components/qualitative/QualitativeAnalysisView'
 import { useCompanyScores } from '@/contexts/CompanyScoresContext'
 import { useIsMobile } from '@/lib/hooks/useIsMobile'
-
-// ── Fear-Greed 계산 ───────────────────────────────────────
-
-function computeFearGreed(
-  vix: number | null,
-  bullishPct: number,
-  shortPctOfFloat?: number | null,
-  positionPct?: number | null,
-): { score: number; label: string; description: string } {
-  // VIX → 공포지수 기여 (inverse: 낮을수록 탐욕)
-  const vixScore = vix == null ? 55
-    : vix <= 12 ? 85 : vix <= 17 ? 70 : vix <= 22 ? 50 : vix <= 30 ? 30 : 15
-
-  // 애널리스트 컨센서스 기여
-  const consScore = Math.min(100, Math.max(0, bullishPct))
-
-  // 공매도 비율 기여 (낮을수록 탐욕)
-  const shortScore = shortPctOfFloat == null ? 55
-    : shortPctOfFloat < 0.03 ? 78
-    : shortPctOfFloat < 0.08 ? 60
-    : shortPctOfFloat < 0.15 ? 40
-    : shortPctOfFloat < 0.25 ? 24
-    : 10
-
-  // 52주 위치 기여 (높을수록 탐욕)
-  const posScore = positionPct == null ? 55 : Math.min(100, Math.max(0, positionPct))
-
-  const score = Math.round(
-    vixScore * 0.30 + consScore * 0.30 + shortScore * 0.20 + posScore * 0.20,
-  )
-  const label = score >= 75 ? '극단적 탐욕' : score >= 55 ? '탐욕 Greed'
-    : score >= 45 ? '중립 Neutral' : score >= 25 ? '공포 Fear' : '극단적 공포'
-  const description = score >= 55
-    ? '기관 심리 우호적 · 공매도 포지션 낮음 · 과열 구간 주의'
-    : score >= 45
-      ? '기관 심리 중립 · 방향성 탐색 구간'
-      : '기관 심리 위축 · 공매도 포지션 높음 · 역발상 진입 고려'
-
-  return { score, label, description }
-}
-
-// ── 경영진 신뢰도 계산 ────────────────────────────────────
-
-function computeManagementGrade(
-  sentiment: SentimentData | null,
-  bullishPct: number,
-): { grade: string; color: string } {
-  if (!sentiment) return { grade: 'N/A', color: 'var(--ink-3)' }
-
-  let score = 60
-
-  // 내부자 거래 신호
-  const insider = sentiment.insider_transactions ?? []
-  const buyCount  = insider.filter((t) => t.transaction === 'buy').length
-  const sellCount = insider.filter((t) => t.transaction === 'sell').length
-  if (buyCount > sellCount) score += 15
-  else if (sellCount > buyCount * 2) score -= 10
-
-  // 컨센서스 기여
-  score += (bullishPct - 50) * 0.4
-
-  // 목표주가 괴리
-  const consensus = sentiment.consensus
-  if (consensus?.target_mean != null && consensus?.current_price != null) {
-    const upside = (consensus.target_mean / consensus.current_price - 1) * 100
-    if (upside > 20) score += 10
-    else if (upside < -5) score -= 8
-  }
-
-  score = Math.max(0, Math.min(100, score))
-
-  const grade = score >= 85 ? 'A+'
-    : score >= 78 ? 'A'
-    : score >= 70 ? 'A-'
-    : score >= 62 ? 'B+'
-    : score >= 54 ? 'B'
-    : score >= 46 ? 'B-'
-    : 'C+'
-  const color = score >= 70 ? 'var(--accent)' : score >= 55 ? '#b45309' : '#dc2626'
-
-  return { grade, color }
-}
 
 // ── Fear-Greed 반원 게이지 (SVG) ──────────────────────────
 
@@ -264,7 +183,7 @@ function QualitativeContent() {
 
   const [sentiment, setSentiment] = useState<SentimentData | null>(null)
   const [sentimentLoading, setSentimentLoading] = useState(true)
-  const [vix, setVix] = useState<number | null>(null)
+  const [gateA, setGateA] = useState<GateAData | null>(null)
 
   useEffect(() => {
     if (!ticker) return
@@ -279,7 +198,7 @@ function QualitativeContent() {
 
   useEffect(() => {
     fetchGateAData()
-      .then((d) => setVix(d.vix))
+      .then((d) => setGateA(d))
       .catch(() => {})
   }, [])
 
@@ -288,20 +207,30 @@ function QualitativeContent() {
     ? ((consensus.strong_buy + consensus.buy) / consensus.total) * 100
     : null
 
-  useEffect(() => {
-    if (bullishPct === null) return
-    const tone = bullishPct >= 60 ? 'strong' as const : bullishPct < 40 ? 'weak' as const : 'neutral' as const
-    const label = bullishPct >= 60 ? '매수' : bullishPct < 40 ? '매도' : '중립'
-    setTabBadge('qualitative', { label, tone, score: Math.round(bullishPct) })
-  }, [bullishPct, setTabBadge])
-
   const shortPct = sentiment?.short_data?.short_pct_of_float ?? null
   const positionPct = sentiment?.fifty_two_week?.position_pct ?? null
 
-  const { score: fgScore, label: fgLabel, description: fgDesc } = computeFearGreed(
-    vix, bullishPct ?? 55, shortPct, positionPct,
-  )
-  const { grade: mgmtGrade, color: mgmtColor } = computeManagementGrade(sentiment, bullishPct ?? 55)
+  const { score: fgScore, label: fgLabel, description: fgDesc, activeSignals } = computeFearGreed({
+    market,
+    vix: gateA?.vix ?? null,
+    kospiPrice: gateA?.kospi_price ?? null,
+    kospiMa200: gateA?.kospi_ma200 ?? null,
+    bullishPct,
+    shortPctOfFloat: shortPct,
+    positionPct,
+    earningsSurprises: sentiment?.earnings_surprises,
+    upgradeDowngrade: sentiment?.upgrade_downgrade,
+    disclosures: sentiment?.disclosures,
+    news: sentiment?.news,
+  })
+  const { grade: mgmtGrade, color: mgmtColor } = computeManagementGrade(sentiment)
+
+  useEffect(() => {
+    if (sentimentLoading || activeSignals === 0) return
+    const tone = fgScore >= 60 ? 'strong' as const : fgScore < 40 ? 'weak' as const : 'neutral' as const
+    const label = fgScore >= 60 ? '긍정' : fgScore < 40 ? '위축' : '중립'
+    setTabBadge('qualitative', { label, tone, score: fgScore })
+  }, [sentimentLoading, activeSignals, fgScore, setTabBadge])
 
   // 매수 컨센서스 추이 — 실제 3개월 데이터 (가짜 시뮬레이션 제거)
   const fgHistory = sentiment?.rec_trend?.length
@@ -681,6 +610,43 @@ function QualitativeContent() {
                   </span>
                 </div>
               ))}
+            </div>
+          </div>
+        )}
+
+        {sentiment?.news && sentiment.news.length > 0 && (
+          <div style={{ marginTop: 20 }}>
+            <Eyebrow>최근 뉴스 센티먼트 · News</Eyebrow>
+            <div style={{ marginTop: 10 }}>
+              {sentiment.news.slice(0, 5).map((n, i) => {
+                const badgeColor = n.sentiment === 'positive' ? 'var(--accent)' : n.sentiment === 'negative' ? '#dc2626' : 'var(--ink-3)'
+                const badgeLabel = n.sentiment === 'positive' ? '긍정' : n.sentiment === 'negative' ? '부정' : '중립'
+                return (
+                  <div key={i} style={{
+                    display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+                    padding: '9px 0', borderBottom: i < 4 ? '1px solid var(--line)' : 'none', gap: 12,
+                  }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 8, minWidth: 0 }}>
+                      <span style={{
+                        fontFamily: 'var(--font-mono)', fontSize: 10, fontWeight: 700,
+                        color: badgeColor, border: `1px solid ${badgeColor}`, borderRadius: 4, padding: '1px 5px', flexShrink: 0,
+                      }}>{badgeLabel}</span>
+                      {n.link ? (
+                        <a href={n.link} target="_blank" rel="noreferrer" style={{ fontSize: 12.5, color: 'var(--ink)', lineHeight: 1.4, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', textDecoration: 'none' }}>
+                          {n.title}
+                        </a>
+                      ) : (
+                        <span style={{ fontSize: 12.5, color: 'var(--ink)', lineHeight: 1.4, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                          {n.title}
+                        </span>
+                      )}
+                    </div>
+                    <span style={{ fontFamily: 'var(--font-mono)', fontSize: 11, color: 'var(--ink-3)', flexShrink: 0 }}>
+                      {n.publisher} · {n.published_at}
+                    </span>
+                  </div>
+                )
+              })}
             </div>
           </div>
         )}

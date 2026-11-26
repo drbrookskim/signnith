@@ -263,6 +263,18 @@ export default {
         })
       }
 
+      // ── Yahoo Finance: 종목 뉴스 헤드라인 ────────────────────────────────────
+      if (url.pathname === '/yahoo/news') {
+        let symbol = p.get('symbol') ?? ''
+        if (p.get('market') === 'KR' && !/\.(KS|KQ)$/i.test(symbol)) symbol = symbol + '.KS'
+        const upstream = `https://query1.finance.yahoo.com/v1/finance/search?q=${encodeURIComponent(symbol)}&quotesCount=0&newsCount=10`
+        const res = await fetch(upstream, { headers: YAHOO_HEADERS })
+        return new Response(await res.text(), {
+          status: res.status,
+          headers: { ...CORS, 'Content-Type': 'application/json; charset=utf-8', 'Cache-Control': 'public, max-age=1800' },
+        })
+      }
+
       // ── Yahoo Finance: fundamentals timeseries ─────────────────────────────
       if (url.pathname === '/yahoo/timeseries') {
         let symbol = p.get('symbol') ?? ''

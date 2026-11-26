@@ -7,6 +7,7 @@ import {
   ResponsiveContainer, Tooltip, XAxis, YAxis,
 } from 'recharts'
 import { getMoatScore, getFundamentals } from '@/lib/api-client'
+import { computeRoicWaccSeries } from '@/lib/adapters/moat'
 import type { FundamentalAnalysis, Market, MoatAnalysis, MoatDimension } from '@/types'
 import { Card, Eyebrow, MetricBar, Reveal, Stat, TabHead, Term, Verdict } from '@/components/ui'
 import { useCompanyScores } from '@/contexts/CompanyScoresContext'
@@ -132,6 +133,11 @@ const GRADE_DURABILITY: Record<string, string> = {
   narrow: '5~10년',
   none: '불확실',
 }
+const DURABILITY_TREND_LABEL: Record<'expanding' | 'stable' | 'contracting', string> = {
+  expanding: '추세 확장',
+  stable: '추세 안정',
+  contracting: '추세 약화',
+}
 const COMPOUND_EMOJI: Record<string, string> = {
   lock_in_ring: '🔗',
   value_flywheel: '🔄',
@@ -140,17 +146,7 @@ const COMPOUND_EMOJI: Record<string, string> = {
 
 /* ── ROIC vs WACC Chart ── */
 function RoicWaccChart({ fundamentals }: { fundamentals: FundamentalAnalysis }) {
-  const rows = fundamentals.metrics_by_year
-    .filter((m) => m.roa != null)
-    .map((m) => {
-      // ROIC ≈ ROA × (1 + D/E × (1 - tax_rate)), approximate with ROA × 1.3
-      const roic = m.roa != null ? Math.min(80, m.roa * 1.3) : null
-      // WACC: approximate 6-9% based on debt level
-      const wacc = m.debt_ratio != null
-        ? Math.max(6, Math.min(10, 7 + m.debt_ratio * 0.01))
-        : 8
-      return { year: String(m.fiscal_year), ROIC: roic, WACC: wacc }
-    })
+  const rows = computeRoicWaccSeries(fundamentals)
 
   if (rows.length < 2) return (
     <p style={{ fontSize: 12, color: 'var(--ink-3)' }}>데이터 부족</p>
@@ -300,7 +296,7 @@ function MoatContent() {
               big
             />
             <span style={{ fontFamily: 'var(--font-mono)', fontSize: 12, color: 'var(--ink-2)' }}>
-              지속 {GRADE_DURABILITY[data.grade]} · 추세 안정
+              지속 {GRADE_DURABILITY[data.grade]} · {DURABILITY_TREND_LABEL[data.durability_trend ?? 'stable']}
             </span>
           </div>
           {data.analyst_note && (

@@ -115,6 +115,7 @@ export interface MoatAnalysis {
   compound_moats: CompoundMoat[]
   composite_score: number
   grade: MoatGrade
+  durability_trend?: 'expanding' | 'stable' | 'contracting'
   analyst_note: string | null
   scored_at: string
   peer_comparison?: PeerComparison | null
@@ -312,6 +313,14 @@ export interface FiftyTwoWeek {
   position_pct: number | null         // 0-100
 }
 
+export interface NewsItem {
+  title: string
+  link: string
+  publisher: string
+  published_at: string
+  sentiment: 'positive' | 'negative' | 'neutral'
+}
+
 export interface SentimentData {
   consensus: AnalystConsensus | null
   earnings_surprises: EarningsSurprise[]
@@ -325,6 +334,7 @@ export interface SentimentData {
   insider_net_purchase_pct: number | null   // 최근 6개월 내부자 순매수 비율(%)
   institution_ownership_pct: number | null  // 기관 보유 비율(%)
   outlook: BusinessOutlook | null
+  news?: NewsItem[]
 }
 
 // ──────────────────────────────────────────────

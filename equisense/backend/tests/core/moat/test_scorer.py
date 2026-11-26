@@ -97,16 +97,16 @@ class TestDetermineGrade:
         assert determine_grade(NARROW_MOAT_THRESHOLD - 0.01) == MoatGrade.NONE
 
     def test_exact_wide_threshold(self):
-        assert determine_grade(7.0) == MoatGrade.WIDE
+        assert determine_grade(7.5) == MoatGrade.WIDE
 
     def test_just_below_wide_threshold(self):
-        assert determine_grade(6.99) == MoatGrade.NARROW
+        assert determine_grade(7.49) == MoatGrade.NARROW
 
     def test_exact_narrow_threshold(self):
-        assert determine_grade(4.0) == MoatGrade.NARROW
+        assert determine_grade(5.0) == MoatGrade.NARROW
 
     def test_just_below_narrow_threshold(self):
-        assert determine_grade(3.99) == MoatGrade.NONE
+        assert determine_grade(4.99) == MoatGrade.NONE
 
 
 # ---------------------------------------------------------------------------
@@ -125,8 +125,18 @@ class TestScoreMoat:
     def test_wide_moat_company(self):
         inp = _make_input(scores=_make_scores(8.0, 9.0, 8.0, 8.0))
         result = score_moat(inp)
-        assert result.composite_score == 8.25
+        # 8.25 + compound_bonus(0.6: lock_in_ring + value_flywheel) = 8.85
+        assert result.composite_score == 8.85
         assert result.grade == MoatGrade.WIDE
+        assert len(result.compound_moats) == 2
+
+    def test_five_dimension_with_sector_weights(self):
+        scores = _make_scores(5.0, 5.0, 9.0, 9.0) + [
+            DimensionScore(dimension=MoatDimension.EFFICIENT_SCALE, score=4.0)
+        ]
+        tech = score_moat(_make_input(scores=scores, sector="Technology"))
+        util = score_moat(_make_input(scores=scores, sector="Utilities"))
+        assert tech.composite_score > util.composite_score
 
     def test_narrow_moat_company(self):
         inp = _make_input(scores=_make_scores(5.0, 6.0, 5.0, 4.0))

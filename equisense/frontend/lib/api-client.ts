@@ -24,7 +24,7 @@ import { ApiError } from '@/lib/api-error'
 import { transformDartToFundamentals } from '@/lib/adapters/dart'
 import { extractOutlook, extractOwnershipSignals, extractProfile, transformYahooToFundamentals, transformYahooToTechnical, parseTimeseries } from '@/lib/adapters/yahoo'
 import { computeQuarterlyInsights } from '@/lib/adapters/quarterly'
-import { calculateMoat } from '@/lib/adapters/moat'
+import { applyPeerComparisonToMoat, calculateMoat } from '@/lib/adapters/moat'
 import { calculateQualitative, lookupJob } from '@/lib/adapters/qualitative'
 import { parseSentimentData } from '@/lib/adapters/sentiment'
 import { MACRO_CONSTANTS } from '@/lib/adapters/swingPipeline'
@@ -196,10 +196,11 @@ async function getPeerComparison(ticker: string, companyMargin: number | null): 
 
 export async function getMoatScore(ticker: string, market: Market): Promise<MoatAnalysis> {
   const fundamentals = await getFundamentals(ticker, market)
-  const moat = calculateMoat(fundamentals)
+  let moat = calculateMoat(fundamentals)
   if (market === 'US') {
     const companyMargin = fundamentals.metrics_by_year.at(-1)?.operating_margin ?? null
-    moat.peer_comparison = await getPeerComparison(ticker, companyMargin)
+    const peerComparison = await getPeerComparison(ticker, companyMargin)
+    moat = applyPeerComparisonToMoat(moat, peerComparison, fundamentals.name ?? ticker, fundamentals.profile?.sector)
   }
   return moat
 }
@@ -315,7 +316,7 @@ export async function fetchSentimentData(
   ].join(',')
 
   const symbol = normalizeYahooSymbol(ticker, market)
-  const [yahooRes, dartRes] = await Promise.allSettled([
+  const [yahooRes, dartRes, newsRes] = await Promise.allSettled([
     proxyFetch<unknown>(
       `/yahoo/summary?symbol=${encodeURIComponent(symbol)}&market=${market}&modules=${SENTIMENT_MODULES}`,
     ),
@@ -324,12 +325,16 @@ export async function fetchSentimentData(
           proxyFetch<unknown>(`/dart/disclosures?corp_code=${corpCode}&page_count=20`),
         )
       : Promise.resolve(null),
+    proxyFetch<unknown>(
+      `/yahoo/news?symbol=${encodeURIComponent(symbol)}&market=${market}`,
+    ).catch(() => null),
   ])
 
   const yahooData = yahooRes.status === 'fulfilled' ? yahooRes.value : null
   const dartData  = dartRes.status  === 'fulfilled' ? dartRes.value  : null
+  const newsData  = newsRes.status  === 'fulfilled' ? newsRes.value  : null
 
-  return parseSentimentData(yahooData, dartData)
+  return parseSentimentData(yahooData, dartData, newsData)
 }
 
 export async function fetchGateAData(): Promise<GateAData> {

@@ -50,12 +50,20 @@ const DIMENSION_LABEL: Record<MoatDimension, string> = {
   efficient_scale: '효율적 규모',
 }
 
+const DIMENSION_LABEL_FULL: Record<MoatDimension, string> = {
+  cost_advantage: '비용 우위 (경쟁사보다 싸게 만드는 원가 경쟁력)',
+  intangible_assets: '무형 자산 (브랜드·특허·독점 라이선스)',
+  switching_costs: '전환 비용 (고객이 타사로 옮기기 어려운 정도)',
+  network_effects: '네트워크 효과 (사용자가 늘수록 가치가 커지는 구조)',
+  efficient_scale: '효율적 규모 (소수 기업만 수익을 내는 과점 시장)',
+}
+
 const METHODOLOGY: Array<{ dimension: MoatDimension; proxy: string; bench: string }> = [
-  { dimension: 'cost_advantage',    proxy: '영업이익률 + 부채비율',      bench: '영업이익률 30%↑ = 10점' },
-  { dimension: 'intangible_assets', proxy: 'ROE (브랜드·IP 초과수익)',   bench: 'ROE 25%↑ = 10점' },
-  { dimension: 'switching_costs',   proxy: '매출 CAGR + 방향성 보정',    bench: 'CAGR 12%↑ = 10점' },
-  { dimension: 'network_effects',   proxy: 'FCF 마진',                   bench: 'FCF 마진 15%↑ = 10점' },
-  { dimension: 'efficient_scale',   proxy: 'ROA + 이자보상배율(ICR)',     bench: 'ROA 15%↑ · ICR 20배↑ = 10점' },
+  { dimension: 'cost_advantage',    proxy: '영업이익률 + 부채비율 (자기자본 대비 타인자본 비중)', bench: '영업이익률 30%↑ = 10점' },
+  { dimension: 'intangible_assets', proxy: 'ROE (자기자본이익률, 브랜드·IP 초과수익)',         bench: 'ROE 25%↑ = 10점' },
+  { dimension: 'switching_costs',   proxy: '매출 CAGR (연평균 성장률) + 방향성 보정',          bench: 'CAGR 12%↑ = 10점' },
+  { dimension: 'network_effects',   proxy: 'FCF (잉여현금흐름) 마진',                         bench: 'FCF 마진 15%↑ = 10점' },
+  { dimension: 'efficient_scale',   proxy: 'ROA (총자산이익률) + ICR (이자보상배율)',           bench: 'ROA 15%↑ · ICR 20배↑ = 10점' },
 ]
 
 function RadarChart({ scores }: { scores: Record<MoatDimension, number> }) {
@@ -143,6 +151,11 @@ const COMPOUND_EMOJI: Record<string, string> = {
   value_flywheel: '🔄',
   scale_fortress: '🏰',
 }
+const COMPOUND_SHORT_DESC: Record<string, string> = {
+  lock_in_ring: '전환비용+네트워크 이중 잠금',
+  value_flywheel: '브랜드+원가우위 선순환',
+  scale_fortress: '규모장벽+원가우위 독과점',
+}
 
 /* ── ROIC vs WACC Chart ── */
 function RoicWaccChart({ fundamentals }: { fundamentals: FundamentalAnalysis }) {
@@ -209,7 +222,7 @@ function RoicWaccChart({ fundamentals }: { fundamentals: FundamentalAnalysis }) 
               {Number(spread) > 0 ? '+' : ''}{spread}
               <span style={{ fontFamily: 'var(--font-mono)', fontSize: 14, color: 'var(--ink-3)', marginLeft: 2 }}>%p</span>
             </div>
-            <div style={{ fontFamily: 'var(--font-mono)', fontSize: 11, color: 'var(--ink-3)', marginTop: 4 }}>최근 연도 ROIC−WACC 스프레드</div>
+            <div style={{ fontFamily: 'var(--font-mono)', fontSize: 11, color: 'var(--ink-3)', marginTop: 4 }}>최근 연도 ROIC (투하자본이익률) − WACC (자본비용) 스프레드</div>
           </div>
         )}
         <p style={{ fontSize: 13, lineHeight: 1.65, color: verdictColor }}>
@@ -325,7 +338,7 @@ function MoatContent() {
                   border: '1px solid var(--accent)', color: 'var(--accent)',
                   borderRadius: 999, padding: '3px 10px',
                 }}>
-                  {COMPOUND_EMOJI[m.type]} {m.name}
+                  {COMPOUND_EMOJI[m.type]} {m.name}{COMPOUND_SHORT_DESC[m.type] ? ` (${COMPOUND_SHORT_DESC[m.type]})` : ''}
                 </span>
               ))}
             </div>
@@ -359,7 +372,7 @@ function MoatContent() {
               }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', gap: 12 }}>
                   <span style={{ fontSize: 13.5, fontWeight: 600, color: 'var(--ink)' }}>
-                    {DIMENSION_LABEL[d.dimension]}
+                    {DIMENSION_LABEL_FULL[d.dimension]}
                   </span>
                   <span style={{
                     fontFamily: 'var(--font-mono)', fontSize: 13, fontWeight: 700,
@@ -443,8 +456,8 @@ function MoatContent() {
       {/* Depth 2 — ROIC vs WACC */}
       {fundamentals && (
         <Reveal
-          title="경제적 해자의 증거 — ROIC vs WACC"
-          hint="두 선의 간격 = 초과수익"
+          title="경제적 해자의 증거 — ROIC (투하자본이익률) vs WACC (자본조달비용)"
+          hint="두 선의 간격 = 초과수익 (자본비용 대비 벌어들인 수익)"
           depth={2}
           defaultOpen={false}
         >

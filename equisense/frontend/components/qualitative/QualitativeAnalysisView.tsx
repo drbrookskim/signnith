@@ -1,7 +1,8 @@
 'use client'
 
-import { useCallback, useEffect, useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { triggerDualQualitativeAnalysis } from '@/lib/api-client'
+import LoadingSuccessButton from '@/components/ui/LoadingSuccessButton'
 import type {
   DualQualitativeResult,
   Market,
@@ -330,15 +331,12 @@ export default function QualitativeAnalysisView({ ticker, market, name }: Props)
           </select>
         </div>
 
-        <button type="submit" disabled={loading} style={{
-          borderRadius: 6, padding: '6px 16px',
-          background: loading ? 'var(--line-2)' : 'var(--ink)', color: 'var(--bg)',
-          fontFamily: 'var(--font-mono)', fontSize: 12, fontWeight: 600,
-          letterSpacing: '.06em', border: 'none', cursor: loading ? 'not-allowed' : 'pointer',
-          transition: 'background .2s',
-        }}>
-          {loading ? '분석 중…' : '분석 시작'}
-        </button>
+        <LoadingSuccessButton
+          loading={loading}
+          hasResult={!!dualResult && !error}
+          idleLabel="분석 시작"
+          doneLabel="분석 완료"
+        />
       </form>
 
       {error && (

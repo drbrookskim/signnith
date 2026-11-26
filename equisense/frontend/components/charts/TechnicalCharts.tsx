@@ -177,7 +177,7 @@ export default function TechnicalCharts({
               key={p.value}
               onClick={() => handlePeriod(p.value)}
               className={[
-                'rounded-md px-3 py-1.5 text-xs font-medium transition-colors',
+                'rounded-full px-3 py-1.5 text-xs font-medium transition-colors',
                 p.value === currentPeriod
                   ? 'bg-zinc-900 text-white dark:bg-zinc-50 dark:text-zinc-900'
                   : 'border border-zinc-300 text-zinc-600 hover:bg-zinc-100 dark:border-zinc-700 dark:text-zinc-400 dark:hover:bg-zinc-800',

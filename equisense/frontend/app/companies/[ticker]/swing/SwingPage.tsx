@@ -545,7 +545,7 @@ function SwingContent() {
                     onClick={() => setStockType(t)}
                     style={{
                       all: 'unset', boxSizing: 'border-box',
-                      padding: '5px 10px', borderRadius: 5, cursor: 'pointer',
+                      padding: '5px 12px', borderRadius: 999, cursor: 'pointer',
                       fontSize: 12, textAlign: 'left',
                       background: stockType === t ? 'var(--ink)' : 'transparent',
                       color: stockType === t ? 'var(--bg)' : 'var(--ink-2)',

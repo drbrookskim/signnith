@@ -9,8 +9,20 @@ import type {
   RiskFactor,
 } from '@/types'
 
-const CURRENT_YEAR = new Date().getFullYear()
-const FISCAL_YEARS = Array.from({ length: 5 }, (_, i) => CURRENT_YEAR - 1 - i)
+function buildRecentQuarters(count = 8): string[] {
+  const now = new Date()
+  let y = now.getFullYear()
+  let q = Math.floor(now.getMonth() / 3) + 1
+  const out: string[] = []
+  for (let i = 0; i < count; i++) {
+    out.push(`${y} Q${q}`)
+    q -= 1
+    if (q === 0) { q = 4; y -= 1 }
+  }
+  return out
+}
+
+const RECENT_QUARTERS = buildRecentQuarters(8)
 
 const SEV_COLOR: Record<RiskFactor['severity'], string> = {
   high:   '#dc2626',
@@ -167,11 +179,11 @@ function DualResultCard({ result }: { result: DualQualitativeResult }) {
         <SectionLabel title="언행일치 점수" />
         <div style={{ display: 'flex', gap: 24 }}>
           {annual.integrity_score != null && (
-            <IntegrityGauge score={annual.integrity_score} label="장기 구조" color={LONG_COLOR} />
+            <IntegrityGauge score={annual.integrity_score} label="해자 기반 장기 구조" color={LONG_COLOR} />
           )}
           <div style={{ width: 1, background: 'var(--line)', flexShrink: 0 }} />
           {earnings.integrity_score != null && (
-            <IntegrityGauge score={earnings.integrity_score} label="단기 모멘텀" color={SHORT_COLOR} />
+            <IntegrityGauge score={earnings.integrity_score} label={`${earnings.fiscal_period} 분기 모멘텀`} color={SHORT_COLOR} />
           )}
         </div>
       </div>
@@ -189,7 +201,7 @@ function DualResultCard({ result }: { result: DualQualitativeResult }) {
                 display: 'inline-block', marginBottom: 5,
                 fontFamily: 'var(--font-mono)', fontSize: 10, fontWeight: 600,
                 letterSpacing: '.08em', textTransform: 'uppercase', color: LONG_COLOR,
-              }}>장기 구조</span>
+              }}>해자 기반 장기 구조</span>
               <p style={{ fontSize: 13, color: 'var(--ink-2)', lineHeight: 1.6 }}>{annual.summary_ko}</p>
             </div>
           )}
@@ -202,7 +214,7 @@ function DualResultCard({ result }: { result: DualQualitativeResult }) {
                 display: 'inline-block', marginBottom: 5,
                 fontFamily: 'var(--font-mono)', fontSize: 10, fontWeight: 600,
                 letterSpacing: '.08em', textTransform: 'uppercase', color: SHORT_COLOR,
-              }}>단기 모멘텀</span>
+              }}>{earnings.fiscal_period} 분기 모멘텀</span>
               <p style={{ fontSize: 13, color: 'var(--ink-2)', lineHeight: 1.6 }}>{earnings.summary_ko}</p>
             </div>
           )}
@@ -261,7 +273,7 @@ function DualResultCard({ result }: { result: DualQualitativeResult }) {
 // ── 메인 컴포넌트 ─────────────────────────────────────────────
 
 export default function QualitativeAnalysisView({ ticker, market, name }: Props) {
-  const [fiscalYear, setFiscalYear] = useState<number>(FISCAL_YEARS[0])
+  const [quarter, setQuarter] = useState<string>(RECENT_QUARTERS[0])
   const [dualResult, setDualResult] = useState<DualQualitativeResult | null>(null)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -276,7 +288,7 @@ export default function QualitativeAnalysisView({ ticker, market, name }: Props)
     setError(null)
     setLoading(true)
     try {
-      const result = await triggerDualQualitativeAnalysis(ticker, market, fiscalYear)
+      const result = await triggerDualQualitativeAnalysis(ticker, market, quarter)
       setDualResult(result)
     } catch (err: unknown) {
       const e = err as { message?: string; code?: string }
@@ -310,11 +322,11 @@ export default function QualitativeAnalysisView({ ticker, market, name }: Props)
       }}>
         <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
           <label style={{ fontFamily: 'var(--font-mono)', fontSize: 10, letterSpacing: '.1em', textTransform: 'uppercase', color: 'var(--ink-3)' }}>
-            회계연도
+            기준 분기
           </label>
-          <select value={fiscalYear} onChange={(e) => setFiscalYear(Number(e.target.value))}
+          <select value={quarter} onChange={(e) => setQuarter(e.target.value)}
             style={selectStyle} disabled={loading}>
-            {FISCAL_YEARS.map((y) => <option key={y} value={y}>{y}</option>)}
+            {RECENT_QUARTERS.map((q) => <option key={q} value={q}>{q}</option>)}
           </select>
         </div>
 

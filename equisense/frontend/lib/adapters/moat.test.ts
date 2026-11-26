@@ -1,6 +1,6 @@
 import { describe, it } from 'node:test'
 import assert from 'node:assert/strict'
-import { applyPeerComparisonToMoat, calculateMoat, computeRoicWaccSeries } from './moat.ts'
+import { applyBusinessMoatToMoat, applyPeerComparisonToMoat, calculateMoat, computeRoicWaccSeries } from './moat.ts'
 import type { FundamentalAnalysis } from '../../types/index.ts'
 
 function makeBaseFundamentals(overrides: Partial<FundamentalAnalysis> = {}): FundamentalAnalysis {
@@ -169,5 +169,29 @@ describe('calculateMoat', () => {
     const usSeries = computeRoicWaccSeries(makeBaseFundamentals({ market: 'US' }))
     const krSeries = computeRoicWaccSeries(makeBaseFundamentals({ market: 'KR' }))
     assert.ok(krSeries[0].WACC > usSeries[0].WACC)
+  })
+
+  it('applyBusinessMoatToMoat는 재무 점수(70%)와 사업 점수(30%)를 블렌딩하고 사업 근거를 보존한다', () => {
+    const base = calculateMoat(makeBaseFundamentals())
+    const enriched = applyBusinessMoatToMoat(
+      base,
+      {
+        business_summary: '강력한 생태계 잠금과 규모의 경제를 보유한 플랫폼 기업입니다.',
+        dimensions: {
+          cost_advantage: { score: 9.0, rationale: '수직 계열화 기반 원가 우위' },
+          intangible_assets: { score: 9.0, rationale: '글로벌 브랜드 파워' },
+          switching_costs: { score: 9.5, rationale: 'OS·클라우드 생태계 잠금' },
+          network_effects: { score: 9.0, rationale: '개발자·사용자 양면 네트워크' },
+          efficient_scale: { score: 8.0, rationale: '대규모 인프라 진입 장벽' },
+        },
+        erosion_risks: ['반독점 규제 강화', 'AI 플랫폼 패러다임 전환'],
+        model: '@cf/meta/llama-3.3-70b-instruct-fp8-fast',
+      },
+      'Test Corp',
+      'Technology',
+    )
+    const sw = enriched.dimension_scores.find((d) => d.dimension === 'switching_costs')!
+    assert.equal(sw.business_rationale, 'OS·클라우드 생태계 잠금')
+    assert.equal(enriched.business_moat?.erosion_risks.length, 2)
   })
 })

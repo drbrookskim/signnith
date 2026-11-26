@@ -92,6 +92,19 @@ export interface DimensionScore {
   dimension: MoatDimension
   score: number
   rationale: string | null
+  business_rationale?: string | null
+}
+
+export interface BusinessMoatDimension {
+  score: number
+  rationale: string
+}
+
+export interface BusinessMoatInsight {
+  business_summary: string
+  dimensions: Partial<Record<MoatDimension, BusinessMoatDimension>>
+  erosion_risks: string[]
+  model?: string
 }
 
 export interface PeerMargin {
@@ -119,6 +132,7 @@ export interface MoatAnalysis {
   analyst_note: string | null
   scored_at: string
   peer_comparison?: PeerComparison | null
+  business_moat?: BusinessMoatInsight | null
 }
 
 // ──────────────────────────────────────────────

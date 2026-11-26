@@ -307,6 +307,14 @@ function MoatContent() {
               {data.analyst_note.split('\n')[0]}
             </p>
           )}
+          {data.business_moat?.business_summary && (
+            <p style={{ margin: '10px 0 0', fontSize: 13.5, lineHeight: 1.6, color: 'var(--ink-2)', maxWidth: 560 }}>
+              <span style={{ fontFamily: 'var(--font-mono)', fontSize: 10.5, fontWeight: 700, color: 'var(--accent)', marginRight: 6 }}>
+                사업 구조
+              </span>
+              {data.business_moat.business_summary}
+            </p>
+          )}
           {/* Compound moats */}
           {data.compound_moats.length > 0 && (
             <div style={{ display: 'flex', gap: 8, marginTop: 12, flexWrap: 'wrap' }}>
@@ -366,6 +374,12 @@ function MoatContent() {
                 {d.rationale && (
                   <div style={{ fontSize: 12, color: 'var(--ink-3)', lineHeight: 1.5 }}>{d.rationale}</div>
                 )}
+                {d.business_rationale && (
+                  <div style={{ fontSize: 12, color: 'var(--ink-2)', lineHeight: 1.5, marginTop: 4 }}>
+                    <span style={{ fontFamily: 'var(--font-mono)', fontSize: 10.5, fontWeight: 700, color: 'var(--accent)', marginRight: 5 }}>사업</span>
+                    {d.business_rationale}
+                  </div>
+                )}
               </div>
             ))}
           </div>
@@ -408,6 +422,20 @@ function MoatContent() {
                 {line}
               </p>
             ))}
+            {data.business_moat?.erosion_risks && data.business_moat.erosion_risks.length > 0 && (
+              <div style={{ marginTop: 14, paddingTop: 12, borderTop: '1px solid var(--line)' }}>
+                <div style={{ fontFamily: 'var(--font-mono)', fontSize: 11, fontWeight: 700, color: '#92400e', marginBottom: 8 }}>
+                  해자 침식 리스크 · Moat Erosion Risks
+                </div>
+                <ul style={{ margin: 0, paddingLeft: 18, display: 'flex', flexDirection: 'column', gap: 6 }}>
+                  {data.business_moat.erosion_risks.map((risk, idx) => (
+                    <li key={idx} style={{ fontSize: 13, lineHeight: 1.55, color: 'var(--ink-2)' }}>
+                      {risk}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
           </div>
         )}
       </Reveal>

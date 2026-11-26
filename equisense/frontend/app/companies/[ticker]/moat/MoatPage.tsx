@@ -316,12 +316,12 @@ function MoatContent() {
             </span>
           </div>
           {data.analyst_note && (
-            <p style={{ margin: '14px 0 0', fontSize: 14.5, lineHeight: 1.6, color: 'var(--ink)', maxWidth: 540 }}>
+            <p style={{ margin: '14px 0 0', fontSize: 14.5, lineHeight: 1.6, color: 'var(--ink)' }}>
               {data.analyst_note.split('\n')[0]}
             </p>
           )}
           {data.business_moat?.business_summary && (
-            <p style={{ margin: '10px 0 0', fontSize: 13.5, lineHeight: 1.6, color: 'var(--ink-2)', maxWidth: 560 }}>
+            <p style={{ margin: '10px 0 0', fontSize: 13.5, lineHeight: 1.6, color: 'var(--ink-2)' }}>
               <span style={{ fontFamily: 'var(--font-mono)', fontSize: 10.5, fontWeight: 700, color: 'var(--accent)', marginRight: 6 }}>
                 사업 구조
               </span>

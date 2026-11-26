@@ -305,10 +305,11 @@ export default function QualitativeAnalysisView({ ticker, market, name }: Props)
   const ticker_ = name ? `${name} (${ticker})` : ticker
 
   const selectStyle: React.CSSProperties = {
-    borderRadius: 6, border: '1px solid var(--line-2)',
+    height: 38, minWidth: 132, boxSizing: 'border-box',
+    borderRadius: 999, border: '1px solid var(--line-2)',
     background: 'var(--surface)', color: 'var(--ink)',
-    fontFamily: 'var(--font-ui)', fontSize: 13,
-    padding: '6px 10px', outline: 'none',
+    fontFamily: 'var(--font-ui)', fontSize: 13, fontWeight: 500,
+    padding: '0 16px', outline: 'none',
     opacity: loading ? 0.5 : 1,
   }
 

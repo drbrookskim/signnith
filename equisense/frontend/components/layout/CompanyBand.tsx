@@ -117,7 +117,7 @@ export default function CompanyBand() {
 
   return (
     <div style={{
-      maxWidth: 1080, margin: '0 auto',
+      maxWidth: 1300, margin: '0 auto',
       padding: isMobile ? '16px 16px 0' : '26px 32px 0',
     }}>
       <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 12 }}>

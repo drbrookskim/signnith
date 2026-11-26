@@ -232,14 +232,14 @@ body::before {
 
 /* ── Company page main content ── */
 .eq-company-main {
-  max-width: 1080px;
+  max-width: 1300px;
   margin: 0 auto;
   padding: 30px 32px 80px;
 }
 
 /* ── Landing page layout ── */
 .eq-landing-main {
-  max-width: 980px;
+  max-width: 1300px;
   margin: 0 auto;
   padding: 0 32px;
 }

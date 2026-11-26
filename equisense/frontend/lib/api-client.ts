@@ -204,6 +204,7 @@ async function getBusinessMoat(params: {
   market: Market
   sector?: string | null
   industry?: string | null
+  metrics?: string | null
   summary?: string | null
 }): Promise<BusinessMoatInsight | null> {
   if (!PROXY || !params.ticker) return null
@@ -215,6 +216,7 @@ async function getBusinessMoat(params: {
     if (params.name) qs.set('name', params.name)
     if (params.sector) qs.set('sector', params.sector)
     if (params.industry) qs.set('industry', params.industry)
+    if (params.metrics) qs.set('metrics', params.metrics.slice(0, 400))
     if (params.summary) qs.set('summary', params.summary.slice(0, 1500))
     const res = await fetch(`${PROXY}/ai/moat-business?${qs.toString()}`)
     if (!res.ok) return null
@@ -232,9 +234,18 @@ export async function getMoatScore(
 ): Promise<MoatAnalysis> {
   const fundamentals = existingFundamentals ?? (await getFundamentals(ticker, market))
   let moat = calculateMoat(fundamentals)
-  const companyMargin = fundamentals.metrics_by_year.at(-1)?.operating_margin ?? null
+  const latest = fundamentals.metrics_by_year.at(-1)
+  const companyMargin = latest?.operating_margin ?? null
   const displayName = fundamentals.name ?? ticker
   const sector = fundamentals.profile?.sector
+  const revCagr = fundamentals.trends.revenue?.cagr
+  const metricsSummary = [
+    companyMargin != null ? `영업이익률 ${companyMargin.toFixed(1)}%` : null,
+    latest?.roe != null ? `ROE ${latest.roe.toFixed(1)}%` : null,
+    latest?.roa != null ? `ROA ${latest.roa.toFixed(1)}%` : null,
+    revCagr != null ? `매출 CAGR ${revCagr.toFixed(1)}%` : null,
+    latest?.debt_ratio != null ? `부채비율 ${latest.debt_ratio.toFixed(1)}%` : null,
+  ].filter(Boolean).join(', ')
 
   const [peerRes, bizRes] = await Promise.allSettled([
     market === 'US' ? getPeerComparison(ticker, companyMargin) : Promise.resolve(null),
@@ -244,6 +255,7 @@ export async function getMoatScore(
       market,
       sector,
       industry: fundamentals.profile?.industry,
+      metrics: metricsSummary || null,
       summary: fundamentals.profile?.description,
     }),
   ])
@@ -313,12 +325,93 @@ export async function triggerQualitativeAnalysis(
 export async function triggerDualQualitativeAnalysis(
   ticker: string,
   market: Market,
-  fiscal_year: number,
+  quarterLabel: string,
 ): Promise<DualQualitativeResult> {
-  const fundamentals = await getFundamentals(ticker, market)
-  const annual = calculateQualitative(fundamentals, fiscal_year, 'annual_report', market)
-  const earnings = calculateQualitative(fundamentals, fiscal_year, 'earnings_call', market)
-  return { annual: annual.result!, earnings: earnings.result! }
+  const fiscalYear = parseInt(quarterLabel.slice(0, 4), 10) || new Date().getFullYear()
+  const [fundRes, qRes, sentRes] = await Promise.allSettled([
+    getFundamentals(ticker, market),
+    getQuarterlyInsights(ticker, market),
+    fetchSentimentData(ticker, market),
+  ])
+  if (fundRes.status === 'rejected') throw fundRes.reason
+  const fundamentals = fundRes.value
+  const annual = calculateQualitative(fundamentals, fiscalYear, 'annual_report', market).result!
+  const earnings = calculateQualitative(fundamentals, fiscalYear, 'earnings_call', market).result!
+  annual.fiscal_period = quarterLabel
+  earnings.fiscal_period = quarterLabel
+
+  if (!PROXY) return { annual, earnings }
+
+  try {
+    const moat = await getMoatScore(ticker, market, fundamentals).catch(() => null)
+    const quarterly = qRes.status === 'fulfilled' ? qRes.value : null
+    const sentiment = sentRes.status === 'fulfilled' ? sentRes.value : null
+
+    const moatLines = moat ? [
+      `종합 해자: ${moat.grade.toUpperCase()} (${moat.composite_score}/10, ${moat.durability_trend ?? 'stable'})`,
+      moat.business_moat?.business_summary ? `사업 구조: ${moat.business_moat.business_summary}` : null,
+      ...moat.dimension_scores.map(
+        (d) => `- ${d.dimension} ${d.score}점: ${d.business_rationale ?? d.rationale ?? ''}`,
+      ),
+      moat.business_moat?.erosion_risks?.length
+        ? `침식 리스크: ${moat.business_moat.erosion_risks.join(' / ')}`
+        : null,
+    ].filter(Boolean).join('\n') : ''
+
+    const quarterlyLines = quarterly
+      ? Object.entries(quarterly)
+          .filter(([, v]) => v && !v.insufficient)
+          .map(([k, v]) => `${k}: ${v!.trend_line} (${v!.momentum_label})`)
+          .join('\n')
+      : ''
+
+    const sentLines = sentiment ? [
+      sentiment.consensus ? `애널리스트 매수 ${sentiment.consensus.strong_buy + sentiment.consensus.buy}/${sentiment.consensus.total}` : null,
+      sentiment.earnings_surprises.length > 0
+        ? `최근 서프라이즈: ${sentiment.earnings_surprises.map((s) => `${s.quarter} ${s.surprise_pct != null ? `${s.surprise_pct.toFixed(1)}%` : '—'}`).join(', ')}`
+        : null,
+      sentiment.news?.length
+        ? `최근 뉴스: ${sentiment.news.slice(0, 4).map((n) => `[${n.sentiment}] ${n.title}`).join(' | ')}`
+        : null,
+      sentiment.disclosures?.length
+        ? `DART 공시: ${sentiment.disclosures.slice(0, 4).map((d) => d.report_nm).join(' | ')}`
+        : null,
+    ].filter(Boolean).join('\n') : ''
+
+    const qs = new URLSearchParams({
+      ticker,
+      market,
+      quarter: quarterLabel,
+    })
+    if (fundamentals.name) qs.set('name', fundamentals.name)
+    if (moatLines) qs.set('moat', moatLines.slice(0, 1400))
+    if (quarterlyLines) qs.set('quarterly', quarterlyLines.slice(0, 800))
+    if (sentLines) qs.set('sentiment', sentLines.slice(0, 800))
+
+    const res = await fetch(`${PROXY}/ai/qualitative-quarter?${qs.toString()}`)
+    if (res.ok) {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const data = (await res.json()) as { analysis?: any }
+      const s = data?.analysis?.structural
+      const q = data?.analysis?.quarterly
+      if (s) {
+        if (typeof s.summary_ko === 'string' && s.summary_ko.trim()) annual.summary_ko = s.summary_ko.trim()
+        if (Array.isArray(s.risk_factors) && s.risk_factors.length > 0) annual.risk_factors = s.risk_factors
+        if (Array.isArray(s.growth_drivers) && s.growth_drivers.length > 0) annual.growth_drivers = s.growth_drivers
+        if (Array.isArray(s.noise_filter) && s.noise_filter.length > 0) annual.noise_filter = s.noise_filter
+      }
+      if (q) {
+        if (typeof q.summary_ko === 'string' && q.summary_ko.trim()) earnings.summary_ko = q.summary_ko.trim()
+        if (Array.isArray(q.risk_factors) && q.risk_factors.length > 0) earnings.risk_factors = q.risk_factors
+        if (Array.isArray(q.growth_drivers) && q.growth_drivers.length > 0) earnings.growth_drivers = q.growth_drivers
+        if (Array.isArray(q.noise_filter) && q.noise_filter.length > 0) earnings.noise_filter = q.noise_filter
+      }
+    }
+  } catch {
+    // AI 생성 실패 시 계산된 정량 기반 폴백 유지
+  }
+
+  return { annual, earnings }
 }
 
 export async function getJobStatus(jobId: string): Promise<AnalysisJob> {

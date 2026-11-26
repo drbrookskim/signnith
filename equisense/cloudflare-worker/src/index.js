@@ -456,6 +456,7 @@ export default {
         const market = (p.get('market') ?? 'US').trim().slice(0, 10)
         const sector = (p.get('sector') ?? '').trim().slice(0, 80)
         const industry = (p.get('industry') ?? '').trim().slice(0, 80)
+        const metrics = (p.get('metrics') ?? '').trim().slice(0, 400)
         const summary = (p.get('summary') ?? '').trim().slice(0, 1500)
 
         if (!ticker || !env.AI) {
@@ -476,6 +477,7 @@ export default {
           name ? `기업명: ${name}` : null,
           sector ? `섹터: ${sector}` : null,
           industry ? `산업: ${industry}` : null,
+          metrics ? `실제 재무 지표: ${metrics}` : null,
           summary ? `사업 개요:\n${summary}` : null,
         ].filter(Boolean).join('\n')
 
@@ -485,7 +487,7 @@ export default {
               {
                 role: 'system',
                 content:
-                  '당신은 Morningstar 경제적 해자(Economic Moat) 전문 애널리스트입니다. 제공된 기업의 사업 모델과 산업 구조만을 바탕으로 5개 해자 차원의 사업적 경쟁우위(0~10점)와 한국어 근거, 해자 침식 리스크를 평가하세요. 반드시 순수 JSON만 출력하세요(코드블록/설명 금지). 스키마: {"business_summary":"2문장 한국어 요약","dimensions":{"cost_advantage":{"score":0-10,"rationale":"1문장"},"intangible_assets":{"score":0-10,"rationale":"1문장"},"switching_costs":{"score":0-10,"rationale":"1문장"},"network_effects":{"score":0-10,"rationale":"1문장"},"efficient_scale":{"score":0-10,"rationale":"1문장"}},"erosion_risks":["리스크1","리스크2","리스크3"]}',
+                  '당신은 Morningstar 경제적 해자(Economic Moat) 전문 애널리스트입니다. 제공된 기업의 실제 제품/서비스, 고객 구조, 산업 특성, 재무 수치를 근거로 5개 해자 차원(0~10점)을 평가하세요. "규모의 경제", "글로벌 불확실성", "새로운 기술의 등장", "지속적인 노력" 같은 뜬구름 잡는 추상적 상투어는 절대 쓰지 말고, 반드시 이 기업 고유의 구체적 제품명·수익원·경쟁 구도·제공된 재무 수치를 인용해 실체감 있게 작성하세요. 순수 JSON만 출력하세요: {"business_summary":"2문장 한국어 요약","dimensions":{"cost_advantage":{"score":0-10,"rationale":"구체적 1문장"},"intangible_assets":{"score":0-10,"rationale":"구체적 1문장"},"switching_costs":{"score":0-10,"rationale":"구체적 1문장"},"network_effects":{"score":0-10,"rationale":"구체적 1문장"},"efficient_scale":{"score":0-10,"rationale":"구체적 1문장"}},"erosion_risks":["구체적 침식 리스크1","구체적 침식 리스크2","구체적 침식 리스크3"]}',
               },
               {
                 role: 'user',
@@ -536,6 +538,79 @@ export default {
           return resp
         } catch {
           return new Response(JSON.stringify({ business_moat: null }), {
+            status: 200,
+            headers: { ...CORS, 'Content-Type': 'application/json; charset=utf-8' },
+          })
+        }
+      }
+
+      // ── AI: 분기 기준 + 해자 연동 정성 분석 (Llama 3.3 70B) ─────────────────
+      if (url.pathname === '/ai/qualitative-quarter') {
+        const ticker = (p.get('ticker') ?? '').trim().slice(0, 20)
+        const name = (p.get('name') ?? '').trim().slice(0, 120)
+        const market = (p.get('market') ?? 'US').trim().slice(0, 10)
+        const quarter = (p.get('quarter') ?? '').trim().slice(0, 20)
+        const moatContext = (p.get('moat') ?? '').trim().slice(0, 1400)
+        const quarterContext = (p.get('quarterly') ?? '').trim().slice(0, 800)
+        const sentimentContext = (p.get('sentiment') ?? '').trim().slice(0, 800)
+
+        if (!ticker || !env.AI) {
+          return new Response(JSON.stringify({ analysis: null }), {
+            status: 200,
+            headers: { ...CORS, 'Content-Type': 'application/json; charset=utf-8' },
+          })
+        }
+
+        const cache = caches.default
+        const cacheKey = new Request(url.toString(), { method: 'GET' })
+        const cached = await cache.match(cacheKey)
+        if (cached) return cached
+
+        const model = '@cf/meta/llama-3.3-70b-instruct-fp8-fast'
+        const promptLines = [
+          `종목: ${name || ticker} (${ticker}, ${market})`,
+          `기준 분기: ${quarter}`,
+          moatContext ? `[해자(Moat) 분석에서 발견된 핵심 사실]\n${moatContext}` : null,
+          quarterContext ? `[최근 분기 실적 추이]\n${quarterContext}` : null,
+          sentimentContext ? `[시장 센티먼트·어닝 서프라이즈·뉴스/공시]\n${sentimentContext}` : null,
+        ].filter(Boolean).join('\n\n')
+
+        try {
+          const aiRes = await env.AI.run(model, {
+            messages: [
+              {
+                role: 'system',
+                content:
+                  '당신은 실전 주식 리서치 애널리스트입니다. 제공된 [해자 분석 결과], [최근 분기 실적 추이], [센티먼트·뉴스/공시]를 연결해 장기 구조(structural)와 해당 분기 단기 모멘텀(quarterly)을 분석하세요. 절대 뜬구름 잡는 일반론("거시경제 불확실성", "지속적 성장 기대" 등)을 쓰지 말고, 해자에서 발견된 실제 강점·약점·침식 리스크와 분기 실적 수치·어닝 서프라이즈·뉴스/공시를 직접 인용해 실체감 있게 작성하세요. 순수 JSON만 출력하세요: {"structural":{"summary_ko":"2~3문장","risk_factors":[{"title":"제목","description":"구체적 근거 1~2문장","severity":"high|medium|low"}],"growth_drivers":[{"title":"제목","description":"구체적 근거 1~2문장"}],"noise_filter":[{"claim":"시장의 과장/우려 주장","is_substantiated":true,"evidence":"해자/분기 데이터 기반 검증"}]},"quarterly":{"summary_ko":"2~3문장","risk_factors":[{"title":"제목","description":"구체적 근거 1~2문장","severity":"high|medium|low"}],"growth_drivers":[{"title":"제목","description":"구체적 근거 1~2문장"}],"noise_filter":[{"claim":"단기 시장 노이즈","is_substantiated":false,"evidence":"분기 수치/센티먼트 기반 검증"}]}}',
+              },
+              {
+                role: 'user',
+                content: promptLines,
+              },
+            ],
+            max_tokens: 1100,
+            temperature: 0.2,
+          })
+
+          const rawText =
+            typeof aiRes?.response === 'string'
+              ? aiRes.response.trim()
+              : typeof aiRes?.choices?.[0]?.message?.content === 'string'
+                ? aiRes.choices[0].message.content.trim()
+                : ''
+          const jsonStr = rawText.replace(/^```(?:json)?\s*/i, '').replace(/\s*```$/i, '').trim()
+          const parsed = JSON.parse(jsonStr)
+
+          const headers = {
+            ...CORS,
+            'Content-Type': 'application/json; charset=utf-8',
+            'Cache-Control': 'public, max-age=43200',
+          }
+          const resp = new Response(JSON.stringify({ analysis: parsed, model }), { status: 200, headers })
+          await cache.put(cacheKey, resp.clone())
+          return resp
+        } catch {
+          return new Response(JSON.stringify({ analysis: null }), {
             status: 200,
             headers: { ...CORS, 'Content-Type': 'application/json; charset=utf-8' },
           })

@@ -208,31 +208,31 @@ function buildKeyRatios(m: FundamentalMetrics) {
 
   return [
     {
-      k: 'PER', label: '주가수익비율',
+      k: 'PER', label: '주가수익비율 (주가 ÷ 주당순이익)',
       value: fmt(m.per, 'x'),
       peer: m.per ? `동종 ${(m.per * 0.78).toFixed(1)}x` : undefined,
       barValue: m.per != null ? Math.max(0, 100 - Math.min(100, m.per * 2)) : 0,
       accent: false,
-      hint: 'TTM 기준',
+      hint: 'TTM (최근 12개월) 기준',
     },
     {
-      k: 'ROIC', label: '투하자본이익률',
+      k: 'ROIC', label: '투하자본이익률 (투입 자본 대비 수익률)',
       value: fmt(roic, '%'),
-      peer: roic ? `WACC ≈ ${(Math.max(6, (m.debt_ratio ?? 100) * 0.04 + 6)).toFixed(1)}%` : undefined,
+      peer: roic ? `WACC (자본비용) ≈ ${(Math.max(6, (m.debt_ratio ?? 100) * 0.04 + 6)).toFixed(1)}%` : undefined,
       barValue: Math.min(100, (roic ?? 0) * 2),
       accent: (roic ?? 0) >= 15,
-      hint: 'NOPAT ÷ 투자본',
+      hint: 'NOPAT (세후영업이익) ÷ 투자본',
     },
     {
-      k: 'FCF', label: '잉여현금흐름 마진',
+      k: 'FCF', label: '잉여현금흐름 마진 (설비투자 후 현금 비율)',
       value: fmt(fcfPct, '%'),
       peer: fcfPct ? `동종 ${(fcfPct * 0.55).toFixed(1)}%` : undefined,
       barValue: Math.min(100, (fcfPct ?? 0) * 4),
       accent: (fcfPct ?? 0) >= 15,
-      hint: 'FCF ÷ 매출',
+      hint: 'FCF (잉여현금흐름) ÷ 매출',
     },
     {
-      k: 'OPM', label: '영업이익률',
+      k: 'OPM', label: '영업이익률 (매출 대비 본업 이익 비율)',
       value: fmt(m.operating_margin, '%'),
       peer: m.operating_margin ? `동종 ${(m.operating_margin * 0.62).toFixed(1)}%` : undefined,
       barValue: Math.min(100, (m.operating_margin ?? 0) * 3),
@@ -240,7 +240,7 @@ function buildKeyRatios(m: FundamentalMetrics) {
       hint: '영업이익 ÷ 매출',
     },
     {
-      k: 'D/E', label: '부채비율',
+      k: 'D/E', label: '부채비율 (자기자본 대비 총부채)',
       value: fmt(m.debt_ratio != null ? m.debt_ratio / 100 : null, 'x'),
       peer: undefined,
       barValue: Math.min(100, m.debt_ratio ?? 0),
@@ -425,7 +425,7 @@ function FundamentalsContent() {
                 <tr style={{ borderBottom: '1px solid var(--line)' }}>
                   <th style={{ textAlign: 'left', padding: '6px 8px', color: 'var(--ink-3)', fontWeight: 500 }}>구간</th>
                   <th style={{ textAlign: 'right', padding: '6px 8px', color: 'var(--ink-3)', fontWeight: 500 }}>매출 성장률</th>
-                  <th style={{ textAlign: 'right', padding: '6px 8px', color: 'var(--ink-3)', fontWeight: 500 }}>EPS 성장률</th>
+                  <th style={{ textAlign: 'right', padding: '6px 8px', color: 'var(--ink-3)', fontWeight: 500 }}>EPS (주당순이익) 성장률</th>
                 </tr>
               </thead>
               <tbody>

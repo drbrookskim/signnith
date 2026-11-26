@@ -423,7 +423,7 @@ function SwingContent() {
           {rr && (
             <div className="eq-glass" style={{ display: 'flex', alignItems: 'center', gap: 24, padding: '10px 14px', borderRadius: 8, marginTop: 8 }}>
               <span style={{ fontFamily: 'var(--font-mono)', fontSize: 14, fontWeight: 700, color: rr.verdict === 'PASS' ? 'var(--accent)' : rr.verdict === 'CAUTION' ? '#b45309' : 'var(--ink-2)' }}>
-                R:R = {rr.rr} : 1
+                R:R (손익비, 기대수익 ÷ 손실위험) = {rr.rr} : 1
               </span>
               <span style={{ fontSize: 12, color: 'var(--ink-3)' }}>손익분기 승률 {rr.breakeven_winrate}%</span>
               <span style={{ fontSize: 12, color: 'var(--ink-3)' }}>손실 {rr.loss_pct}% · 수익 {rr.gain_pct}%</span>
@@ -477,7 +477,7 @@ function SwingContent() {
       )}
 
       {/* Gate A */}
-      <Reveal title="Gate A — 거시환경 점검" hint="VIX · KOSPI · 금리" depth={2} defaultOpen>
+      <Reveal title="Gate A — 거시환경 점검" hint="VIX (변동성 공포지수) · KOSPI · 금리" depth={2} defaultOpen>
         <div style={{ paddingTop: 8 }}>
           <GateAPanel onResult={setGateAResult} />
         </div>

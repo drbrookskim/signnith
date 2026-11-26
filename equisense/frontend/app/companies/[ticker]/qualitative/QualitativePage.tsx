@@ -304,7 +304,7 @@ function QualitativeContent() {
       <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1fr minmax(0,340px)', gap: isMobile ? 16 : 28, marginTop: 22 }}>
         {/* 매수 컨센서스 추이 3개월 */}
         <Card>
-          <Eyebrow n={2}>매수 컨센서스 추이 · 3개월</Eyebrow>
+          <Eyebrow n={2}>매수 컨센서스 (증권사 투자의견 종합) 추이 · 3개월</Eyebrow>
           <div style={{ marginTop: 12 }}>
             {fgHistory.length > 0 ? (
               <ResponsiveContainer width="100%" height={160}>
@@ -336,7 +336,7 @@ function QualitativeContent() {
 
         {/* 애널리스트 컨센서스 */}
         <Card>
-          <Eyebrow n={2}>애널리스트 컨센서스</Eyebrow>
+          <Eyebrow n={2}>애널리스트 컨센서스 (목표가·투자의견 종합)</Eyebrow>
           <div style={{ marginTop: 12 }}>
             {sentimentLoading ? (
               <div style={{ height: 80, borderRadius: 6, background: 'var(--surface-2)', animation: 'pulse 1.5s ease-in-out infinite' }} />
@@ -384,7 +384,7 @@ function QualitativeContent() {
 
             {/* 공매도 비율 */}
             <div>
-              <div style={{ fontFamily: 'var(--font-mono)', fontSize: 10, color: 'var(--ink-3)', marginBottom: 6, letterSpacing: '.04em' }}>공매도 비율 · Short Float</div>
+              <div style={{ fontFamily: 'var(--font-mono)', fontSize: 10, color: 'var(--ink-3)', marginBottom: 6, letterSpacing: '.04em' }}>공매도 비율 (주가하락 베팅 비중) · Short Float</div>
               {shortPct != null ? (() => {
                 const pct = shortPct * 100
                 const color = pct < 3 ? 'var(--accent)' : pct < 8 ? '#b45309' : '#dc2626'
@@ -488,7 +488,7 @@ function QualitativeContent() {
       </Card>
 
       {/* Depth 3 — 어닝 서프라이즈 */}
-      <Reveal title="어닝 서프라이즈" hint="컨센서스 대비 실제 EPS" depth={2}>
+      <Reveal title="어닝 서프라이즈" hint="컨센서스 (시장 예상치) 대비 실제 EPS (주당순이익)" depth={2}>
         {sentimentLoading ? (
           <div style={{ height: 60, borderRadius: 6, background: 'var(--surface-2)', marginTop: 8, animation: 'pulse 1.5s ease-in-out infinite' }} />
         ) : sentiment?.earnings_surprises && sentiment.earnings_surprises.length > 0 ? (

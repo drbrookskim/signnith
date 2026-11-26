@@ -238,19 +238,22 @@ function MoatContent() {
     let cancelled = false
     setIsLoading(true) // eslint-disable-line react-hooks/set-state-in-effect
     setErrorMsg(null) // eslint-disable-line react-hooks/set-state-in-effect
-    Promise.allSettled([
-      getMoatScore(ticker, market),
-      getFundamentals(ticker, market),
-    ]).then(([moatRes, fundRes]) => {
-      if (cancelled) return
-      if (moatRes.status === 'fulfilled') setData(moatRes.value)
-      else setErrorMsg(
-        (moatRes.reason as { status?: number })?.status === 404
-          ? `${ticker} 종목의 해자 점수가 아직 입력되지 않았습니다.`
-          : '데이터를 불러오는 중 오류가 발생했습니다. 잠시 후 다시 시도해 주세요.',
-      )
-      if (fundRes.status === 'fulfilled') setFundamentals(fundRes.value)
-    }).finally(() => { if (!cancelled) setIsLoading(false) })
+    getFundamentals(ticker, market)
+      .then(async (fund) => {
+        if (cancelled) return
+        setFundamentals(fund)
+        const moat = await getMoatScore(ticker, market, fund)
+        if (!cancelled) setData(moat)
+      })
+      .catch((err) => {
+        if (cancelled) return
+        setErrorMsg(
+          (err as { status?: number })?.status === 404
+            ? `${ticker} 종목의 해자 점수가 아직 입력되지 않았습니다.`
+            : '데이터를 불러오는 중 오류가 발생했습니다. 잠시 후 다시 시도해 주세요.',
+        )
+      })
+      .finally(() => { if (!cancelled) setIsLoading(false) })
     return () => { cancelled = true }
   }, [ticker, market])
 

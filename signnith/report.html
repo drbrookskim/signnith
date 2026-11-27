@@ -15,49 +15,49 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Noto+Sans+KR:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <style>
-  /* ── CSS 변수: 다크 모드 (기본) ── */
+  /* ── CSS 변수: 다크 모드 (Kinetics Graphite × Warm Bone) ── */
   :root {
-    --bg:       #080a0f;
-    --card:     #11141d;
-    --card2:    #171b26;
-    --border:   rgba(255,255,255,0.08);
-    --border2:  rgba(255,255,255,0.15);
-    --text:     #f8fafc;
-    --text2:    #cbd5e1;
-    --muted:    #8b95a7;
-    --muted2:   #64748b;
-    --topbar:   rgba(8,10,15,0.84);
-    --green:    #00d4aa;
-    --red:      #ff4b6e;
+    --bg:       #0e0e10;
+    --card:     #17171a;
+    --card2:    #212125;
+    --border:   rgba(237,233,224,0.09);
+    --border2:  rgba(237,233,224,0.18);
+    --text:     #ede9e0;
+    --text2:    #c9c5bc;
+    --muted:    #a8a6a0;
+    --muted2:   #827f7a;
+    --topbar:   rgba(14,14,16,0.86);
+    --green:    #4cd08a;
+    --red:      #ff5c5c;
     --up:       #ff4b6e;  /* 상승 = 빨간 */
     --down:     #3b82f6;  /* 하락 = 파란 */
     --yellow:   #fbbf24;
-    --blue:     #3b82f6;
-    --shadow:   rgba(0,0,0,.45);
-    --desc-bg:  #171b26;
-    --divider:  rgba(255,255,255,0.07);
+    --blue:     #5b8def;
+    --shadow:   rgba(0,0,0,.48);
+    --desc-bg:  #212125;
+    --divider:  rgba(237,233,224,0.08);
   }
-  /* ── CSS 변수: 라이트 모드 ── */
+  /* ── CSS 변수: 라이트 모드 (Warm Bone Paper × Stone) ── */
   html.light {
-    --bg:       #f6f7fb;
-    --card:     #ffffff;
-    --card2:    #f1f4f9;
-    --border:   rgba(15,23,42,0.08);
-    --border2:  rgba(15,23,42,0.16);
-    --text:     #0f172a;
-    --text2:    #1e293b;
-    --muted:    #475569;
-    --muted2:   #64748b;
-    --topbar:   rgba(246,247,251,0.92);
+    --bg:       #f5f3ee;
+    --card:     #fcfbf8;
+    --card2:    #ece9e1;
+    --border:   rgba(14,14,16,0.09);
+    --border2:  rgba(14,14,16,0.18);
+    --text:     #121214;
+    --text2:    #2c2c30;
+    --muted:    #5e5c58;
+    --muted2:   #73706a;
+    --topbar:   rgba(245,243,238,0.90);
     --green:    #047857;
     --red:      #be123c;
     --up:       #be123c;
     --down:     #1d4ed8;
     --yellow:   #b45309;
     --blue:     #1d4ed8;
-    --shadow:   rgba(15,23,42,.08);
-    --desc-bg:  #f1f4f9;
-    --divider:  rgba(15,23,42,0.08);
+    --shadow:   rgba(14,14,16,.07);
+    --desc-bg:  #ece9e1;
+    --divider:  rgba(14,14,16,0.08);
   }
 
   *{ box-sizing:border-box; margin:0; padding:0; }
@@ -77,8 +77,13 @@
     pointer-events: none;
     z-index: -1;
     background:
-      radial-gradient(circle at 16% 0%, rgba(252, 114, 255, 0.08), transparent 36%),
-      radial-gradient(circle at 84% 6%, rgba(0, 212, 170, 0.07), transparent 34%);
+      radial-gradient(60% 55% at 20% 0%, rgba(255, 138, 0, 0.10), transparent 68%),
+      radial-gradient(50% 45% at 84% 4%, rgba(91, 141, 239, 0.06), transparent 65%);
+  }
+  html.light .ambient-glow {
+    background:
+      radial-gradient(60% 55% at 20% 0%, rgba(255, 138, 0, 0.08), transparent 68%),
+      radial-gradient(50% 45% at 84% 4%, rgba(91, 141, 239, 0.05), transparent 65%);
   }
   #main-wrap {
     position: relative;

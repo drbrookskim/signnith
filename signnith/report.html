@@ -629,6 +629,53 @@
   }
   .action-btn:hover{ color: var(--green); border-color: var(--green); }
 
+  /* ── Pixel + Dithering Interactive Chart ── */
+  .rpt-px-card {
+    background: var(--card2); border: 1px solid var(--border); border-radius: 14px;
+    padding: 14px 16px 12px; margin-bottom: 18px;
+  }
+  .rpt-px-head {
+    display: flex; align-items: center; justify-content: space-between;
+    gap: 8px; margin-bottom: 10px; font-size: 0.78rem; font-weight: 700;
+  }
+  .rpt-px-stage {
+    position: relative; height: 220px; border-radius: 8px;
+    background-color: var(--card);
+    background-image:
+      linear-gradient(to right, rgba(148,163,184,0.08) 1px, transparent 1px),
+      linear-gradient(to bottom, rgba(148,163,184,0.08) 1px, transparent 1px);
+    background-size: 16px 16px; border: 1px solid var(--border);
+    overflow: hidden; cursor: crosshair;
+  }
+  html.light .rpt-px-stage {
+    background-image:
+      linear-gradient(to right, rgba(15,23,42,0.06) 1px, transparent 1px),
+      linear-gradient(to bottom, rgba(15,23,42,0.06) 1px, transparent 1px);
+  }
+  .rpt-px-svg { width: 100%; height: 100%; display: block; shape-rendering: crispEdges; }
+  .rpt-px-tip {
+    position: absolute; top: 8px; left: 10px; background: var(--card2);
+    border: 1px solid var(--border2); border-radius: 6px; padding: 4px 10px;
+    font-size: 0.74rem; font-weight: 700; font-variant-numeric: tabular-nums;
+    pointer-events: none; opacity: 0; transition: opacity .1s; z-index: 4;
+  }
+  .rpt-px-tip.show { opacity: 1; }
+  .rpt-px-controls {
+    display: flex; align-items: center; justify-content: space-between;
+    gap: 8px; flex-wrap: wrap; margin-top: 10px;
+  }
+  .rpt-px-group {
+    display: inline-flex; align-items: center; gap: 2px; padding: 3px;
+    border-radius: 8px; border: 1px solid var(--border); background: var(--card);
+  }
+  .rpt-px-pill {
+    border: none; background: transparent; color: var(--muted); font-family: inherit;
+    font-size: 0.72rem; font-weight: 700; padding: 4px 10px; border-radius: 6px; cursor: pointer;
+  }
+  .rpt-px-pill.active { background: var(--card2); color: var(--text); box-shadow: 0 1px 3px rgba(0,0,0,.16); }
+  @keyframes pxBlink { 0%, 49% { opacity: 1; } 50%, 100% { opacity: 0.22; } }
+  .px-cursor { animation: pxBlink 1s steps(1, end) infinite; }
+
   /* ── Divider ── */
   .divider{ height:1px; background: var(--divider); margin:8px 0; }
 
@@ -1836,6 +1883,31 @@ function renderReport(data) {
   <div class="section-card">
     <div class="section-title">${skIcon('chart', 15)}기술적 분석</div>
 
+    ${Array.isArray(bars) && bars.length > 5 ? `
+    <div class="rpt-px-card">
+      <div class="rpt-px-head">
+        <span>실시간 추이 차트 (픽셀 + 디더링 · 마우스 호버로 시점 확인)</span>
+        <span id="rpt-px-meta" style="color:var(--green)">Price · ${bars.length}봉</span>
+      </div>
+      <div class="rpt-px-stage" id="rpt-px-stage">
+        <div class="rpt-px-tip" id="rpt-px-tip"></div>
+        <svg class="rpt-px-svg" id="rpt-px-svg" viewBox="0 0 820 220" preserveAspectRatio="none"></svg>
+      </div>
+      <div class="rpt-px-controls">
+        <div class="rpt-px-group">
+          <button class="rpt-px-pill active" onclick="setRptPxMetric('Price', this)">Price</button>
+          <button class="rpt-px-pill" onclick="setRptPxMetric('Volume', this)">Volume</button>
+          <button class="rpt-px-pill" onclick="setRptPxMetric('RSI', this)">RSI</button>
+          <button class="rpt-px-pill" onclick="setRptPxMetric('MACD', this)">MACD</button>
+        </div>
+        <div class="rpt-px-group">
+          <button class="rpt-px-pill active" onclick="setRptPxType('line', this)">Line</button>
+          <button class="rpt-px-pill" onclick="setRptPxType('candle', this)">Candle</button>
+          <button class="rpt-px-pill" onclick="setRptPxType('bar', this)">Bar</button>
+        </div>
+      </div>
+    </div>` : ''}
+
     ${metricBlock({
       subTitle: 'RSI — 상대강도지수 (14일)',
       barPct: Math.round(I.rsi ?? 50),
@@ -2303,6 +2375,202 @@ function renderReport(data) {
   </div>`;
   })()}
   `;
+
+  initReportPixelChart(bars, ind, isKr);
+}
+
+function initReportPixelChart(bars, ind, isKr) {
+  if (!Array.isArray(bars) || bars.length < 2) return;
+  const svg = document.getElementById('rpt-px-svg');
+  const stage = document.getElementById('rpt-px-stage');
+  if (!svg || !stage) return;
+
+  window._rptPxCtx = { bars, ind, isKr, metric: 'Price', type: 'line', pts: [] };
+  window.setRptPxMetric = function(m, btn) {
+    btn.parentElement.querySelectorAll('.rpt-px-pill').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    window._rptPxCtx.metric = m;
+    renderRptPx();
+  };
+  window.setRptPxType = function(t, btn) {
+    btn.parentElement.querySelectorAll('.rpt-px-pill').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    window._rptPxCtx.type = t;
+    renderRptPx();
+  };
+
+  function renderRptPx() {
+    const ctx = window._rptPxCtx;
+    const isCandle = ctx.type === 'candle' && ctx.metric === 'Price';
+    const maxCols = isCandle ? 40 : 54;
+    const sampled = ctx.bars.length <= maxCols
+      ? ctx.bars.map((bar, idx) => ({ bar, idx }))
+      : Array.from({ length: maxCols }, (_, i) => {
+          const idx = Math.round((i / (maxCols - 1)) * (ctx.bars.length - 1));
+          return { bar: ctx.bars[idx], idx };
+        });
+
+    const metaEl = document.getElementById('rpt-px-meta');
+    if (metaEl) metaEl.textContent = `${ctx.metric} · ${ctx.bars.length}봉`;
+
+    const W = 820, H = 220, padL = 12, padR = 70, padT = 16, padB = 28;
+    const plotW = W - padL - padR, plotH = H - padT - padB;
+    const px = n => Math.round(n);
+
+    const raw = sampled.map(({ bar, idx }) => {
+      if (ctx.metric === 'Volume') return bar.volume || 0;
+      if (ctx.metric === 'RSI') return ctx.ind?.rsi?.[idx] ?? 50;
+      if (ctx.metric === 'MACD') return ctx.ind?.hist?.[idx] ?? 0;
+      return bar.close;
+    });
+
+    let minV = isCandle ? Math.min(...sampled.map(x => x.bar.low ?? x.bar.close)) : Math.min(...raw);
+    let maxV = isCandle ? Math.max(...sampled.map(x => x.bar.high ?? x.bar.close)) : Math.max(...raw);
+    if (ctx.metric === 'RSI') { minV = 0; maxV = 100; }
+    if (ctx.metric === 'MACD') {
+      const absM = Math.max(Math.abs(minV), Math.abs(maxV)) || 1;
+      minV = -absM; maxV = absM;
+    }
+    const span = (maxV - minV) || 1;
+    const yOf = v => px(padT + (1 - (v - minV) / span) * plotH);
+
+    const pts = raw.map((v, i) => ({
+      x: px(padL + (i / Math.max(1, raw.length - 1)) * plotW),
+      y: yOf(v),
+      norm: (v - minV) / span,
+      v,
+      bar: sampled[i].bar,
+      date: new Date(sampled[i].bar.date)
+    }));
+    ctx.pts = pts;
+
+    const isUp = raw[raw.length - 1] >= raw[0];
+    const strokeCol = ctx.metric === 'RSI' ? '#a78bfa' : (isUp ? '#ff4b6e' : '#3b82f6');
+    const gid = 'rpt_px_' + Date.now();
+    const last = pts[pts.length - 1];
+
+    const fmtVal = v => ctx.metric === 'Volume' ? `${(v / 1e6).toFixed(1)}M`
+      : ctx.metric === 'RSI' ? v.toFixed(1)
+      : ctx.metric === 'MACD' ? (ctx.isKr ? Math.round(v).toLocaleString() : v.toFixed(2))
+      : fmt(v, ctx.isKr);
+
+    const yTicks = [0, 0.33, 0.66, 1].map(r => {
+      const val = maxV - r * span;
+      const y = px(padT + r * plotH);
+      return `<text x="${W - padR + 8}" y="${y}" fill="var(--muted)" font-family="ui-monospace, monospace" font-size="10" dominant-baseline="middle">${fmtVal(val)}</text>`;
+    }).join('');
+    const xTicks = [0, 0.25, 0.5, 0.75, 1].map(r => {
+      const idx = Math.min(pts.length - 1, Math.round(r * (pts.length - 1)));
+      const d = pts[idx].date;
+      const lbl = Number.isNaN(d.getTime()) ? '' : `${d.getMonth() + 1}/${d.getDate()}`;
+      return `<text x="${pts[idx].x}" y="${H - 9}" fill="var(--muted)" font-family="ui-monospace, monospace" font-size="10" text-anchor="${r === 0 ? 'start' : r === 1 ? 'end' : 'middle'}">${lbl}</text>`;
+    }).join('');
+
+    let refLines = '';
+    if (ctx.metric === 'RSI') {
+      [70, 30].forEach(lvl => {
+        const y = yOf(lvl);
+        refLines += `<line x1="${padL}" y1="${y}" x2="${W - padR}" y2="${y}" stroke="var(--border2)" stroke-dasharray="4 4"/>`;
+      });
+    } else if (ctx.metric === 'MACD') {
+      const y0 = yOf(0);
+      refLines += `<line x1="${padL}" y1="${y0}" x2="${W - padR}" y2="${y0}" stroke="var(--border2)" stroke-dasharray="2 2"/>`;
+    }
+
+    let bodySvg = '';
+    if (ctx.type === 'bar' || ctx.metric === 'MACD') {
+      const rows = 16;
+      const midRow = Math.floor(rows / 2);
+      const brickW = Math.max(4, px((plotW / pts.length) * 0.66));
+      const brickH = Math.max(4, px((plotH / rows) * 0.72));
+      bodySvg = pts.map(p => {
+        const col = ctx.metric === 'MACD' ? (p.v >= 0 ? '#ff4b6e' : '#3b82f6') : strokeCol;
+        const topRow = Math.round((1 - p.norm) * (rows - 1));
+        let colHtml = '';
+        for (let r = 0; r < rows; r++) {
+          const on = ctx.metric === 'MACD'
+            ? ((p.v >= 0 && r >= topRow && r <= midRow) || (p.v < 0 && r <= topRow && r >= midRow))
+            : (r >= topRow);
+          if (!on) continue;
+          const by = px(padT + (r / (rows - 1)) * (plotH - brickH));
+          const op = r === topRow ? 0.98 : 0.45;
+          colHtml += `<rect x="${px(p.x - brickW / 2)}" y="${by}" width="${brickW}" height="${brickH}" fill="${col}" fill-opacity="${op}"/>`;
+        }
+        return colHtml;
+      }).join('');
+    } else if (ctx.type === 'candle') {
+      const bw = Math.max(4, px((plotW / pts.length) * 0.56));
+      bodySvg = pts.map(p => {
+        const b = p.bar;
+        if (!isCandle) {
+          const bh = Math.max(2, (H - padB) - p.y);
+          return `<rect x="${px(p.x - bw / 2)}" y="${p.y}" width="${bw}" height="${bh}" fill="${strokeCol}" fill-opacity="0.78"/>`;
+        }
+        const open = b.open ?? b.close, close = b.close;
+        const high = b.high ?? Math.max(open, close), low = b.low ?? Math.min(open, close);
+        const col = close >= open ? '#ff4b6e' : '#3b82f6';
+        const yH = yOf(high), yL = yOf(low), yO = yOf(open), yC = yOf(close);
+        const bodyTop = Math.min(yO, yC);
+        const bodyH = Math.max(3, Math.abs(yC - yO));
+        return `<rect x="${p.x - 1}" y="${yH}" width="2" height="${Math.max(2, yL - yH)}" fill="${col}" fill-opacity="0.88"/>
+          <rect x="${px(p.x - bw / 2)}" y="${bodyTop}" width="${bw}" height="${bodyH}" fill="${col}"/>`;
+      }).join('');
+    } else {
+      let stepD = `M ${pts[0].x},${pts[0].y}`;
+      for (let i = 1; i < pts.length; i++) {
+        stepD += ` H ${pts[i].x} V ${pts[i].y}`;
+      }
+      const areaD = `${stepD} V ${H - padB} H ${pts[0].x} Z`;
+      bodySvg = `
+        <defs><pattern id="${gid}" width="4" height="4" patternUnits="userSpaceOnUse">
+          <rect x="0" y="0" width="2" height="2" fill="${strokeCol}" fill-opacity="0.28"/>
+          <rect x="2" y="2" width="2" height="2" fill="${strokeCol}" fill-opacity="0.14"/>
+        </pattern></defs>
+        <path d="${areaD}" fill="url(#${gid})"/>
+        <path d="${stepD}" fill="none" stroke="${strokeCol}" stroke-width="2.2"/>
+        <rect class="px-cursor" x="${last.x - 4}" y="${last.y - 4}" width="8" height="8" fill="${strokeCol}" stroke="var(--card)" stroke-width="1.4"/>`;
+    }
+
+    svg.innerHTML = `${refLines}${bodySvg}${yTicks}${xTicks}
+      <line id="rpt-px-cx" x1="0" y1="${padT}" x2="0" y2="${H - padB}" stroke="var(--muted)" stroke-dasharray="3 3" stroke-opacity="0.6" style="display:none"/>
+      <rect id="rpt-px-cd" x="0" y="0" width="8" height="8" fill="${strokeCol}" stroke="#fff" stroke-width="1.5" style="display:none"/>`;
+  }
+
+  renderRptPx();
+  stage.onmousemove = e => {
+    const pts = window._rptPxCtx?.pts || [];
+    if (!pts.length) return;
+    const rect = stage.getBoundingClientRect();
+    const relX = ((e.clientX - rect.left) / rect.width) * 820;
+    let best = pts[0], minD = Infinity;
+    for (const p of pts) { const d = Math.abs(p.x - relX); if (d < minD) { minD = d; best = p; } }
+    const cx = document.getElementById('rpt-px-cx');
+    const cd = document.getElementById('rpt-px-cd');
+    const tip = document.getElementById('rpt-px-tip');
+    if (cx && cd) {
+      cx.setAttribute('x1', best.x); cx.setAttribute('x2', best.x); cx.style.display = 'block';
+      cd.setAttribute('x', best.x - 4); cd.setAttribute('y', best.y - 4); cd.style.display = 'block';
+    }
+    const dLbl = Number.isNaN(best.date.getTime()) ? '' : `${best.date.getMonth() + 1}/${best.date.getDate()} · `;
+    if (window._rptPxCtx.type === 'candle' && window._rptPxCtx.metric === 'Price') {
+      const b = best.bar;
+      tip.textContent = `${dLbl}시:${fmt(b.open ?? b.close, isKr)} 고:${fmt(b.high ?? b.close, isKr)} 저:${fmt(b.low ?? b.close, isKr)} 종:${fmt(b.close, isKr)}`;
+    } else {
+      const vStr = window._rptPxCtx.metric === 'Volume' ? `${(best.v / 1e6).toFixed(2)}M`
+        : window._rptPxCtx.metric === 'RSI' ? best.v.toFixed(1)
+        : window._rptPxCtx.metric === 'MACD' ? (isKr ? Math.round(best.v).toLocaleString() : best.v.toFixed(2))
+        : fmt(best.v, isKr);
+      tip.textContent = `${dLbl}${window._rptPxCtx.metric}: ${vStr}`;
+    }
+    tip.classList.add('show');
+  };
+  stage.onmouseleave = () => {
+    const cx = document.getElementById('rpt-px-cx');
+    const cd = document.getElementById('rpt-px-cd');
+    if (cx) cx.style.display = 'none';
+    if (cd) cd.style.display = 'none';
+    document.getElementById('rpt-px-tip')?.classList.remove('show');
+  };
 }
 
 // ══════════════════════════════════════════════════════

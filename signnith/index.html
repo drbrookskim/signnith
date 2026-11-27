@@ -1564,32 +1564,47 @@
   .mtf-row { display:grid; grid-template-columns:repeat(4,1fr); gap:10px; margin-top:12px; }
   @media (max-width:640px){ .mtf-row { grid-template-columns:repeat(2,1fr); } }
   .mtf-cell {
-    background:var(--card2); border:1px solid var(--border); border-radius:12px;
+    background:var(--card2); border:1px solid var(--border); border-radius:10px;
     padding:13px 12px 15px; text-align:center; position:relative; overflow:hidden;
     box-shadow: 0 8px 20px -12px var(--mtf-accent, transparent);
-    transition: border-color .35s ease, box-shadow .35s ease, transform .25s ease;
+    transition: border-color .2s steps(4, end), box-shadow .2s ease, transform .18s steps(3, end);
   }
-  .mtf-cell > * { position: relative; z-index: 1; transition: opacity .38s ease, filter .38s ease; }
+  .mtf-cell > * { position: relative; z-index: 1; transition: opacity .25s ease; }
   .mtf-cell::before {
-    content:''; position:absolute; left:0; right:0; bottom:0; height:2.5px; z-index: 2;
+    content:''; position:absolute; left:0; right:0; bottom:0; height:3px; z-index: 2;
     background:var(--mtf-accent,var(--muted));
-    box-shadow: 0 0 12px 2px var(--mtf-accent, transparent), 0 -4px 14px 0 var(--mtf-accent, transparent);
+    -webkit-mask-image: repeating-linear-gradient(90deg, #000 0 6px, transparent 6px 8px);
+    mask-image: repeating-linear-gradient(90deg, #000 0 6px, transparent 6px 8px);
     opacity: 0.85;
-    transition: opacity .38s ease, height .35s ease, box-shadow .38s ease;
+    transition: opacity .2s ease, height .2s steps(2, end);
   }
   .mtf-cell::after {
     content:''; position:absolute; left:0; right:0; bottom:0; height:0%; z-index: 0;
-    background: linear-gradient(to top, rgba(239, 68, 68, 0.24) 0%, rgba(239, 68, 68, 0.08) 100%);
-    transition: height .48s cubic-bezier(0.22, 1, 0.36, 1);
+    background:
+      repeating-conic-gradient(rgba(255, 75, 110, 0.22) 0% 25%, transparent 0% 50%) 0 0 / 4px 4px,
+      linear-gradient(to top, rgba(255, 75, 110, 0.14) 0%, transparent 100%);
+    transition: height .32s steps(10, end);
     pointer-events: none;
   }
   .mtf-cell.is-bull:hover {
-    border-color: rgba(239, 68, 68, 0.65);
-    box-shadow: 0 10px 24px -10px rgba(239, 68, 68, 0.45);
+    border-color: rgba(255, 75, 110, 0.68);
+    box-shadow: 0 10px 24px -10px rgba(255, 75, 110, 0.42);
     transform: translateY(-2px);
   }
   .mtf-cell.is-bull:hover::after { height: 100%; }
-  .mtf-cell.is-bull:hover::before { height: 3.5px; opacity: 1; }
+  .mtf-cell.is-bull:hover::before { height: 4px; opacity: 1; }
+  .mtf-cell.is-neutral::after {
+    background:
+      repeating-conic-gradient(rgba(251, 191, 36, 0.20) 0% 25%, transparent 0% 50%) 0 0 / 4px 4px,
+      linear-gradient(to top, rgba(251, 191, 36, 0.12) 0%, transparent 100%);
+  }
+  .mtf-cell.is-neutral:hover {
+    border-color: rgba(251, 191, 36, 0.62);
+    box-shadow: 0 10px 22px -10px rgba(251, 191, 36, 0.35);
+    transform: translateY(-2px);
+  }
+  .mtf-cell.is-neutral:hover::after { height: 100%; }
+  .mtf-cell.is-neutral:hover::before { height: 4px; opacity: 1; }
   .mtf-cell.is-bear {
     background: linear-gradient(160deg, rgba(56, 189, 248, 0.14) 0%, rgba(37, 99, 235, 0.06) 65%, rgba(186, 230, 253, 0.12) 100%);
     border-color: rgba(125, 211, 252, 0.45);
@@ -1598,11 +1613,12 @@
   }
   .mtf-cell.is-bear::before {
     background: linear-gradient(90deg, #38bdf8, #bae6fd, #60a5fa);
-    box-shadow: 0 0 14px 2px rgba(56, 189, 248, 0.45);
     opacity: 0.95;
   }
   .mtf-cell.is-bear::after {
-    background: linear-gradient(to top, rgba(56, 189, 248, 0.24) 0%, rgba(186, 230, 253, 0.12) 55%, rgba(224, 242, 254, 0.04) 100%);
+    background:
+      repeating-conic-gradient(rgba(56, 189, 248, 0.24) 0% 25%, transparent 0% 50%) 0 0 / 4px 4px,
+      linear-gradient(to top, rgba(56, 189, 248, 0.16) 0%, rgba(186, 230, 253, 0.05) 100%);
     height: 36%;
   }
   .mtf-cell.is-bear .mtf-tf,
@@ -1620,7 +1636,7 @@
     transform: translateY(-2px);
   }
   .mtf-cell.is-bear:hover::after { height: 100%; }
-  .mtf-cell.is-bear:hover::before { height: 3.5px; opacity: 1; }
+  .mtf-cell.is-bear:hover::before { height: 4px; opacity: 1; }
   .mtf-cell .mtf-tf  { font-size:0.66rem; color:var(--muted); font-weight:700; letter-spacing:.03em; }
   .mtf-cell .mtf-ret { font-size:1.35rem; font-weight:800; margin:7px 0 3px; line-height:1; }
   .mtf-cell .mtf-ma  { font-size:0.65rem; color:var(--muted); }

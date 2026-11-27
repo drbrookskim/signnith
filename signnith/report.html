@@ -540,19 +540,36 @@
   }
   .bar-wrap{
     flex:1;
-    height:12px;
+    height:14px;
     background: var(--card2);
-    border-radius:99px;
+    background-image: repeating-linear-gradient(90deg, rgba(148,163,184,0.12) 0 6px, transparent 6px 8px);
+    border: 1px solid var(--border);
+    border-radius:3px;
+    padding: 2px;
     overflow:hidden;
   }
   .bar-fill{
     height:100%;
-    border-radius:99px;
-    transition:width .6s cubic-bezier(.4,0,.2,1);
+    border-radius:1px;
+    transition:width .6s steps(16, end);
+    -webkit-mask-image: repeating-linear-gradient(90deg, #000 0 6px, transparent 6px 8px);
+    mask-image: repeating-linear-gradient(90deg, #000 0 6px, transparent 6px 8px);
   }
-  .bar-fill.bull { background:linear-gradient(90deg,#d97706,#f59e0b); }
-  .bar-fill.bear { background:linear-gradient(90deg,#be123c,#f43f5e); }
-  .bar-fill.neutral { background:linear-gradient(90deg,#64748b,#94a3b8); }
+  .bar-fill.bull {
+    background:
+      repeating-conic-gradient(rgba(255,255,255,0.18) 0% 25%, transparent 0% 50%) 0 0 / 4px 4px,
+      linear-gradient(90deg,#d97706,#f59e0b);
+  }
+  .bar-fill.bear {
+    background:
+      repeating-conic-gradient(rgba(255,255,255,0.18) 0% 25%, transparent 0% 50%) 0 0 / 4px 4px,
+      linear-gradient(90deg,#be123c,#f43f5e);
+  }
+  .bar-fill.neutral {
+    background:
+      repeating-conic-gradient(rgba(255,255,255,0.16) 0% 25%, transparent 0% 50%) 0 0 / 4px 4px,
+      linear-gradient(90deg,#64748b,#94a3b8);
+  }
   .bar-value{
     min-width:80px;
     text-align:right;

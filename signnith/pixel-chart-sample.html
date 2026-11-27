@@ -1,0 +1,731 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Signnith — 픽셀(Pixel) 타입 그래프 검토 & HTML 샘플</title>
+<style>
+  :root {
+    --bg: #090d14;
+    --card: #101622;
+    --card2: #151d2c;
+    --border: rgba(148, 163, 184, 0.16);
+    --border2: rgba(148, 163, 184, 0.30);
+    --text: #f1f5f9;
+    --text2: #cbd5e1;
+    --muted: #8494a7;
+    --up: #ff4b6e;
+    --down: #3b82f6;
+    --green: #10b981;
+    --purple: #a78bfa;
+    --yellow: #fbbf24;
+    --px-grid: rgba(148, 163, 184, 0.08);
+    --px-off: rgba(148, 163, 184, 0.10);
+    --shadow: 0 12px 30px rgba(0, 0, 0, 0.4);
+  }
+  html.light {
+    --bg: #eef2f7;
+    --card: #ffffff;
+    --card2: #f4f7fb;
+    --border: rgba(15, 23, 42, 0.12);
+    --border2: rgba(15, 23, 42, 0.24);
+    --text: #0f172a;
+    --text2: #334155;
+    --muted: #64748b;
+    --px-grid: rgba(15, 23, 42, 0.06);
+    --px-off: rgba(15, 23, 42, 0.07);
+    --shadow: 0 10px 24px rgba(15, 23, 42, 0.08);
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: -apple-system, BlinkMacSystemFont, "Pretendard", "Segoe UI", sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.5;
+    padding: 24px 18px 64px;
+    transition: background .2s, color .2s;
+  }
+  .mono {
+    font-family: ui-monospace, "SFMono-Regular", Menlo, Monaco, Consolas, monospace;
+    font-variant-numeric: tabular-nums;
+  }
+  .wrap { max-width: 1080px; margin: 0 auto; }
+
+  /* Header */
+  .topbar {
+    display: flex; align-items: center; justify-content: space-between;
+    gap: 12px; flex-wrap: wrap; margin-bottom: 18px;
+  }
+  .brand { display: flex; align-items: center; gap: 10px; }
+  .brand-badge {
+    width: 34px; height: 34px;
+    background: var(--card);
+    border: 1px solid var(--border2);
+    border-radius: 6px;
+    display: grid; place-items: center;
+  }
+  .brand h1 { font-size: 1.1rem; margin: 0; font-weight: 800; letter-spacing: -0.02em; }
+  .brand p { font-size: 0.78rem; margin: 2px 0 0; color: var(--muted); }
+  .actions { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+
+  .pill-group {
+    display: inline-flex; align-items: center; gap: 2px; padding: 3px;
+    border-radius: 8px; border: 1px solid var(--border); background: var(--card2);
+  }
+  .pill {
+    border: none; background: transparent; color: var(--muted);
+    font-family: inherit; font-size: 0.75rem; font-weight: 700;
+    padding: 6px 11px; border-radius: 6px; cursor: pointer;
+    transition: all .12s;
+  }
+  .pill:hover { color: var(--text); }
+  .pill.active {
+    background: var(--card); color: var(--text);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, .24);
+  }
+  .theme-btn {
+    border: 1px solid var(--border2); background: var(--card); color: var(--text);
+    font-family: inherit; font-size: 0.75rem; font-weight: 700;
+    padding: 7px 12px; border-radius: 8px; cursor: pointer;
+  }
+
+  /* Card & Stage */
+  .card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 16px 18px;
+    box-shadow: var(--shadow);
+    margin-bottom: 16px;
+  }
+  .card-head {
+    display: flex; align-items: center; justify-content: space-between;
+    gap: 10px; flex-wrap: wrap; margin-bottom: 12px;
+  }
+  .card-title {
+    display: flex; align-items: center; gap: 8px;
+    font-size: 0.88rem; font-weight: 800;
+  }
+  .px-ind { width: 8px; height: 8px; background: var(--up); display: inline-block; }
+  .meta-line { font-size: 0.76rem; color: var(--muted); }
+  .tag {
+    display: inline-block; font-size: 0.68rem; font-weight: 700;
+    padding: 2px 7px; border-radius: 4px;
+    background: rgba(148,163,184,0.14); color: var(--text2);
+  }
+  .tag.rec { background: rgba(16,185,129,0.16); color: var(--green); }
+
+  .stage {
+    position: relative;
+    height: 276px;
+    border-radius: 8px;
+    background-color: var(--card2);
+    background-image:
+      linear-gradient(to right, var(--px-grid) 1px, transparent 1px),
+      linear-gradient(to bottom, var(--px-grid) 1px, transparent 1px);
+    background-size: 16px 16px;
+    border: 1px solid var(--border);
+    overflow: hidden;
+    cursor: crosshair;
+  }
+  .stage svg, .mini-stage svg, .spark-box svg {
+    width: 100%; height: 100%; display: block;
+    shape-rendering: crispEdges;
+  }
+  .hover-tip {
+    position: absolute; top: 10px; left: 10px;
+    background: var(--card);
+    border: 1px solid var(--border2);
+    border-radius: 4px;
+    padding: 5px 10px;
+    font-size: 0.74rem; font-weight: 700;
+    pointer-events: none;
+    opacity: 0; transition: opacity .1s;
+    z-index: 4;
+  }
+  .hover-tip.show { opacity: 1; }
+
+  .controls-bar {
+    display: flex; align-items: center; justify-content: space-between;
+    gap: 10px; flex-wrap: wrap; margin-top: 12px;
+  }
+
+  /* 2-col Grid */
+  .grid-2 {
+    display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px;
+    margin-bottom: 16px;
+  }
+  @media (max-width: 820px) { .grid-2 { grid-template-columns: 1fr; } }
+
+  .mini-stage {
+    height: 176px;
+    border-radius: 8px;
+    background-color: var(--card2);
+    background-image:
+      linear-gradient(to right, var(--px-grid) 1px, transparent 1px),
+      linear-gradient(to bottom, var(--px-grid) 1px, transparent 1px);
+    background-size: 14px 14px;
+    border: 1px solid var(--border);
+    overflow: hidden;
+  }
+  .desc { font-size: 0.78rem; color: var(--muted); margin: 8px 0 0; line-height: 1.55; }
+
+  /* Pixel Sparklines */
+  .spark-grid {
+    display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px;
+  }
+  @media (max-width: 820px) { .spark-grid { grid-template-columns: repeat(2, 1fr); } }
+  .spark-tile {
+    background: var(--card2); border: 1px solid var(--border);
+    border-radius: 8px; padding: 12px 14px;
+  }
+  .spark-top { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 6px; }
+  .spark-name { font-size: 0.82rem; font-weight: 800; }
+  .spark-chg { font-size: 0.75rem; font-weight: 800; }
+  .spark-chg.up { color: var(--up); }
+  .spark-chg.down { color: var(--down); }
+  .spark-box { height: 48px; }
+
+  @keyframes pxBlink {
+    0%, 49% { opacity: 1; }
+    50%, 100% { opacity: 0.2; }
+  }
+  .px-cursor { animation: pxBlink 1s steps(1, end) infinite; }
+
+  /* Review Table */
+  .review-table { width: 100%; border-collapse: collapse; font-size: 0.78rem; margin-top: 6px; }
+  .review-table th {
+    text-align: left; color: var(--muted); font-size: 0.7rem;
+    padding: 8px 10px; border-bottom: 1px solid var(--border);
+  }
+  .review-table td {
+    padding: 9px 10px; border-bottom: 1px solid var(--border); vertical-align: top;
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <!-- Header -->
+  <div class="topbar">
+    <div class="brand">
+      <div class="brand-badge">
+        <svg width="18" height="18" viewBox="0 0 18 18" shape-rendering="crispEdges">
+          <rect x="2" y="12" width="3" height="3" fill="#ff4b6e"/>
+          <rect x="6" y="9" width="3" height="3" fill="#ff4b6e"/>
+          <rect x="10" y="10" width="3" height="3" fill="#ff4b6e"/>
+          <rect x="14" y="4" width="3" height="3" fill="#ff4b6e"/>
+        </svg>
+      </div>
+      <div>
+        <h1>Signnith 픽셀(Pixel) 타입 그래프 검토 샘플</h1>
+        <p>계단형(Step) 스캔 + 바이너리 디더링(Dither) + 픽셀 브릭(Brick) + 8-bit 캔들 비교</p>
+      </div>
+    </div>
+    <div class="actions">
+      <div class="pill-group" id="stock-pills">
+        <button class="pill active" data-stock="NVDA">NVDA (+8.4%)</button>
+        <button class="pill" data-stock="005930">삼성전자 (-3.2%)</button>
+      </div>
+      <button class="theme-btn" id="theme-toggle">라이트 모드</button>
+    </div>
+  </div>
+
+  <!-- Main Interactive Stage -->
+  <div class="card">
+    <div class="card-head">
+      <div class="card-title">
+        <span class="px-ind" id="main-dot"></span>
+        <span>인터랙티브 픽셀 차트 스테이지</span>
+        <span class="tag rec" id="mode-badge">추천: 픽셀 스텝 + 디더링</span>
+      </div>
+      <div class="meta-line mono" id="main-meta">NVDA · 60BARS · PRICE</div>
+    </div>
+
+    <div class="stage" id="main-stage">
+      <div class="hover-tip mono" id="main-tip"></div>
+      <svg id="main-svg" viewBox="0 0 900 276" preserveAspectRatio="none"></svg>
+    </div>
+
+    <div class="controls-bar">
+      <div class="pill-group" id="metric-pills">
+        <button class="pill active" data-metric="Price">Price</button>
+        <button class="pill" data-metric="Volume">Volume</button>
+        <button class="pill" data-metric="RSI">RSI</button>
+        <button class="pill" data-metric="MACD">MACD Hist</button>
+      </div>
+      <div class="pill-group" id="style-pills">
+        <button class="pill active" data-style="dither">1. 스텝 + 디더링</button>
+        <button class="pill" data-style="bricks">2. 픽셀 브릭</button>
+        <button class="pill" data-style="candle">3. 픽셀 캔들(OHLC)</button>
+        <button class="pill" data-style="stepline">4. 스텝 라인 + 노드</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 4 Style Comparison Grid -->
+  <div class="grid-2">
+    <div class="card">
+      <div class="card-head">
+        <div class="card-title">① 픽셀 스텝 + 디더링(Dither) <span class="tag rec">추천</span></div>
+        <span class="meta-line mono">Step + Bayer 2x2</span>
+      </div>
+      <div class="mini-stage"><svg id="cmp-dither" viewBox="0 0 440 176" preserveAspectRatio="none"></svg></div>
+      <p class="desc">직각 계단형 라인 아래를 부드러운 그라데이션 대신 <b>체커보드 디더링 패턴</b>으로 채워, 레트로 퀀트·터미널 감성과 시인성을 동시에 확보.</p>
+    </div>
+
+    <div class="card">
+      <div class="card-head">
+        <div class="card-title">② 픽셀 브릭 컬럼 (LED Brick) <span class="tag rec">Volume/MACD 추천</span></div>
+        <span class="meta-line mono">Quantized Bricks</span>
+      </div>
+      <div class="mini-stage"><svg id="cmp-bricks" viewBox="0 0 440 176" preserveAspectRatio="none"></svg></div>
+      <p class="desc">사각 픽셀 블록을 세로로 적층. 최상단 블록만 밝은 헤드 픽셀로 강조해 거래량 스파이크나 MACD 모멘텀 강도를 한눈에 파악 가능.</p>
+    </div>
+
+    <div class="card">
+      <div class="card-head">
+        <div class="card-title">③ 8-bit 픽셀 캔들스틱 (OHLC)</div>
+        <span class="meta-line mono">Pixel Candle</span>
+      </div>
+      <div class="mini-stage"><svg id="cmp-candle" viewBox="0 0 440 176" preserveAspectRatio="none"></svg></div>
+      <p class="desc">1px 직선 심지 + 정수 좌표로 정렬된 사각 몸통. 기존 실시간 차트에 없는 시가·고가·저가·종가 정보를 픽셀 스타일로 압축 제공.</p>
+    </div>
+
+    <div class="card">
+      <div class="card-head">
+        <div class="card-title">④ 픽셀 스텝 라인 + 사각 노드</div>
+        <span class="meta-line mono">Crisp Step + Markers</span>
+      </div>
+      <div class="mini-stage"><svg id="cmp-stepline" viewBox="0 0 440 176" preserveAspectRatio="none"></svg></div>
+      <p class="desc">가장 가볍고 깔끔한 형태. 계단식 경로 위에 4×4 사각 픽셀 노드를 배치하고 마지막 지점은 점멸하는 터미널 커서로 표현.</p>
+    </div>
+  </div>
+
+  <!-- Pixel Sparklines -->
+  <div class="card">
+    <div class="card-head">
+      <div class="card-title">미니 픽셀 스파크라인 예시 (관심종목 타일 / 상단 KPI용)</div>
+      <span class="meta-line mono">14-STEP PIXEL SPARK</span>
+    </div>
+    <div class="spark-grid" id="spark-grid"></div>
+  </div>
+
+  <!-- Review Notes -->
+  <div class="card">
+    <div class="card-head">
+      <div class="card-title">도트(원형) vs 픽셀(사각) 검토 비교</div>
+      <span class="meta-line mono">Signnith UI 적합성</span>
+    </div>
+    <table class="review-table">
+      <thead>
+        <tr>
+          <th>항목</th>
+          <th>도트(원형) 스타일</th>
+          <th>픽셀(사각) 스타일</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><b>시각적 인상</b></td>
+          <td>부드럽고 모던함 (Nothing / Uniswap 감성)</td>
+          <td>날카롭고 정밀함 (퀀트 터미널 · 8-bit 금융 감성)</td>
+        </tr>
+        <tr>
+          <td><b>경계 선명도</b></td>
+          <td>소형 크기(r=1.5~2px)에서 안티앨리어싱으로 흐려질 수 있음</td>
+          <td><code>shape-rendering: crispEdges</code> 적용 시 1px 단위까지 완벽히 선명</td>
+        </tr>
+        <tr>
+          <td><b>주식 차트 확장성</b></td>
+          <td>라인/바 위주 (캔들 표현 어색)</td>
+          <td><b>스텝 라인 + 디더링 + 픽셀 캔들(OHLC) + 브릭 바</b>까지 한 톤으로 통일 가능</td>
+        </tr>
+        <tr>
+          <td><b>Signnith 추천 조합</b></td>
+          <td colspan="2">
+            • <b>메인 실시간 차트(Price/RSI)</b>: ① 스텝 + 디더링 (또는 ③ 픽셀 캔들 토글 추가)<br>
+            • <b>Volume / MACD 히스토그램</b>: ② 픽셀 브릭 컬럼<br>
+            • <b>관심종목 스파크라인</b>: ④ 14-step 픽셀 라인 + 점멸 사각 커서
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<script>
+// ── Deterministic OHLCV + Indicator Sample Data ──
+function makeSeries(seed, trend) {
+  const bars = [];
+  let price = trend > 0 ? 118 : 74000;
+  const start = new Date(2026, 8, 1);
+  for (let i = 0; i < 60; i++) {
+    const wave = Math.sin(i * 0.28 + seed) * 0.019 + Math.cos(i * 0.55 + seed * 2) * 0.012;
+    const drift = trend > 0 ? 0.0024 : -0.0013;
+    const open = price;
+    const close = open * (1 + drift + wave);
+    const wickUp = Math.abs(Math.sin(i * 1.1 + seed)) * 0.014;
+    const wickDn = Math.abs(Math.cos(i * 0.9 + seed)) * 0.013;
+    const high = Math.max(open, close) * (1 + wickUp);
+    const low = Math.min(open, close) * (1 - wickDn);
+    price = close;
+
+    const vol = (trend > 0 ? 38e6 : 16e6) * (0.65 + Math.abs(Math.sin(i * 0.7 + seed)) * 0.95);
+    const rsi = Math.max(16, Math.min(86, 50 + Math.sin(i * 0.32 + seed) * 23 + (trend > 0 ? 7 : -7)));
+    const macd = Math.sin(i * 0.25 + seed * 1.4) * (trend > 0 ? 1.8 : 900) + (trend > 0 ? 0.25 : -120);
+    const d = new Date(start);
+    d.setDate(start.getDate() + i);
+    bars.push({ date: d, open, high, low, close, volume: vol, rsi, macd });
+  }
+  return bars;
+}
+
+const DATASETS = {
+  NVDA:     { name: 'NVDA', isKr: false, bars: makeSeries(1.2, 1) },
+  '005930': { name: '삼성전자', isKr: true,  bars: makeSeries(3.7, -1) }
+};
+
+let state = { stock: 'NVDA', metric: 'Price', style: 'dither', hoverIdx: -1 };
+let uidCounter = 0;
+
+function fmtVal(v, metric, isKr) {
+  if (metric === 'Volume') return (v / 1e6).toFixed(1) + 'M';
+  if (metric === 'RSI') return v.toFixed(1);
+  if (metric === 'MACD') return isKr ? Math.round(v).toLocaleString() : v.toFixed(2);
+  return isKr ? Math.round(v).toLocaleString() + '원' : '$' + v.toFixed(2);
+}
+
+function getVal(b, metric) {
+  if (metric === 'Volume') return b.volume;
+  if (metric === 'RSI') return b.rsi;
+  if (metric === 'MACD') return b.macd;
+  return b.close;
+}
+
+function resampleBars(bars, targetCols) {
+  if (bars.length <= targetCols) return bars;
+  const out = [];
+  for (let i = 0; i < targetCols; i++) {
+    const idx = Math.round((i / (targetCols - 1)) * (bars.length - 1));
+    out.push(bars[idx]);
+  }
+  return out;
+}
+
+// Snap to integer pixel for crispEdges
+const px = n => Math.round(n);
+
+function renderPixelChart(svgEl, opts) {
+  const {
+    bars, metric, style, isKr,
+    W = 900, H = 276, cols = 48,
+    interactive = false, hoverIdx = -1
+  } = opts;
+
+  const padL = 14, padR = interactive ? 74 : 12, padT = 18, padB = interactive ? 28 : 14;
+  const plotW = W - padL - padR;
+  const plotH = H - padT - padB;
+
+  const sampled = resampleBars(bars, style === 'candle' ? Math.min(cols, 38) : cols);
+  const vals = sampled.map(b => getVal(b, metric));
+
+  let minV, maxV;
+  if (style === 'candle' && metric === 'Price') {
+    minV = Math.min(...sampled.map(b => b.low));
+    maxV = Math.max(...sampled.map(b => b.high));
+  } else {
+    minV = Math.min(...vals);
+    maxV = Math.max(...vals);
+  }
+  if (metric === 'RSI') { minV = 0; maxV = 100; }
+  if (metric === 'MACD') {
+    const absM = Math.max(Math.abs(minV), Math.abs(maxV)) || 1;
+    minV = -absM; maxV = absM;
+  }
+  const span = (maxV - minV) || 1;
+
+  const isUp = vals[vals.length - 1] >= vals[0];
+  const baseCol = metric === 'RSI' ? '#a78bfa' : (isUp ? '#ff4b6e' : '#3b82f6');
+
+  const yOf = v => px(padT + (1 - (v - minV) / span) * plotH);
+  const pts = sampled.map((b, i) => {
+    const v = getVal(b, metric);
+    return {
+      x: px(padL + (i / Math.max(1, sampled.length - 1)) * plotW),
+      y: yOf(v),
+      v,
+      bar: b,
+      norm: (v - minV) / span
+    };
+  });
+
+  let html = '';
+
+  // Reference lines
+  if (metric === 'RSI') {
+    [70, 30].forEach(lvl => {
+      const y = yOf(lvl);
+      html += `<line x1="${padL}" y1="${y}" x2="${W - padR}" y2="${y}" stroke="var(--border2)" stroke-dasharray="4 4"/>`;
+    });
+  } else if (metric === 'MACD') {
+    const y0 = yOf(0);
+    html += `<line x1="${padL}" y1="${y0}" x2="${W - padR}" y2="${y0}" stroke="var(--border2)" stroke-dasharray="2 2"/>`;
+  }
+
+  // ── Style 1: Pixel Step Line + Bayer 2x2 Dither Pattern Fill ──
+  if (style === 'dither') {
+    const pid = 'px_dither_' + (++uidCounter);
+    const baseY = metric === 'MACD' ? yOf(0) : (H - padB);
+    let stepD = `M ${pts[0].x},${pts[0].y}`;
+    for (let i = 1; i < pts.length; i++) {
+      stepD += ` H ${pts[i].x} V ${pts[i].y}`;
+    }
+    const areaD = `${stepD} V ${baseY} H ${pts[0].x} Z`;
+
+    html += `<defs>
+      <pattern id="${pid}" width="4" height="4" patternUnits="userSpaceOnUse">
+        <rect x="0" y="0" width="2" height="2" fill="${baseCol}" fill-opacity="0.28"/>
+        <rect x="2" y="2" width="2" height="2" fill="${baseCol}" fill-opacity="0.16"/>
+      </pattern>
+    </defs>`;
+    html += `<path d="${areaD}" fill="url(#${pid})"/>`;
+    html += `<path d="${stepD}" fill="none" stroke="${baseCol}" stroke-width="2.2"/>`;
+
+    // Pixel corner highlights
+    pts.forEach((p, i) => {
+      const isHov = interactive && hoverIdx === i;
+      if (isHov) {
+        html += `<rect x="${p.x - 3}" y="${p.y - 3}" width="6" height="6" fill="${baseCol}" stroke="#fff" stroke-width="1"/>`;
+      }
+    });
+  }
+
+  // ── Style 2: Pixel Bricks (Quantized Rectangular Matrix) ──
+  if (style === 'bricks') {
+    const rows = interactive ? 18 : 12;
+    const brickW = Math.max(4, px((plotW / pts.length) * 0.68));
+    const brickH = Math.max(4, px((plotH / rows) * 0.72));
+    const midRow = Math.floor(rows / 2);
+
+    pts.forEach((p, c) => {
+      const isHov = interactive && hoverIdx === c;
+      const col = metric === 'MACD' ? (p.v >= 0 ? '#ff4b6e' : '#3b82f6') : baseCol;
+      const topRow = Math.round((1 - p.norm) * (rows - 1));
+      for (let r = 0; r < rows; r++) {
+        const by = px(padT + (r / (rows - 1)) * (plotH - brickH));
+        const on = metric === 'MACD'
+          ? ((p.v >= 0 && r >= topRow && r <= midRow) || (p.v < 0 && r <= topRow && r >= midRow))
+          : (r >= topRow);
+        if (on) {
+          const isHead = (r === topRow);
+          const op = isHov ? 1 : (isHead ? 0.98 : 0.45);
+          html += `<rect x="${px(p.x - brickW / 2)}" y="${by}" width="${brickW}" height="${brickH}" fill="${col}" fill-opacity="${op}"/>`;
+        } else if (interactive && r % 2 === 0) {
+          html += `<rect x="${px(p.x - 1)}" y="${px(by + brickH / 2)}" width="2" height="2" fill="var(--px-off)"/>`;
+        }
+      }
+    });
+  }
+
+  // ── Style 3: 8-bit Pixel Candlestick (OHLC) ──
+  if (style === 'candle') {
+    const bw = Math.max(4, px((plotW / pts.length) * 0.56));
+    pts.forEach((p, i) => {
+      const b = p.bar;
+      const isHov = interactive && hoverIdx === i;
+      if (metric !== 'Price') {
+        // Fallback to pixel bar for Volume/RSI/MACD
+        const y0 = metric === 'MACD' ? yOf(0) : (H - padB);
+        const top = Math.min(p.y, y0);
+        const h = Math.max(2, Math.abs(y0 - p.y));
+        const col = metric === 'MACD' ? (p.v >= 0 ? '#ff4b6e' : '#3b82f6') : baseCol;
+        html += `<rect x="${px(p.x - bw / 2)}" y="${top}" width="${bw}" height="${h}" fill="${col}" fill-opacity="${isHov ? 1 : 0.8}"/>`;
+        return;
+      }
+      const bull = b.close >= b.open;
+      const col = bull ? '#ff4b6e' : '#3b82f6';
+      const yH = yOf(b.high), yL = yOf(b.low);
+      const yO = yOf(b.open), yC = yOf(b.close);
+      const bodyTop = Math.min(yO, yC);
+      const bodyH = Math.max(3, Math.abs(yC - yO));
+
+      // Crisp 2px pixel wick + solid pixel body
+      html += `<rect x="${p.x - 1}" y="${yH}" width="2" height="${Math.max(2, yL - yH)}" fill="${col}" fill-opacity="${isHov ? 1 : 0.85}"/>`;
+      html += `<rect x="${px(p.x - bw / 2)}" y="${bodyTop}" width="${bw}" height="${bodyH}" fill="${col}" ${isHov ? 'stroke="#fff" stroke-width="1"' : ''}/>`;
+    });
+  }
+
+  // ── Style 4: Crisp Pixel Step Line + Square Nodes ──
+  if (style === 'stepline') {
+    let stepD = `M ${pts[0].x},${pts[0].y}`;
+    for (let i = 1; i < pts.length; i++) {
+      stepD += ` H ${pts[i].x} V ${pts[i].y}`;
+    }
+    html += `<path d="${stepD}" fill="none" stroke="${baseCol}" stroke-width="1.8" stroke-opacity="0.72"/>`;
+    const sz = interactive ? 5 : 4;
+    pts.forEach((p, i) => {
+      const isHov = interactive && hoverIdx === i;
+      const s = isHov ? sz + 3 : sz;
+      const col = metric === 'MACD' ? (p.v >= 0 ? '#ff4b6e' : '#3b82f6') : baseCol;
+      html += `<rect x="${px(p.x - s / 2)}" y="${px(p.y - s / 2)}" width="${s}" height="${s}" fill="${col}" stroke="var(--card2)" stroke-width="1"/>`;
+    });
+  }
+
+  // Blinking pixel cursor on last point
+  const last = pts[pts.length - 1];
+  const lastCol = metric === 'MACD' ? (last.v >= 0 ? '#ff4b6e' : '#3b82f6') : baseCol;
+  html += `<rect class="px-cursor" x="${last.x - 4}" y="${last.y - 4}" width="8" height="8" fill="${lastCol}" stroke="#fff" stroke-width="1.2"/>`;
+
+  // Axes & Hover Crosshair
+  if (interactive) {
+    [0, 0.33, 0.66, 1].forEach(r => {
+      const val = maxV - r * span;
+      const y = px(padT + r * plotH);
+      html += `<text x="${W - padR + 8}" y="${y}" fill="var(--muted)" font-family="ui-monospace, monospace" font-size="10.5" dominant-baseline="middle">${fmtVal(val, metric, isKr)}</text>`;
+    });
+    [0, 0.25, 0.5, 0.75, 1].forEach(r => {
+      const idx = Math.min(pts.length - 1, Math.round(r * (pts.length - 1)));
+      const d = pts[idx].bar.date;
+      const lbl = `${d.getMonth() + 1}/${d.getDate()}`;
+      html += `<text x="${pts[idx].x}" y="${H - 8}" fill="var(--muted)" font-family="ui-monospace, monospace" font-size="10" text-anchor="${r === 0 ? 'start' : r === 1 ? 'end' : 'middle'}">${lbl}</text>`;
+    });
+
+    if (hoverIdx >= 0 && pts[hoverIdx]) {
+      const hp = pts[hoverIdx];
+      html += `<line x1="${hp.x}" y1="${padT}" x2="${hp.x}" y2="${H - padB}" stroke="var(--text)" stroke-opacity="0.4" stroke-dasharray="3 3"/>`;
+      html += `<line x1="${padL}" y1="${hp.y}" x2="${W - padR}" y2="${hp.y}" stroke="var(--text)" stroke-opacity="0.22" stroke-dasharray="3 3"/>`;
+      html += `<rect x="${hp.x - 4}" y="${hp.y - 4}" width="8" height="8" fill="${lastCol}" stroke="#fff" stroke-width="1.5"/>`;
+    }
+  }
+
+  svgEl.innerHTML = html;
+  return pts;
+}
+
+// ── Mini Pixel Sparklines ──
+function renderPixelSparklines() {
+  const items = [
+    { name: 'NVDA', chg: '+8.42%', up: true, pts: [0.22,0.28,0.25,0.34,0.42,0.39,0.52,0.58,0.54,0.68,0.76,0.85,0.82,0.92] },
+    { name: 'AAPL', chg: '+2.15%', up: true, pts: [0.40,0.44,0.41,0.49,0.52,0.48,0.55,0.60,0.58,0.63,0.66,0.62,0.70,0.74] },
+    { name: '삼성전자', chg: '-3.20%', up: false, pts: [0.82,0.78,0.75,0.79,0.68,0.64,0.66,0.58,0.52,0.49,0.53,0.44,0.38,0.34] },
+    { name: 'TSLA', chg: '-1.85%', up: false, pts: [0.65,0.72,0.68,0.58,0.61,0.54,0.48,0.52,0.44,0.39,0.45,0.41,0.36,0.32] }
+  ];
+  const grid = document.getElementById('spark-grid');
+  grid.innerHTML = items.map(it => {
+    const col = it.up ? '#ff4b6e' : '#3b82f6';
+    const W = 200, H = 48, pad = 6;
+    const coords = it.pts.map((v, i) => [
+      px(pad + (i / (it.pts.length - 1)) * (W - pad * 2)),
+      px(pad + (1 - v) * (H - pad * 2))
+    ]);
+    let stepD = `M ${coords[0][0]},${coords[0][1]}`;
+    for (let i = 1; i < coords.length; i++) {
+      stepD += ` H ${coords[i][0]} V ${coords[i][1]}`;
+    }
+    const last = coords[coords.length - 1];
+    const nodes = coords.map(([x, y], i) => {
+      if (i === coords.length - 1) return `<rect class="px-cursor" x="${x - 3}" y="${y - 3}" width="6" height="6" fill="${col}"/>`;
+      return `<rect x="${x - 1}" y="${y - 1}" width="3" height="3" fill="${col}" fill-opacity="0.85"/>`;
+    }).join('');
+    return `<div class="spark-tile">
+      <div class="spark-top">
+        <span class="spark-name">${it.name}</span>
+        <span class="spark-chg mono ${it.up ? 'up' : 'down'}">${it.chg}</span>
+      </div>
+      <div class="spark-box">
+        <svg viewBox="0 0 ${W} ${H}" preserveAspectRatio="none">
+          <path d="${stepD}" fill="none" stroke="${col}" stroke-opacity="0.45" stroke-width="1.5"/>
+          ${nodes}
+        </svg>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+let currentPts = [];
+function refreshAll() {
+  const ds = DATASETS[state.stock];
+  const badges = {
+    dither: '추천: 픽셀 스텝 + 디더링',
+    bricks: '픽셀 브릭 컬럼 (LED Brick)',
+    candle: '8-bit 픽셀 캔들스틱',
+    stepline: '픽셀 스텝 라인 + 사각 노드'
+  };
+  document.getElementById('mode-badge').textContent = badges[state.style];
+  document.getElementById('main-meta').textContent = `${ds.name} · 60BARS · ${state.metric.toUpperCase()}`;
+
+  const vals = ds.bars.map(b => getVal(b, state.metric));
+  const isUp = vals[vals.length - 1] >= vals[0];
+  document.getElementById('main-dot').style.background = state.metric === 'RSI' ? 'var(--purple)' : (isUp ? 'var(--up)' : 'var(--down)');
+
+  currentPts = renderPixelChart(document.getElementById('main-svg'), {
+    bars: ds.bars, metric: state.metric, style: state.style, isKr: ds.isKr,
+    W: 900, H: 276, cols: 48, interactive: true, hoverIdx: state.hoverIdx
+  });
+
+  ['dither', 'bricks', 'candle', 'stepline'].forEach(st => {
+    renderPixelChart(document.getElementById('cmp-' + st), {
+      bars: ds.bars, metric: state.metric, style: st, isKr: ds.isKr,
+      W: 440, H: 176, cols: 32, interactive: false
+    });
+  });
+}
+
+function bindPills(id, key) {
+  const wrap = document.getElementById(id);
+  wrap.querySelectorAll('.pill').forEach(btn => {
+    btn.addEventListener('click', () => {
+      wrap.querySelectorAll('.pill').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      state[key] = btn.dataset[key];
+      state.hoverIdx = -1;
+      refreshAll();
+    });
+  });
+}
+bindPills('stock-pills', 'stock');
+bindPills('metric-pills', 'metric');
+bindPills('style-pills', 'style');
+
+document.getElementById('theme-toggle').addEventListener('click', e => {
+  const isLight = document.documentElement.classList.toggle('light');
+  e.target.textContent = isLight ? '다크 모드' : '라이트 모드';
+});
+
+const mainStage = document.getElementById('main-stage');
+const mainTip = document.getElementById('main-tip');
+mainStage.addEventListener('mousemove', e => {
+  if (!currentPts.length) return;
+  const rect = mainStage.getBoundingClientRect();
+  const relX = ((e.clientX - rect.left) / rect.width) * 900;
+  let bestIdx = 0, minD = Infinity;
+  currentPts.forEach((p, i) => {
+    const d = Math.abs(p.x - relX);
+    if (d < minD) { minD = d; bestIdx = i; }
+  });
+  if (state.hoverIdx !== bestIdx) {
+    state.hoverIdx = bestIdx;
+    const ds = DATASETS[state.stock];
+    const p = currentPts[bestIdx];
+    const dStr = `${p.bar.date.getFullYear()}-${String(p.bar.date.getMonth() + 1).padStart(2, '0')}-${String(p.bar.date.getDate()).padStart(2, '0')}`;
+    if (state.style === 'candle' && state.metric === 'Price') {
+      mainTip.textContent = `${dStr} · O:${fmtVal(p.bar.open, 'Price', ds.isKr)} H:${fmtVal(p.bar.high, 'Price', ds.isKr)} L:${fmtVal(p.bar.low, 'Price', ds.isKr)} C:${fmtVal(p.bar.close, 'Price', ds.isKr)}`;
+    } else {
+      mainTip.textContent = `${dStr} · ${fmtVal(p.v, state.metric, ds.isKr)}`;
+    }
+    mainTip.classList.add('show');
+    refreshAll();
+  }
+});
+mainStage.addEventListener('mouseleave', () => {
+  state.hoverIdx = -1;
+  mainTip.classList.remove('show');
+  refreshAll();
+});
+
+renderPixelSparklines();
+refreshAll();
+</script>
+</body>
+</html>

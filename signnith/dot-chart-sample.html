@@ -1,0 +1,661 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Signnith — 도트 형태 그래프 검토 & HTML 샘플</title>
+<style>
+  :root {
+    --bg: #0b0f17;
+    --card: #121824;
+    --card2: #171f2e;
+    --border: rgba(148, 163, 184, 0.14);
+    --border2: rgba(148, 163, 184, 0.26);
+    --text: #f1f5f9;
+    --text2: #cbd5e1;
+    --muted: #8494a7;
+    --up: #ff4b6e;
+    --down: #3b82f6;
+    --green: #10b981;
+    --purple: #a78bfa;
+    --yellow: #fbbf24;
+    --dot-grid: rgba(148, 163, 184, 0.14);
+    --dot-off: rgba(148, 163, 184, 0.12);
+    --shadow: 0 12px 32px rgba(0, 0, 0, 0.35);
+  }
+  html.light {
+    --bg: #f4f7fb;
+    --card: #ffffff;
+    --card2: #f1f5f9;
+    --border: rgba(15, 23, 42, 0.10);
+    --border2: rgba(15, 23, 42, 0.20);
+    --text: #0f172a;
+    --text2: #334155;
+    --muted: #64748b;
+    --dot-grid: rgba(15, 23, 42, 0.10);
+    --dot-off: rgba(15, 23, 42, 0.08);
+    --shadow: 0 10px 28px rgba(15, 23, 42, 0.08);
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: -apple-system, BlinkMacSystemFont, "Pretendard", "Segoe UI", Roboto, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.5;
+    padding: 24px 18px 64px;
+    transition: background .2s, color .2s;
+  }
+  .wrap { max-width: 1080px; margin: 0 auto; }
+
+  /* Top header */
+  .topbar {
+    display: flex; align-items: center; justify-content: space-between;
+    gap: 12px; flex-wrap: wrap; margin-bottom: 20px;
+  }
+  .brand { display: flex; align-items: center; gap: 10px; }
+  .brand-badge {
+    width: 32px; height: 32px; border-radius: 10px;
+    background: linear-gradient(135deg, rgba(255,75,110,0.22), rgba(59,130,246,0.22));
+    border: 1px solid var(--border2);
+    display: grid; place-items: center;
+  }
+  .brand h1 { font-size: 1.12rem; margin: 0; font-weight: 800; letter-spacing: -0.02em; }
+  .brand p { font-size: 0.78rem; margin: 2px 0 0; color: var(--muted); }
+  .actions { display: flex; align-items: center; gap: 8px; }
+  .pill-group {
+    display: inline-flex; align-items: center; gap: 2px; padding: 3px;
+    border-radius: 999px; border: 1px solid var(--border); background: var(--card2);
+  }
+  .pill {
+    border: none; background: transparent; color: var(--muted);
+    font-family: inherit; font-size: 0.76rem; font-weight: 700;
+    padding: 6px 12px; border-radius: 999px; cursor: pointer;
+    transition: all .15s;
+  }
+  .pill:hover { color: var(--text); }
+  .pill.active {
+    background: var(--card); color: var(--text);
+    box-shadow: 0 1px 4px rgba(0, 0, 0, .2);
+  }
+  .theme-btn {
+    border: 1px solid var(--border2); background: var(--card); color: var(--text);
+    font-family: inherit; font-size: 0.76rem; font-weight: 700;
+    padding: 7px 13px; border-radius: 999px; cursor: pointer;
+  }
+
+  /* Main interactive stage */
+  .card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 18px;
+    padding: 18px 20px;
+    box-shadow: var(--shadow);
+    margin-bottom: 16px;
+  }
+  .card-head {
+    display: flex; align-items: center; justify-content: space-between;
+    gap: 12px; flex-wrap: wrap; margin-bottom: 12px;
+  }
+  .card-title {
+    display: flex; align-items: center; gap: 8px;
+    font-size: 0.88rem; font-weight: 800;
+  }
+  .dot-ind { width: 8px; height: 8px; border-radius: 50%; background: var(--up); display: inline-block; }
+  .meta-line { font-size: 0.78rem; color: var(--muted); font-variant-numeric: tabular-nums; }
+  .meta-line b { color: var(--text); }
+
+  .stage {
+    position: relative;
+    height: 270px;
+    border-radius: 14px;
+    background: var(--card2);
+    border: 1px solid var(--border);
+    overflow: hidden;
+    cursor: crosshair;
+  }
+  .stage-bg-dots {
+    background-image: radial-gradient(circle, var(--dot-grid) 1px, transparent 1px);
+    background-size: 16px 16px;
+  }
+  .stage svg { width: 100%; height: 100%; display: block; }
+  .hover-tip {
+    position: absolute; top: 10px; left: 12px;
+    background: var(--card);
+    border: 1px solid var(--border2);
+    border-radius: 10px;
+    padding: 6px 11px;
+    font-size: 0.76rem; font-weight: 700;
+    font-variant-numeric: tabular-nums;
+    pointer-events: none;
+    opacity: 0; transition: opacity .12s;
+    z-index: 4;
+  }
+  .hover-tip.show { opacity: 1; }
+
+  .controls-bar {
+    display: flex; align-items: center; justify-content: space-between;
+    gap: 10px; flex-wrap: wrap; margin-top: 12px;
+  }
+
+  /* 2-col grid for variant review */
+  .grid-2 {
+    display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px;
+    margin-bottom: 16px;
+  }
+  @media (max-width: 820px) { .grid-2 { grid-template-columns: 1fr; } }
+
+  .mini-stage {
+    height: 175px;
+    border-radius: 12px;
+    background: var(--card2);
+    border: 1px solid var(--border);
+    overflow: hidden;
+  }
+  .mini-stage svg { width: 100%; height: 100%; display: block; }
+
+  .tag {
+    display: inline-block; font-size: 0.68rem; font-weight: 700;
+    padding: 2px 8px; border-radius: 999px;
+    background: rgba(148,163,184,0.14); color: var(--text2);
+  }
+  .tag.rec { background: rgba(16,185,129,0.16); color: var(--green); }
+  .desc { font-size: 0.78rem; color: var(--muted); margin: 8px 0 0; line-height: 1.55; }
+
+  /* Sparkline Tiles */
+  .spark-grid {
+    display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px;
+  }
+  @media (max-width: 820px) { .spark-grid { grid-template-columns: repeat(2, 1fr); } }
+  .spark-tile {
+    background: var(--card2); border: 1px solid var(--border);
+    border-radius: 14px; padding: 12px 14px;
+  }
+  .spark-top { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 6px; }
+  .spark-name { font-size: 0.82rem; font-weight: 800; }
+  .spark-chg { font-size: 0.76rem; font-weight: 800; font-variant-numeric: tabular-nums; }
+  .spark-chg.up { color: var(--up); }
+  .spark-chg.down { color: var(--down); }
+  .spark-box { height: 48px; }
+  .spark-box svg { width: 100%; height: 100%; display: block; }
+
+  @keyframes dotPulse {
+    0% { r: 4; opacity: 0.9; }
+    80%, 100% { r: 11; opacity: 0; }
+  }
+  .dot-beacon { animation: dotPulse 1.8s cubic-bezier(.24,0,.38,1) infinite; }
+
+  /* Review notes table */
+  .review-table { width: 100%; border-collapse: collapse; font-size: 0.78rem; margin-top: 8px; }
+  .review-table th {
+    text-align: left; color: var(--muted); font-size: 0.7rem;
+    padding: 8px 10px; border-bottom: 1px solid var(--border);
+  }
+  .review-table td {
+    padding: 9px 10px; border-bottom: 1px solid var(--border); vertical-align: top;
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <!-- Header -->
+  <div class="topbar">
+    <div class="brand">
+      <div class="brand-badge">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+          <circle cx="3" cy="12" r="1.4" fill="#ff4b6e"/>
+          <circle cx="6.5" cy="9" r="1.4" fill="#ff4b6e"/>
+          <circle cx="10" cy="10.5" r="1.4" fill="#ff4b6e"/>
+          <circle cx="13.5" cy="4.5" r="1.6" fill="#ff4b6e"/>
+        </svg>
+      </div>
+      <div>
+        <h1>Signnith 도트(Dot) 그래프 검토 샘플</h1>
+        <p>기존 실시간 추이 차트(uni-live-svg) 및 스파크라인의 도트화 변형 비교</p>
+      </div>
+    </div>
+    <div class="actions">
+      <div class="pill-group" id="stock-pills">
+        <button class="pill active" data-stock="NVDA">NVDA (+8.4%)</button>
+        <button class="pill" data-stock="005930">삼성전자 (-3.2%)</button>
+      </div>
+      <button class="theme-btn" id="theme-toggle">라이트 모드</button>
+    </div>
+  </div>
+
+  <!-- Main Interactive Stage -->
+  <div class="card">
+    <div class="card-head">
+      <div class="card-title">
+        <span class="dot-ind" id="main-dot"></span>
+        <span>인터랙티브 도트 차트 스테이지</span>
+        <span class="tag rec" id="mode-badge">추천: 도트 매트릭스 영역형</span>
+      </div>
+      <div class="meta-line" id="main-meta">NVDA · 60봉 · Price</div>
+    </div>
+
+    <div class="stage" id="main-stage">
+      <div class="hover-tip" id="main-tip"></div>
+      <svg id="main-svg" viewBox="0 0 900 270" preserveAspectRatio="none"></svg>
+    </div>
+
+    <div class="controls-bar">
+      <div class="pill-group" id="metric-pills">
+        <button class="pill active" data-metric="Price">Price</button>
+        <button class="pill" data-metric="Volume">Volume</button>
+        <button class="pill" data-metric="RSI">RSI</button>
+        <button class="pill" data-metric="MACD">MACD Hist</button>
+      </div>
+      <div class="pill-group" id="style-pills">
+        <button class="pill active" data-style="matrix">1. 도트 매트릭스</button>
+        <button class="pill" data-style="columns">2. 도트 컬럼(LED)</button>
+        <button class="pill" data-style="scatter">3. 도트 포인트 라인</button>
+        <button class="pill" data-style="hybrid">4. 가이드라인 + 도트</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 4 Style Comparison Grid -->
+  <div class="grid-2">
+    <div class="card">
+      <div class="card-head">
+        <div class="card-title">① 도트 매트릭스 영역형 <span class="tag rec">추천</span></div>
+        <span class="meta-line">Halftone Grid</span>
+      </div>
+      <div class="mini-stage"><svg id="cmp-matrix" viewBox="0 0 440 175" preserveAspectRatio="none"></svg></div>
+      <p class="desc">기존 그라데이션 영역 대신 균일 격자 도트의 투명도/크기로 높이를 표현. 배경 도트(`uni-chart-stage`)와 이질감 없이 가장 세련되게 어우러짐.</p>
+    </div>
+
+    <div class="card">
+      <div class="card-head">
+        <div class="card-title">② 도트 컬럼형 (LED / Equalizer)</div>
+        <span class="meta-line">Discrete Columns</span>
+      </div>
+      <div class="mini-stage"><svg id="cmp-columns" viewBox="0 0 440 175" preserveAspectRatio="none"></svg></div>
+      <p class="desc">거래량(Volume)이나 MACD 히스토그램처럼 봉별 크기를 비교할 때 직관적. 0선 기준 상·하 색상 분리가 깔끔함.</p>
+    </div>
+
+    <div class="card">
+      <div class="card-head">
+        <div class="card-title">③ 도트 포인트 라인형</div>
+        <span class="meta-line">Pure Point Sequence</span>
+      </div>
+      <div class="mini-stage"><svg id="cmp-scatter" viewBox="0 0 440 175" preserveAspectRatio="none"></svg></div>
+      <p class="desc">선 없이 시점별 도트만 배치. 데이터 포인트가 명확하지만, 급등락 구간에서는 시선 추적이 다소 끊길 수 있음(호버·밀도 조절 필요).</p>
+    </div>
+
+    <div class="card">
+      <div class="card-head">
+        <div class="card-title">④ 가이드라인 + 도트 하이브리드 <span class="tag rec">추천</span></div>
+        <span class="meta-line">Thin Stroke + Nodes</span>
+      </div>
+      <div class="mini-stage"><svg id="cmp-hybrid" viewBox="0 0 440 175" preserveAspectRatio="none"></svg></div>
+      <p class="desc">1px 얇은 연결선으로 추세 연속성을 유지하면서 리샘플링된 도트로 시점을 강조. 가격(Price)과 RSI에 가장 실용적인 가독성.</p>
+    </div>
+  </div>
+
+  <!-- Mini Dot Sparklines (for Stat Cards / Watchlist Tiles) -->
+  <div class="card">
+    <div class="card-head">
+      <div class="card-title">미니 도트 스파크라인 적용 예시 (관심종목 타일 / 상단 KPI용)</div>
+      <span class="meta-line">14-point Dot Sparkline</span>
+    </div>
+    <div class="spark-grid" id="spark-grid"></div>
+  </div>
+
+  <!-- Review Notes -->
+  <div class="card">
+    <div class="card-head">
+      <div class="card-title">Signnith 적용 검토 요약</div>
+      <span class="meta-line">index.html · report.html 기준</span>
+    </div>
+    <table class="review-table">
+      <thead>
+        <tr>
+          <th>적용 대상</th>
+          <th>추천 도트 방식</th>
+          <th>핵심 고려사항</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><b>실시간 추이 차트</b><br><span style="color:var(--muted)">#uni-live-svg</span></td>
+          <td>Price/RSI → <b>도트 매트릭스</b> 또는 <b>가이드+도트</b><br>Volume → <b>도트 컬럼(LED)</b></td>
+          <td>데이터가 60~120봉 이상이면 도트가 겹치므로, 화면 폭에 맞춰 <b>44~56열로 리샘플링</b>해야 깔끔함.</td>
+        </tr>
+        <tr>
+          <td><b>상세 기술 차트</b><br><span style="color:var(--muted)">priceChart / rsiChart / macdChart</span></td>
+          <td><b>MACD 히스토그램 → 도트 컬럼</b><br>Price → 기존 라인 유지 + 신호점만 도트 강조</td>
+          <td>볼린저밴드·이평선·매수/매도 마커가 겹치는 상세 차트는 본선까지 도트로 바꾸면 복잡해질 수 있음.</td>
+        </tr>
+        <tr>
+          <td><b>관심종목 스파크라인</b><br><span style="color:var(--muted)">.db-chart / _favSparkSvg</span></td>
+          <td><b>12~16개 도트 스파크라인</b></td>
+          <td>작은 영역(높이 36~64px)에서는 반지름 2~2.5px 도트 + 마지막 비콘 도트만으로도 추세가 선명하게 읽힘.</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<script>
+// ── Deterministic Sample Data (60 trading days) ──
+function makeSeries(seed, trend) {
+  const bars = [];
+  let price = trend > 0 ? 118 : 74000;
+  const start = new Date(2026, 8, 1);
+  for (let i = 0; i < 60; i++) {
+    const wave = Math.sin(i * 0.28 + seed) * 0.018 + Math.cos(i * 0.55 + seed * 2) * 0.012;
+    const drift = trend > 0 ? 0.0022 : -0.0012;
+    price = price * (1 + drift + wave);
+    const vol = (trend > 0 ? 38e6 : 16e6) * (0.7 + Math.abs(Math.sin(i * 0.7 + seed)) * 0.9);
+    const rsi = Math.max(18, Math.min(84, 50 + Math.sin(i * 0.32 + seed) * 22 + (trend > 0 ? 6 : -6)));
+    const macd = Math.sin(i * 0.25 + seed * 1.4) * (trend > 0 ? 1.8 : 900) + (trend > 0 ? 0.25 : -120);
+    const d = new Date(start);
+    d.setDate(start.getDate() + i);
+    bars.push({ date: d, close: price, volume: vol, rsi, macd });
+  }
+  return bars;
+}
+
+const DATASETS = {
+  NVDA:   { name: 'NVDA', isKr: false, bars: makeSeries(1.2, 1) },
+  '005930': { name: '삼성전자', isKr: true,  bars: makeSeries(3.7, -1) }
+};
+
+let state = { stock: 'NVDA', metric: 'Price', style: 'matrix', hoverIdx: -1 };
+
+function fmtVal(v, metric, isKr) {
+  if (metric === 'Volume') return (v / 1e6).toFixed(1) + 'M';
+  if (metric === 'RSI') return v.toFixed(1);
+  if (metric === 'MACD') return isKr ? Math.round(v).toLocaleString() : v.toFixed(2);
+  return isKr ? Math.round(v).toLocaleString() + '원' : '$' + v.toFixed(2);
+}
+
+function getValues(bars, metric) {
+  return bars.map(b => {
+    if (metric === 'Volume') return b.volume;
+    if (metric === 'RSI') return b.rsi;
+    if (metric === 'MACD') return b.macd;
+    return b.close;
+  });
+}
+
+function resample(arr, bars, targetCols) {
+  if (arr.length <= targetCols) return arr.map((v, i) => ({ v, date: bars[i].date }));
+  const out = [];
+  for (let i = 0; i < targetCols; i++) {
+    const idx = Math.round((i / (targetCols - 1)) * (arr.length - 1));
+    out.push({ v: arr[idx], date: bars[idx].date });
+  }
+  return out;
+}
+
+// ── Core Dot Graph Renderer ──
+function renderDotChart(svgEl, opts) {
+  const {
+    bars, metric, style, isKr,
+    W = 900, H = 270, cols = 48, rows = 15,
+    interactive = false, hoverIdx = -1
+  } = opts;
+
+  const padL = 16, padR = interactive ? 72 : 14, padT = 18, padB = interactive ? 28 : 14;
+  const plotW = W - padL - padR;
+  const plotH = H - padT - padB;
+
+  const raw = getValues(bars, metric);
+  const sampled = resample(raw, bars, cols);
+  const vals = sampled.map(d => d.v);
+
+  let minV = Math.min(...vals), maxV = Math.max(...vals);
+  if (metric === 'RSI') { minV = 0; maxV = 100; }
+  if (metric === 'MACD') {
+    const absM = Math.max(Math.abs(minV), Math.abs(maxV)) || 1;
+    minV = -absM; maxV = absM;
+  }
+  const span = (maxV - minV) || 1;
+
+  const isUp = vals[vals.length - 1] >= vals[0];
+  const baseCol = metric === 'RSI' ? '#a78bfa' : (isUp ? '#ff4b6e' : '#3b82f6');
+
+  const pts = sampled.map((d, i) => {
+    const norm = (d.v - minV) / span;
+    return {
+      x: padL + (i / Math.max(1, sampled.length - 1)) * plotW,
+      y: padT + (1 - norm) * plotH,
+      norm,
+      v: d.v,
+      date: d.date
+    };
+  });
+
+  let html = '';
+
+  // Reference zero/RSI lines
+  if (metric === 'RSI') {
+    [70, 30].forEach(lvl => {
+      const y = padT + (1 - lvl / 100) * plotH;
+      html += `<line x1="${padL}" y1="${y.toFixed(1)}" x2="${W - padR}" y2="${y.toFixed(1)}" stroke="var(--border2)" stroke-dasharray="3 4"/>`;
+    });
+  } else if (metric === 'MACD') {
+    const y0 = padT + 0.5 * plotH;
+    html += `<line x1="${padL}" y1="${y0.toFixed(1)}" x2="${W - padR}" y2="${y0.toFixed(1)}" stroke="var(--border2)" stroke-dasharray="3 3"/>`;
+  }
+
+  // Style 1: Dot Matrix Area
+  if (style === 'matrix') {
+    const dotR = interactive ? 2.5 : 2.0;
+    for (let c = 0; c < pts.length; c++) {
+      const p = pts[c];
+      const isHov = interactive && hoverIdx === c;
+      const col = metric === 'MACD' ? (p.v >= 0 ? '#ff4b6e' : '#3b82f6') : baseCol;
+      const activeTopRow = Math.round((1 - p.norm) * (rows - 1));
+      for (let r = 0; r < rows; r++) {
+        const cy = padT + (r / (rows - 1)) * plotH;
+        const filled = metric === 'MACD'
+          ? ((p.v >= 0 && r >= activeTopRow && r <= Math.floor(rows / 2)) || (p.v < 0 && r <= activeTopRow && r >= Math.floor(rows / 2)))
+          : (r >= activeTopRow);
+
+        if (filled) {
+          const distFromTop = Math.abs(r - activeTopRow) / rows;
+          const op = isHov ? 0.95 : Math.max(0.18, 0.85 - distFromTop * 0.75);
+          const rad = (r === activeTopRow) ? dotR * 1.25 : dotR;
+          html += `<circle cx="${p.x.toFixed(1)}" cy="${cy.toFixed(1)}" r="${rad.toFixed(2)}" fill="${col}" fill-opacity="${op.toFixed(2)}"/>`;
+        } else {
+          html += `<circle cx="${p.x.toFixed(1)}" cy="${cy.toFixed(1)}" r="1.2" fill="var(--dot-off)"/>`;
+        }
+      }
+    }
+  }
+
+  // Style 2: Dot Columns (LED Equalizer)
+  if (style === 'columns') {
+    const dotR = interactive ? 3.1 : 2.3;
+    const midRow = Math.floor(rows / 2);
+    for (let c = 0; c < pts.length; c++) {
+      const p = pts[c];
+      const isHov = interactive && hoverIdx === c;
+      const col = metric === 'MACD' ? (p.v >= 0 ? '#ff4b6e' : '#3b82f6') : baseCol;
+      const targetRow = Math.round((1 - p.norm) * (rows - 1));
+      for (let r = 0; r < rows; r++) {
+        const cy = padT + (r / (rows - 1)) * plotH;
+        const on = metric === 'MACD'
+          ? ((p.v >= 0 && r >= targetRow && r <= midRow) || (p.v < 0 && r <= targetRow && r >= midRow))
+          : (r >= targetRow);
+        if (on) {
+          const op = isHov ? 1 : (r === targetRow ? 0.95 : 0.58);
+          html += `<circle cx="${p.x.toFixed(1)}" cy="${cy.toFixed(1)}" r="${dotR}" fill="${col}" fill-opacity="${op}"/>`;
+        }
+      }
+    }
+  }
+
+  // Style 3 & 4: Scatter / Hybrid
+  if (style === 'scatter' || style === 'hybrid') {
+    if (style === 'hybrid') {
+      const dPath = pts.map((p, i) => `${i === 0 ? 'M' : 'L'} ${p.x.toFixed(1)},${p.y.toFixed(1)}`).join(' ');
+      html += `<path d="${dPath}" fill="none" stroke="${baseCol}" stroke-width="1.5" stroke-opacity="0.38"/>`;
+    }
+    const rDot = style === 'scatter' ? (interactive ? 3.5 : 2.6) : (interactive ? 3.2 : 2.4);
+    pts.forEach((p, c) => {
+      const isHov = interactive && hoverIdx === c;
+      const col = metric === 'MACD' ? (p.v >= 0 ? '#ff4b6e' : '#3b82f6') : baseCol;
+      html += `<circle cx="${p.x.toFixed(1)}" cy="${p.y.toFixed(1)}" r="${isHov ? rDot * 1.45 : rDot}" fill="${col}" stroke="var(--card2)" stroke-width="${isHov ? 1.8 : 0.8}"/>`;
+    });
+  }
+
+  // Live beacon on last point
+  const last = pts[pts.length - 1];
+  const lastCol = metric === 'MACD' ? (last.v >= 0 ? '#ff4b6e' : '#3b82f6') : baseCol;
+  html += `<circle class="dot-beacon" cx="${last.x.toFixed(1)}" cy="${last.y.toFixed(1)}" r="4" fill="${lastCol}"/>`;
+  html += `<circle cx="${last.x.toFixed(1)}" cy="${last.y.toFixed(1)}" r="4" fill="${lastCol}" stroke="var(--card)" stroke-width="1.6"/>`;
+
+  // Axes labels (only on main interactive stage)
+  if (interactive) {
+    [0, 0.33, 0.66, 1].forEach(r => {
+      const val = maxV - r * span;
+      const y = padT + r * plotH;
+      html += `<text x="${W - padR + 8}" y="${y.toFixed(1)}" fill="var(--muted)" font-size="10.5" dominant-baseline="middle">${fmtVal(val, metric, isKr)}</text>`;
+    });
+    [0, 0.25, 0.5, 0.75, 1].forEach(r => {
+      const idx = Math.min(pts.length - 1, Math.round(r * (pts.length - 1)));
+      const d = pts[idx].date;
+      const lbl = `${d.getMonth() + 1}/${d.getDate()}`;
+      html += `<text x="${pts[idx].x.toFixed(1)}" y="${H - 8}" fill="var(--muted)" font-size="10" text-anchor="${r === 0 ? 'start' : r === 1 ? 'end' : 'middle'}">${lbl}</text>`;
+    });
+
+    if (hoverIdx >= 0 && pts[hoverIdx]) {
+      const hp = pts[hoverIdx];
+      html += `<line x1="${hp.x.toFixed(1)}" y1="${padT}" x2="${hp.x.toFixed(1)}" y2="${H - padB}" stroke="var(--text)" stroke-opacity="0.35" stroke-dasharray="3 3"/>`;
+      html += `<circle cx="${hp.x.toFixed(1)}" cy="${hp.y.toFixed(1)}" r="5" fill="${lastCol}" stroke="#fff" stroke-width="2"/>`;
+    }
+  }
+
+  svgEl.innerHTML = html;
+  return pts;
+}
+
+// ── Mini Dot Sparklines ──
+function renderSparklines() {
+  const items = [
+    { name: 'NVDA', chg: '+8.42%', up: true, pts: [0.22,0.28,0.25,0.34,0.42,0.39,0.52,0.58,0.54,0.68,0.76,0.85,0.82,0.92] },
+    { name: 'AAPL', chg: '+2.15%', up: true, pts: [0.40,0.44,0.41,0.49,0.52,0.48,0.55,0.60,0.58,0.63,0.66,0.62,0.70,0.74] },
+    { name: '삼성전자', chg: '-3.20%', up: false, pts: [0.82,0.78,0.75,0.79,0.68,0.64,0.66,0.58,0.52,0.49,0.53,0.44,0.38,0.34] },
+    { name: 'TSLA', chg: '-1.85%', up: false, pts: [0.65,0.72,0.68,0.58,0.61,0.54,0.48,0.52,0.44,0.39,0.45,0.41,0.36,0.32] }
+  ];
+  const grid = document.getElementById('spark-grid');
+  grid.innerHTML = items.map((it, idx) => {
+    const col = it.up ? '#ff4b6e' : '#3b82f6';
+    const W = 200, H = 48, pad = 6;
+    const coords = it.pts.map((v, i) => [
+      pad + (i / (it.pts.length - 1)) * (W - pad * 2),
+      pad + (1 - v) * (H - pad * 2)
+    ]);
+    const pathD = coords.map((c, i) => `${i === 0 ? 'M' : 'L'} ${c[0].toFixed(1)},${c[1].toFixed(1)}`).join(' ');
+    const dots = coords.map((c, i) => {
+      const isLast = i === coords.length - 1;
+      return `<circle cx="${c[0].toFixed(1)}" cy="${c[1].toFixed(1)}" r="${isLast ? 3.2 : 2.1}" fill="${col}" fill-opacity="${isLast ? 1 : 0.85}"/>`;
+    }).join('');
+    return `<div class="spark-tile">
+      <div class="spark-top">
+        <span class="spark-name">${it.name}</span>
+        <span class="spark-chg ${it.up ? 'up' : 'down'}">${it.chg}</span>
+      </div>
+      <div class="spark-box">
+        <svg viewBox="0 0 ${W} ${H}" preserveAspectRatio="none">
+          <path d="${pathD}" fill="none" stroke="${col}" stroke-opacity="0.28" stroke-width="1.2"/>
+          ${dots}
+        </svg>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+let currentPts = [];
+function refreshAll() {
+  const ds = DATASETS[state.stock];
+  const mainSvg = document.getElementById('main-svg');
+  const stage = document.getElementById('main-stage');
+  stage.classList.toggle('stage-bg-dots', state.style === 'scatter' || state.style === 'hybrid');
+
+  const badges = {
+    matrix: '추천: 도트 매트릭스 영역형',
+    columns: '도트 컬럼(LED)형',
+    scatter: '도트 포인트 라인형',
+    hybrid: '추천: 가이드라인 + 도트'
+  };
+  document.getElementById('mode-badge').textContent = badges[state.style];
+  document.getElementById('main-meta').textContent = `${ds.name} · 60봉 · ${state.metric}`;
+
+  const vals = getValues(ds.bars, state.metric);
+  const isUp = vals[vals.length - 1] >= vals[0];
+  document.getElementById('main-dot').style.background = state.metric === 'RSI' ? 'var(--purple)' : (isUp ? 'var(--up)' : 'var(--down)');
+
+  currentPts = renderDotChart(mainSvg, {
+    bars: ds.bars, metric: state.metric, style: state.style, isKr: ds.isKr,
+    W: 900, H: 270, cols: 48, rows: 15, interactive: true, hoverIdx: state.hoverIdx
+  });
+
+  // Render 4 comparison cards
+  ['matrix', 'columns', 'scatter', 'hybrid'].forEach(st => {
+    renderDotChart(document.getElementById('cmp-' + st), {
+      bars: ds.bars, metric: state.metric, style: st, isKr: ds.isKr,
+      W: 440, H: 175, cols: 34, rows: 11, interactive: false
+    });
+  });
+}
+
+// ── Bindings ──
+function bindPills(id, key) {
+  const wrap = document.getElementById(id);
+  wrap.querySelectorAll('.pill').forEach(btn => {
+    btn.addEventListener('click', () => {
+      wrap.querySelectorAll('.pill').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      state[key] = btn.dataset[key];
+      state.hoverIdx = -1;
+      refreshAll();
+    });
+  });
+}
+bindPills('stock-pills', 'stock');
+bindPills('metric-pills', 'metric');
+bindPills('style-pills', 'style');
+
+document.getElementById('theme-toggle').addEventListener('click', e => {
+  const isLight = document.documentElement.classList.toggle('light');
+  e.target.textContent = isLight ? '다크 모드' : '라이트 모드';
+});
+
+const mainStage = document.getElementById('main-stage');
+const mainTip = document.getElementById('main-tip');
+mainStage.addEventListener('mousemove', e => {
+  if (!currentPts.length) return;
+  const rect = mainStage.getBoundingClientRect();
+  const relX = ((e.clientX - rect.left) / rect.width) * 900;
+  let bestIdx = 0, minD = Infinity;
+  currentPts.forEach((p, i) => {
+    const d = Math.abs(p.x - relX);
+    if (d < minD) { minD = d; bestIdx = i; }
+  });
+  if (state.hoverIdx !== bestIdx) {
+    state.hoverIdx = bestIdx;
+    const ds = DATASETS[state.stock];
+    const p = currentPts[bestIdx];
+    const dStr = `${p.date.getFullYear()}-${String(p.date.getMonth() + 1).padStart(2, '0')}-${String(p.date.getDate()).padStart(2, '0')}`;
+    mainTip.textContent = `${dStr} · ${fmtVal(p.v, state.metric, ds.isKr)}`;
+    mainTip.classList.add('show');
+    refreshAll();
+  }
+});
+mainStage.addEventListener('mouseleave', () => {
+  state.hoverIdx = -1;
+  mainTip.classList.remove('show');
+  refreshAll();
+});
+
+renderSparklines();
+refreshAll();
+</script>
+</body>
+</html>

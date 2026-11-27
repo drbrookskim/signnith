@@ -1581,9 +1581,9 @@
   .mtf-cell::after {
     content:''; position:absolute; left:0; right:0; bottom:0; height:0%; z-index: 0;
     background:
-      repeating-conic-gradient(rgba(255, 75, 110, 0.22) 0% 25%, transparent 0% 50%) 0 0 / 4px 4px,
-      linear-gradient(to top, rgba(255, 75, 110, 0.14) 0%, transparent 100%);
-    transition: height .32s steps(10, end);
+      linear-gradient(to top, rgba(255, 75, 110, 0.28) 0%, rgba(255, 75, 110, 0.12) 55%, rgba(255, 75, 110, 0.02) 100%),
+      repeating-conic-gradient(rgba(255, 75, 110, 0.16) 0% 25%, transparent 0% 50%) 0 0 / 4px 4px;
+    transition: height .48s cubic-bezier(0.22, 1, 0.36, 1);
     pointer-events: none;
   }
   .mtf-cell.is-bull:hover {
@@ -1595,8 +1595,8 @@
   .mtf-cell.is-bull:hover::before { height: 4px; opacity: 1; }
   .mtf-cell.is-neutral::after {
     background:
-      repeating-conic-gradient(rgba(251, 191, 36, 0.20) 0% 25%, transparent 0% 50%) 0 0 / 4px 4px,
-      linear-gradient(to top, rgba(251, 191, 36, 0.12) 0%, transparent 100%);
+      linear-gradient(to top, rgba(251, 191, 36, 0.24) 0%, rgba(251, 191, 36, 0.10) 55%, rgba(251, 191, 36, 0.02) 100%),
+      repeating-conic-gradient(rgba(251, 191, 36, 0.15) 0% 25%, transparent 0% 50%) 0 0 / 4px 4px;
   }
   .mtf-cell.is-neutral:hover {
     border-color: rgba(251, 191, 36, 0.62);
@@ -1617,8 +1617,8 @@
   }
   .mtf-cell.is-bear::after {
     background:
-      repeating-conic-gradient(rgba(56, 189, 248, 0.24) 0% 25%, transparent 0% 50%) 0 0 / 4px 4px,
-      linear-gradient(to top, rgba(56, 189, 248, 0.16) 0%, rgba(186, 230, 253, 0.05) 100%);
+      linear-gradient(to top, rgba(56, 189, 248, 0.28) 0%, rgba(186, 230, 253, 0.14) 55%, rgba(224, 242, 254, 0.03) 100%),
+      repeating-conic-gradient(rgba(56, 189, 248, 0.16) 0% 25%, transparent 0% 50%) 0 0 / 4px 4px;
     height: 36%;
   }
   .mtf-cell.is-bear .mtf-tf,

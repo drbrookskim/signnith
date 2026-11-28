@@ -25,7 +25,7 @@
 <title>리포트 — SIGNNITH</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Noto+Sans+KR:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Space+Grotesk:wght@300;400;500;600;700&family=Noto+Sans+KR:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <style>
   /* ── CSS 변수: 다크 모드 (Kinetics Graphite × Warm Bone) ── */
   :root {
@@ -198,7 +198,17 @@
   .page{
     max-width:860px;
     margin:0 auto;
-    padding:36px 20px 60px;
+    padding:28px 20px 60px;
+  }
+  .report-page-title{
+    font-family:'Instrument Serif','Noto Sans KR',Georgia,serif;
+    font-size:2.15rem;
+    font-weight:400;
+    letter-spacing:-0.01em;
+    line-height:1.18;
+    color:var(--text);
+    text-align:center;
+    margin-bottom:18px;
   }
 
   /* ── Loading / Error ── */
@@ -740,6 +750,7 @@
   @media(max-width:600px){
     .topbar{ padding:0 16px; }
     .page{ padding:20px 12px 40px; }
+    .report-page-title{ font-size:1.75rem; margin-bottom:14px; }
     .section-card,.main-title-card{ padding:20px 18px; }
     .desc-box{ margin-left:0; }
     .price-display{ font-size:1.8rem; }
@@ -780,6 +791,7 @@
   <span>Top</span>
 </button>
 <div class="page">
+  <div class="report-page-title">Analysis Snapshot</div>
   <div id="report-content">
     <!-- 로딩 스켈레톤: JS가 실제 콘텐츠로 교체 -->
     <div class="main-title-card">

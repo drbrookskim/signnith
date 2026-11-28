@@ -80,6 +80,23 @@
   }
   html { font-size: 16.5px; scroll-behavior: smooth; }
   * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, * {
+    scrollbar-width: thin;
+    scrollbar-color: transparent transparent;
+  }
+  html.is-scrolling, .is-scrolling {
+    scrollbar-color: var(--border2) transparent;
+  }
+  ::-webkit-scrollbar { width: 6px; height: 6px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb {
+    background: transparent;
+    border-radius: 999px;
+    transition: background .25s ease;
+  }
+  .is-scrolling::-webkit-scrollbar-thumb {
+    background: var(--border2);
+  }
   body {
     background: var(--bg);
     color: var(--text);
@@ -1352,8 +1369,6 @@
   .ac-loading { padding: 12px 14px; font-size: 0.82rem; color: var(--muted); text-align: center; }
   .chart-scroll { overflow-x: auto; overflow-y: hidden; -webkit-overflow-scrolling: touch; }
   .chart-scroll::-webkit-scrollbar { height: 4px; }
-  .chart-scroll::-webkit-scrollbar-track { background: var(--card2); border-radius: 2px; }
-  .chart-scroll::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
   .chart-container { position: relative; height: 340px; min-width: 520px; }
   .chart-container-sm { position: relative; height: 120px; min-width: 280px; }
   .rsi-macd-grid {
@@ -9482,6 +9497,19 @@ async function _hydrateFeedbacksFromSupabase(ticker, decision) {
   } else {
     applyInbound();
   }
+})();
+// 스크롤 시에만 스크롤바 표시 (전역)
+(() => {
+  const timers = new WeakMap();
+  document.addEventListener('scroll', (e) => {
+    const target = (e.target === document || e.target === document.body)
+      ? document.documentElement
+      : (e.target instanceof Element ? e.target : null);
+    if (!target) return;
+    target.classList.add('is-scrolling');
+    clearTimeout(timers.get(target));
+    timers.set(target, setTimeout(() => target.classList.remove('is-scrolling'), 900));
+  }, { capture: true, passive: true });
 })();
 </script>
 </body>

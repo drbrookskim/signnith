@@ -74,6 +74,23 @@
 
   *{ box-sizing:border-box; margin:0; padding:0; }
   html { background: var(--bg); }
+  html, * {
+    scrollbar-width: thin;
+    scrollbar-color: transparent transparent;
+  }
+  html.is-scrolling, .is-scrolling {
+    scrollbar-color: var(--border2) transparent;
+  }
+  ::-webkit-scrollbar { width: 6px; height: 6px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb {
+    background: transparent;
+    border-radius: 999px;
+    transition: background .25s ease;
+  }
+  .is-scrolling::-webkit-scrollbar-thumb {
+    background: var(--border2);
+  }
   .sk-ico { display:inline-block; vertical-align:-2px; flex-shrink:0; }
   body{
     font-family:'Space Grotesk','Noto Sans KR',-apple-system,sans-serif;
@@ -3429,6 +3446,19 @@ function initReportTocAndTop() {
     syncTop();
   }
 }
+// 스크롤 시에만 스크롤바 표시 (전역)
+(() => {
+  const timers = new WeakMap();
+  document.addEventListener('scroll', (e) => {
+    const target = (e.target === document || e.target === document.body)
+      ? document.documentElement
+      : (e.target instanceof Element ? e.target : null);
+    if (!target) return;
+    target.classList.add('is-scrolling');
+    clearTimeout(timers.get(target));
+    timers.set(target, setTimeout(() => target.classList.remove('is-scrolling'), 900));
+  }, { capture: true, passive: true });
+})();
 </script>
 </body>
 </html>

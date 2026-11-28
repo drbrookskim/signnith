@@ -1,0 +1,7 @@
+name = "signnith-orchestrator"
+main = "orchestrator.js"
+compatibility_date = "2026-11-01"
+
+[vars]
+SUPABASE_URL = "https://anvgqeyghquwrvsjmivj.supabase.co"
+# Set SUPABASE_ANON_KEY via `wrangler secret put SUPABASE_ANON_KEY` or [vars]

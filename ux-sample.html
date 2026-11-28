@@ -1,0 +1,1152 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SIGNNITH — New UX Sample</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Noto+Sans+KR:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg-base: #070b14;
+      --card: rgba(17, 24, 39, 0.78);
+      --card-solid: #111827;
+      --card2: rgba(15, 23, 42, 0.72);
+      --topbar: rgba(9, 13, 24, 0.82);
+      --border: rgba(255, 255, 255, 0.08);
+      --border2: rgba(255, 255, 255, 0.15);
+      --text: #f8fafc;
+      --text2: #e2e8f0;
+      --muted: #94a3b8;
+      --muted2: #64748b;
+      --green: #00d4aa;
+      --blue: #3b82f6;
+      --purple: #a78bfa;
+      --yellow: #fbbf24;
+      --orange: #f97316;
+      --up: #ff4b6e;
+      --down: #3b82f6;
+      --up-bg: rgba(255, 75, 110, 0.12);
+      --down-bg: rgba(59, 130, 246, 0.12);
+      --warn-bg: rgba(251, 191, 36, 0.12);
+      --shadow: 0 12px 36px rgba(0, 0, 0, 0.35);
+    }
+
+    html.light {
+      --bg-base: #f4f6fa;
+      --card: rgba(255, 255, 255, 0.88);
+      --card-solid: #ffffff;
+      --card2: rgba(241, 245, 249, 0.85);
+      --topbar: rgba(255, 255, 255, 0.86);
+      --border: rgba(15, 23, 42, 0.08);
+      --border2: rgba(15, 23, 42, 0.16);
+      --text: #0f172a;
+      --text2: #1e293b;
+      --muted: #475569;
+      --muted2: #64748b;
+      --green: #059669;
+      --blue: #2563eb;
+      --purple: #7c3aed;
+      --yellow: #d97706;
+      --orange: #ea580c;
+      --up: #e11d48;
+      --down: #1d4ed8;
+      --up-bg: rgba(225, 29, 72, 0.09);
+      --down-bg: rgba(29, 78, 216, 0.09);
+      --warn-bg: rgba(217, 119, 6, 0.10);
+      --shadow: 0 8px 28px rgba(15, 23, 42, 0.07);
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html { font-size: 16px; }
+    body {
+      font-family: 'Space Grotesk', 'Noto Sans KR', -apple-system, sans-serif;
+      background: var(--bg-base);
+      color: var(--text);
+      min-height: 100vh;
+      line-height: 1.5;
+      font-variant-numeric: tabular-nums;
+      transition: background 0.25s ease, color 0.25s ease;
+      overflow-x: hidden;
+    }
+
+    /* Ambient Aurora */
+    .aurora {
+      position: fixed;
+      inset: 0;
+      z-index: -1;
+      pointer-events: none;
+      overflow: hidden;
+    }
+    .aurora::before, .aurora::after {
+      content: '';
+      position: absolute;
+      border-radius: 50%;
+      filter: blur(110px);
+      opacity: 0.26;
+    }
+    .aurora::before {
+      width: 520px; height: 520px;
+      top: -140px; left: -100px;
+      background: radial-gradient(circle, #00d4aa, transparent 70%);
+    }
+    .aurora::after {
+      width: 560px; height: 560px;
+      bottom: -180px; right: -120px;
+      background: radial-gradient(circle, #3b82f6, transparent 70%);
+    }
+    html.light .aurora::before, html.light .aurora::after { opacity: 0.14; }
+
+    /* Topbar */
+    .topbar {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      height: 60px;
+      background: var(--topbar);
+      backdrop-filter: blur(18px) saturate(1.4);
+      -webkit-backdrop-filter: blur(18px) saturate(1.4);
+      border-bottom: 1px solid var(--border);
+      padding: 0 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+    }
+    .topbar-left {
+      display: flex;
+      align-items: center;
+      gap: 24px;
+    }
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-weight: 700;
+      font-size: 1.05rem;
+      letter-spacing: 0.04em;
+      color: var(--text);
+      text-decoration: none;
+    }
+    .brand-mark {
+      width: 28px; height: 28px;
+      border-radius: 8px;
+      background: linear-gradient(135deg, #00d4aa, #3b82f6);
+      display: grid;
+      place-items: center;
+      color: #fff;
+      font-size: 0.85rem;
+      font-weight: 800;
+    }
+    .nav-links {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+    .nav-link {
+      padding: 6px 12px;
+      border-radius: 8px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: var(--muted);
+      text-decoration: none;
+      cursor: pointer;
+      border: none;
+      background: transparent;
+      transition: all 0.15s;
+    }
+    .nav-link:hover { color: var(--text); background: var(--card2); }
+    .nav-link.active {
+      color: var(--text);
+      background: rgba(59, 130, 246, 0.14);
+      color: var(--blue);
+    }
+    .topbar-right {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .sample-badge {
+      font-size: 0.72rem;
+      font-weight: 600;
+      padding: 4px 10px;
+      border-radius: 999px;
+      background: rgba(0, 212, 170, 0.12);
+      color: var(--green);
+      border: 1px solid rgba(0, 212, 170, 0.25);
+    }
+    .btn-ghost {
+      height: 34px;
+      padding: 0 12px;
+      border-radius: 9px;
+      border: 1px solid var(--border2);
+      background: var(--card2);
+      color: var(--text2);
+      font-size: 0.8rem;
+      font-weight: 600;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: border-color 0.15s, background 0.15s;
+    }
+    .btn-ghost:hover { border-color: var(--blue); }
+
+    /* Container */
+    .container {
+      max-width: 1240px;
+      margin: 0 auto;
+      padding: 24px 20px 64px;
+    }
+
+    /* Search Command Bar */
+    .search-shell {
+      background: var(--card);
+      border: 1px solid var(--border2);
+      border-radius: 16px;
+      padding: 12px;
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(16px);
+      display: grid;
+      grid-template-columns: 1fr auto auto auto;
+      gap: 10px;
+      align-items: center;
+    }
+    .search-input-wrap {
+      position: relative;
+      display: flex;
+      align-items: center;
+    }
+    .search-icon {
+      position: absolute;
+      left: 14px;
+      color: var(--muted);
+      font-size: 0.95rem;
+      pointer-events: none;
+    }
+    .search-input {
+      width: 100%;
+      height: 44px;
+      padding: 0 14px 0 38px;
+      border-radius: 11px;
+      border: 1px solid var(--border);
+      background: var(--card2);
+      color: var(--text);
+      font-family: inherit;
+      font-size: 0.92rem;
+      outline: none;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+    .search-input:focus {
+      border-color: var(--green);
+      box-shadow: 0 0 0 3px rgba(0, 212, 170, 0.14);
+    }
+    .select-ctrl {
+      height: 44px;
+      padding: 0 14px;
+      border-radius: 11px;
+      border: 1px solid var(--border);
+      background: var(--card2);
+      color: var(--text);
+      font-family: inherit;
+      font-size: 0.86rem;
+      font-weight: 500;
+      cursor: pointer;
+      outline: none;
+    }
+    .btn-analyze {
+      height: 44px;
+      padding: 0 22px;
+      border-radius: 11px;
+      border: none;
+      background: linear-gradient(135deg, #00d4aa 0%, #2563eb 60%, #7c3aed 100%);
+      color: #fff;
+      font-family: inherit;
+      font-size: 0.9rem;
+      font-weight: 700;
+      cursor: pointer;
+      white-space: nowrap;
+      box-shadow: 0 4px 16px rgba(0, 212, 170, 0.28);
+      transition: transform 0.15s, box-shadow 0.2s;
+    }
+    .btn-analyze:hover { transform: translateY(-1px); box-shadow: 0 6px 22px rgba(37, 99, 235, 0.35); }
+    .btn-analyze:active { transform: translateY(0); }
+
+    /* Quick Picks & Favorites Strip */
+    .quick-strip {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 12px;
+      padding: 0 4px;
+    }
+    .chip-group {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+    .chip-label {
+      font-size: 0.76rem;
+      color: var(--muted);
+      font-weight: 600;
+    }
+    .ticker-chip {
+      padding: 5px 12px;
+      border-radius: 999px;
+      border: 1px solid var(--border2);
+      background: var(--card);
+      color: var(--text2);
+      font-size: 0.78rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.15s;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .ticker-chip:hover { border-color: var(--green); color: var(--green); }
+    .ticker-chip.active {
+      background: rgba(0, 212, 170, 0.14);
+      border-color: var(--green);
+      color: var(--green);
+    }
+
+    /* Progress Bar (Simulated Analysis) */
+    .progress-banner {
+      display: none;
+      margin-top: 18px;
+      background: var(--card);
+      border: 1px solid var(--border2);
+      border-radius: 14px;
+      padding: 18px 20px;
+    }
+    .progress-banner.show { display: block; }
+    .progress-steps {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.8rem;
+      color: var(--muted);
+      margin-bottom: 10px;
+    }
+    .progress-steps span.done { color: var(--green); font-weight: 700; }
+    .progress-track {
+      height: 6px;
+      border-radius: 999px;
+      background: var(--border);
+      overflow: hidden;
+    }
+    .progress-bar {
+      height: 100%;
+      width: 0%;
+      background: linear-gradient(90deg, var(--green), var(--blue));
+      transition: width 0.25s ease;
+    }
+
+    /* Executive Hero Summary */
+    .hero-grid {
+      margin-top: 20px;
+      display: grid;
+      grid-template-columns: 1.25fr 1fr;
+      gap: 16px;
+    }
+    .card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 20px;
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(14px);
+    }
+    .card-title {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-size: 0.82rem;
+      font-weight: 700;
+      color: var(--muted);
+      letter-spacing: 0.03em;
+      margin-bottom: 14px;
+    }
+    .title-dot {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; }
+
+    .stock-head {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+    .stock-name { font-size: 1.35rem; font-weight: 800; }
+    .stock-meta {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-top: 4px;
+      font-size: 0.8rem;
+      color: var(--muted);
+    }
+    .pill-tag {
+      padding: 2px 8px;
+      border-radius: 6px;
+      background: var(--card2);
+      border: 1px solid var(--border);
+      font-size: 0.72rem;
+      color: var(--text2);
+    }
+    .signal-pill {
+      padding: 8px 16px;
+      border-radius: 10px;
+      font-size: 0.92rem;
+      font-weight: 800;
+      letter-spacing: 0.03em;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .signal-buy { background: var(--up-bg); color: var(--up); border: 1px solid rgba(255,75,110,0.3); }
+    .signal-sell { background: var(--down-bg); color: var(--down); border: 1px solid rgba(59,130,246,0.3); }
+    .signal-hold { background: var(--warn-bg); color: var(--yellow); border: 1px solid rgba(251,191,36,0.3); }
+
+    .price-row {
+      display: flex;
+      align-items: baseline;
+      gap: 12px;
+      margin: 16px 0 12px;
+      flex-wrap: wrap;
+    }
+    .price-big { font-size: 2.1rem; font-weight: 800; letter-spacing: -0.02em; }
+    .price-chg { font-size: 0.92rem; font-weight: 700; }
+    .up { color: var(--up); }
+    .down { color: var(--down); }
+
+    .range-52w {
+      margin: 12px 0 16px;
+      font-size: 0.78rem;
+      color: var(--muted);
+    }
+    .range-labels { display: flex; justify-content: space-between; margin-bottom: 6px; }
+    .range-bar {
+      position: relative;
+      height: 6px;
+      border-radius: 999px;
+      background: var(--border2);
+    }
+    .range-fill {
+      height: 100%;
+      border-radius: 999px;
+      background: linear-gradient(90deg, var(--down), var(--up));
+    }
+
+    .score-strip {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 8px;
+      margin-top: 12px;
+    }
+    .score-box {
+      background: var(--card2);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 10px 8px;
+      text-align: center;
+    }
+    .score-box-lbl { font-size: 0.72rem; color: var(--muted); }
+    .score-box-val { font-size: 1rem; font-weight: 800; margin-top: 3px; }
+
+    /* Right Hero: KPI + Action Item */
+    .kpi-3 {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+      margin-bottom: 14px;
+    }
+    .kpi-item {
+      background: var(--card2);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 12px;
+    }
+    .kpi-lbl { font-size: 0.74rem; color: var(--muted); }
+    .kpi-val { font-size: 1.15rem; font-weight: 800; margin: 4px 0 2px; }
+    .kpi-sub { font-size: 0.76rem; font-weight: 700; }
+
+    .action-box {
+      border-radius: 12px;
+      padding: 14px 16px;
+      border: 1px solid rgba(0, 212, 170, 0.28);
+      background: rgba(0, 212, 170, 0.08);
+    }
+    .action-box.sell {
+      border-color: rgba(59, 130, 246, 0.28);
+      background: rgba(59, 130, 246, 0.08);
+    }
+    .action-box.hold {
+      border-color: rgba(251, 191, 36, 0.28);
+      background: rgba(251, 191, 36, 0.08);
+    }
+    .action-head {
+      font-size: 0.76rem;
+      font-weight: 800;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      margin-bottom: 6px;
+      color: var(--green);
+    }
+    .action-box.sell .action-head { color: var(--down); }
+    .action-box.hold .action-head { color: var(--yellow); }
+    .action-list {
+      list-style: none;
+      font-size: 0.84rem;
+      color: var(--text2);
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .result-actions {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      margin-top: 14px;
+      flex-wrap: wrap;
+    }
+    .conf-inline {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 0.82rem;
+    }
+    .conf-track {
+      width: 110px;
+      height: 7px;
+      border-radius: 999px;
+      background: var(--border2);
+      overflow: hidden;
+    }
+    .conf-fill { height: 100%; background: var(--green); }
+
+    /* Sticky Result Tabs */
+    .tabs-bar {
+      position: sticky;
+      top: 68px;
+      z-index: 50;
+      margin-top: 20px;
+      background: var(--topbar);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid var(--border2);
+      border-radius: 14px;
+      padding: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      overflow-x: auto;
+    }
+    .tab-group {
+      display: flex;
+      gap: 4px;
+      flex-wrap: nowrap;
+    }
+    .tab-btn {
+      padding: 8px 14px;
+      border-radius: 10px;
+      border: none;
+      background: transparent;
+      color: var(--muted);
+      font-family: inherit;
+      font-size: 0.84rem;
+      font-weight: 600;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: all 0.15s;
+    }
+    .tab-btn:hover { color: var(--text); background: var(--card2); }
+    .tab-btn.active {
+      background: var(--blue);
+      color: #fff;
+      box-shadow: 0 2px 10px rgba(59, 130, 246, 0.35);
+    }
+
+    .tab-panel { display: none; margin-top: 16px; }
+    .tab-panel.active { display: block; }
+    .show-all .tab-panel { display: block; }
+
+    /* Panel Grids */
+    .mtf-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 12px;
+    }
+    .mtf-cell {
+      background: var(--card2);
+      border: 1px solid var(--border);
+      border-top: 3px solid var(--blue);
+      border-radius: 12px;
+      padding: 14px;
+      text-align: center;
+    }
+    .mtf-tf { font-size: 0.76rem; color: var(--muted); font-weight: 700; }
+    .mtf-ret { font-size: 1.35rem; font-weight: 800; margin: 6px 0 4px; }
+    .mtf-ma { font-size: 0.75rem; color: var(--muted); }
+
+    .reason-list {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 10px;
+      margin-top: 14px;
+    }
+    .reason-item {
+      background: var(--card2);
+      border: 1px solid var(--border);
+      border-radius: 11px;
+      padding: 12px 14px;
+      font-size: 0.84rem;
+      color: var(--text2);
+    }
+
+    .layer-strip {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 8px;
+      margin-bottom: 14px;
+    }
+    .layer-pill {
+      background: var(--card2);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 10px 8px;
+      text-align: center;
+    }
+    .layer-name { font-size: 0.73rem; color: var(--muted); }
+    .layer-val { font-size: 0.88rem; font-weight: 800; margin-top: 4px; }
+
+    .adv-cards {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+    }
+    .adv-card {
+      background: var(--card2);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 14px;
+    }
+    .adv-card h4 { font-size: 0.86rem; margin-bottom: 6px; }
+    .adv-card p { font-size: 0.8rem; color: var(--muted); line-height: 1.55; }
+
+    .chart-box {
+      background: var(--card2);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 16px;
+    }
+
+    .kg-box {
+      position: relative;
+      height: clamp(340px, 48vh, 520px);
+      background: var(--card2);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      overflow: hidden;
+      display: grid;
+      place-items: center;
+    }
+    .kg-toolbar {
+      position: absolute;
+      top: 12px;
+      right: 12px;
+      display: flex;
+      gap: 8px;
+      background: var(--card);
+      border: 1px solid var(--border2);
+      padding: 6px 10px;
+      border-radius: 10px;
+      font-size: 0.76rem;
+      color: var(--muted);
+    }
+
+    .footer {
+      margin-top: 36px;
+      padding-top: 20px;
+      border-top: 1px solid var(--border);
+      text-align: center;
+      font-size: 0.78rem;
+      color: var(--muted2);
+    }
+
+    /* Responsive */
+    @media (max-width: 960px) {
+      .hero-grid { grid-template-columns: 1fr; }
+      .layer-strip { grid-template-columns: repeat(4, 1fr); }
+      .adv-cards { grid-template-columns: repeat(2, 1fr); }
+      .reason-list { grid-template-columns: 1fr; }
+    }
+    @media (max-width: 720px) {
+      .topbar { padding: 0 14px; }
+      .sample-badge { display: none; }
+      .nav-links { display: none; }
+      .search-shell { grid-template-columns: 1fr 1fr; }
+      .search-input-wrap { grid-column: 1 / -1; }
+      .btn-analyze { grid-column: 1 / -1; }
+      .mtf-grid { grid-template-columns: repeat(2, 1fr); }
+      .score-strip { grid-template-columns: repeat(2, 1fr); }
+      .kpi-3 { grid-template-columns: 1fr; }
+      .layer-strip { grid-template-columns: repeat(2, 1fr); }
+      .adv-cards { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <div class="aurora"></div>
+
+  <!-- Clean Global Topbar -->
+  <header class="topbar">
+    <div class="topbar-left">
+      <a class="brand" href="#">
+        <span class="brand-mark">S</span>
+        <span>SIGNNITH</span>
+      </a>
+      <nav class="nav-links" aria-label="주 메뉴">
+        <button class="nav-link active">종목 분석</button>
+        <button class="nav-link" onclick="alert('아카이브 페이지(archive.html)로 같은 탭 이동')">아카이브</button>
+        <button class="nav-link" onclick="alert('종목 비교 페이지(compare.html)로 같은 탭 이동')">종목 비교</button>
+      </nav>
+    </div>
+    <div class="topbar-right">
+      <span class="sample-badge">UX Prototype</span>
+      <button class="btn-ghost" id="theme-btn" onclick="toggleTheme()">🌙 다크</button>
+      <button class="btn-ghost" onclick="alert('Google 로그인 모달')">로그인</button>
+    </div>
+  </header>
+
+  <main class="container">
+    <!-- Focused Search Command Bar -->
+    <section class="search-shell" aria-label="종목 검색">
+      <div class="search-input-wrap">
+        <span class="search-icon">🔍</span>
+        <input id="ticker-input" class="search-input" type="text" value="SK하이닉스 (000660)" placeholder="종목명(SK하이닉스) 또는 티커(NVDA) 입력..." />
+      </div>
+      <select class="select-ctrl" aria-label="분석 기간">
+        <option>3개월</option>
+        <option selected>6개월</option>
+        <option>1년</option>
+        <option>2년</option>
+      </select>
+      <select class="select-ctrl" aria-label="투자 스타일">
+        <option>단기</option>
+        <option selected>균형</option>
+        <option>장기</option>
+      </select>
+      <button class="btn-analyze" onclick="simulateAnalyze()">분석 시작</button>
+    </section>
+
+    <!-- 1-Click Sample / Favorites Strip -->
+    <div class="quick-strip">
+      <div class="chip-group">
+        <span class="chip-label">⚡ 빠른 체험</span>
+        <button class="ticker-chip active" data-key="hynix" onclick="selectStock('hynix')">🇰🇷 SK하이닉스</button>
+        <button class="ticker-chip" data-key="nvda" onclick="selectStock('nvda')">🇺🇸 NVDA</button>
+        <button class="ticker-chip" data-key="samsung" onclick="selectStock('samsung')">🇰🇷 삼성전자</button>
+        <button class="ticker-chip" data-key="tsla" onclick="selectStock('tsla')">🇺🇸 TSLA</button>
+      </div>
+      <div class="chip-group">
+        <button class="btn-ghost" id="fav-toggle" onclick="toggleFav()">☆ 즐겨찾기 추가</button>
+      </div>
+    </div>
+
+    <!-- Step Progress Indicator -->
+    <div class="progress-banner" id="progress-banner">
+      <div class="progress-steps">
+        <span id="step-1">1. 시세·재무 데이터 수집</span>
+        <span id="step-2">2. 7-Layer · 패턴 계산</span>
+        <span id="step-3">3. 리포트 렌더링</span>
+      </div>
+      <div class="progress-track"><div class="progress-bar" id="progress-bar"></div></div>
+    </div>
+
+    <!-- Executive Decision Hero -->
+    <section class="hero-grid" id="hero-section">
+      <!-- Left: Price + Signal + 4 Scores -->
+      <div class="card">
+        <div class="stock-head">
+          <div>
+            <div class="stock-name" id="st-name">🇰🇷 SK하이닉스</div>
+            <div class="stock-meta">
+              <span id="st-ticker">000660.KS</span>
+              <span class="pill-tag" id="st-sector">반도체</span>
+              <span class="pill-tag">KRX · NXT</span>
+            </div>
+          </div>
+          <span class="signal-pill signal-buy" id="st-badge">▲ 매수 우위</span>
+        </div>
+
+        <div class="price-row">
+          <span class="price-big" id="st-price">214,500 KRW</span>
+          <span class="price-chg up" id="st-chg">▲ +4,500 (+2.14%)</span>
+        </div>
+
+        <div class="range-52w">
+          <div class="range-labels">
+            <span>52주 저가 <strong id="st-low">148,200</strong></span>
+            <span>52주 고가 <strong id="st-high">248,500</strong></span>
+          </div>
+          <div class="range-bar"><div class="range-fill" id="st-range-fill" style="width:66%"></div></div>
+        </div>
+
+        <div class="score-strip">
+          <div class="score-box"><div class="score-box-lbl">기술적</div><div class="score-box-val up" id="sc-tech">+0.42</div></div>
+          <div class="score-box"><div class="score-box-lbl">기본적</div><div class="score-box-val up" id="sc-fund">+0.31</div></div>
+          <div class="score-box"><div class="score-box-lbl">통합</div><div class="score-box-val up" id="sc-comb">+0.38</div></div>
+          <div class="score-box"><div class="score-box-lbl">고급 7L</div><div class="score-box-val up" id="sc-adv">+0.46</div></div>
+        </div>
+      </div>
+
+      <!-- Right: Target / Stop / R:R + Action Item -->
+      <div class="card" style="display:flex;flex-direction:column;justify-content:space-between">
+        <div>
+          <div class="card-title">
+            <span class="title-dot"><span class="dot" style="background:var(--purple)"></span>핵심 대응 전략</span>
+            <span class="conf-inline">
+              신뢰도 <strong id="st-conf">78.4%</strong>
+              <span class="conf-track"><span class="conf-fill" id="st-conf-bar" style="width:78.4%"></span></span>
+            </span>
+          </div>
+
+          <div class="kpi-3">
+            <div class="kpi-item">
+              <div class="kpi-lbl">목표가</div>
+              <div class="kpi-val up" id="st-target">242,000</div>
+              <div class="kpi-sub up" id="st-target-pct">+12.8%</div>
+            </div>
+            <div class="kpi-item">
+              <div class="kpi-lbl">손절가</div>
+              <div class="kpi-val down" id="st-stop">198,000</div>
+              <div class="kpi-sub down" id="st-stop-pct">-7.7%</div>
+            </div>
+            <div class="kpi-item">
+              <div class="kpi-lbl">R:R 비율</div>
+              <div class="kpi-val" id="st-rr">2.3 : 1</div>
+              <div class="kpi-sub up" id="st-rr-tag">✓ 진입 양호</div>
+            </div>
+          </div>
+
+          <div class="action-box" id="action-box">
+            <div class="action-head">🎯 Action Item</div>
+            <ul class="action-list" id="action-list">
+              <li>✅ <strong>분할 진입</strong>: 현재가 214,500 부근 2~3분할 매수 고려</li>
+              <li>🎯 <strong>목표</strong>: 242,000 도달 시 1차 차익실현</li>
+              <li>🛡️ <strong>손절</strong>: 198,000 이탈 시 추세 훼손으로 비중 축소</li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="result-actions">
+          <div class="chip-group">
+            <button class="btn-ghost" onclick="alert('상세 리포트(report.html) 열기')">📄 상세 리포트</button>
+            <button class="btn-ghost" onclick="alert('이 종목 관련 뉴스 검색')">📰 관련 뉴스</button>
+          </div>
+          <span style="font-size:0.75rem;color:var(--muted)">방금 분석됨</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- Sticky Progressive Disclosure Tabs -->
+    <div class="tabs-bar">
+      <div class="tab-group" role="tablist">
+        <button class="tab-btn active" onclick="switchTab('summary', this)">📊 요약 · 추세</button>
+        <button class="tab-btn" onclick="switchTab('signals', this)">🧠 고급 시그널 (7L)</button>
+        <button class="tab-btn" onclick="switchTab('charts', this)">📈 차트 · 패턴</button>
+        <button class="tab-btn" onclick="switchTab('valuation', this)">📐 밸류에이션 · WACC</button>
+        <button class="tab-btn" onclick="switchTab('graph', this)">🕸️ Knowledge Graph</button>
+      </div>
+      <button class="btn-ghost" id="expand-all-btn" onclick="toggleShowAll()">전체 펼치기</button>
+    </div>
+
+    <!-- Tab Panels -->
+    <div id="panels-wrap">
+      <!-- 1. Summary & MTF -->
+      <section class="tab-panel active" id="panel-summary">
+        <div class="card">
+          <div class="card-title">
+            <span class="title-dot"><span class="dot" style="background:var(--blue)"></span>기간별 추세 · 멀티 타임프레임</span>
+            <span class="up" id="mtf-verdict">중장기 정배열 우위</span>
+          </div>
+          <div class="mtf-grid">
+            <div class="mtf-cell"><div class="mtf-tf">단기 (1주)</div><div class="mtf-ret up">+3.2%</div><div class="mtf-ma">가격 &gt; MA5</div></div>
+            <div class="mtf-cell"><div class="mtf-tf">중기 (1개월)</div><div class="mtf-ret up">+8.7%</div><div class="mtf-ma">가격 &gt; MA20</div></div>
+            <div class="mtf-cell"><div class="mtf-tf">분기 (3개월)</div><div class="mtf-ret up">+16.4%</div><div class="mtf-ma">가격 &gt; MA60</div></div>
+            <div class="mtf-cell"><div class="mtf-tf">장기 (6개월)</div><div class="mtf-ret up">+24.1%</div><div class="mtf-ma">가격 &gt; MA120</div></div>
+          </div>
+          <div class="reason-list">
+            <div class="reason-item"><strong>① 통합 신호</strong>: 기술(+0.42)과 기본(+0.31)이 모두 매수 방향 일치</div>
+            <div class="reason-item"><strong>② 기술 지표</strong>: RSI 58.4 중립 · MACD 상승 모멘텀 · 거래량 1.35x</div>
+            <div class="reason-item"><strong>③ 고급 분석</strong>: 엘리어트·일목·퀀트 팩터 상승 정렬</div>
+            <div class="reason-item"><strong>④ 기본 분석</strong>: ROE 18.4% 우량 · WACC 8.9% 대비 가치 창출 구간</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 2. Advanced Signals -->
+      <section class="tab-panel" id="panel-signals">
+        <div class="card">
+          <div class="card-title">
+            <span class="title-dot"><span class="dot" style="background:var(--orange)"></span>7-Layer 고급 분석 시그널</span>
+            <span class="up">복합점수 +0.460 (LONG)</span>
+          </div>
+          <div class="layer-strip">
+            <div class="layer-pill"><div class="layer-name">캔들스틱</div><div class="layer-val up">매수</div></div>
+            <div class="layer-pill"><div class="layer-name">엘리어트</div><div class="layer-val up">3파 진행</div></div>
+            <div class="layer-pill"><div class="layer-name">일목균형</div><div class="layer-val up">구름 위</div></div>
+            <div class="layer-pill"><div class="layer-name">SMC</div><div class="layer-val" style="color:var(--yellow)">중립</div></div>
+            <div class="layer-pill"><div class="layer-name">퀀트팩터</div><div class="layer-val up">강세</div></div>
+            <div class="layer-pill"><div class="layer-name">WACC</div><div class="layer-val up">가치창출</div></div>
+            <div class="layer-pill"><div class="layer-name">변곡(IPP)</div><div class="layer-val up">+24</div></div>
+          </div>
+          <div class="adv-cards">
+            <div class="adv-card"><h4>🕯️ 캔들스틱 패턴</h4><p>Bullish Engulfing 감지. 단기 지지선 확인 후 매수세 유입.</p></div>
+            <div class="adv-card"><h4>🌊 엘리어트 파동 · 피보나치</h4><p>상승 3파 구간 추정. 피보나치 1.618 확장 목표가 유효.</p></div>
+            <div class="adv-card"><h4>☁️ 일목균형표</h4><p>전환선 &gt; 기준선 호전, 주가 구름대 상단 안착.</p></div>
+            <div class="adv-card"><h4>🏦 스마트머니 (SMC)</h4><p>직전 BOS 돌파 후 오더블록(OB) 리테스트 대기.</p></div>
+            <div class="adv-card"><h4>📐 퀀트 팩터</h4><p>모멘텀·추세 Z-Score 상위권(+1.24σ).</p></div>
+            <div class="adv-card"><h4>🔮 변곡점 예측 (IPP)</h4><p>OBV 상승 다이버전스 + BB 수축 해소 초기(+24).</p></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 3. Charts & Patterns -->
+      <section class="tab-panel" id="panel-charts">
+        <div class="card">
+          <div class="card-title">
+            <span class="title-dot"><span class="dot" style="background:var(--green)"></span>종가 · 볼린저밴드 &amp; 차트 패턴</span>
+            <span style="font-size:0.78rem;color:var(--muted)">상승 삼각형 돌파 감지 (참고 도달률 64%)</span>
+          </div>
+          <div class="chart-box">
+            <svg viewBox="0 0 800 220" width="100%" height="220" style="display:block">
+              <defs>
+                <linearGradient id="areaGrad" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stop-color="#00d4aa" stop-opacity="0.32" />
+                  <stop offset="100%" stop-color="#00d4aa" stop-opacity="0" />
+                </linearGradient>
+              </defs>
+              <path d="M20,170 L120,155 L220,162 L320,130 L420,138 L520,102 L620,90 L720,58 L780,45 L780,200 L20,200 Z" fill="url(#areaGrad)" />
+              <polyline fill="none" stroke="rgba(148,163,184,0.35)" stroke-dasharray="4 4" stroke-width="1.5" points="20,145 120,130 220,136 320,104 420,112 520,76 620,64 720,34 780,22" />
+              <polyline fill="none" stroke="#00d4aa" stroke-width="2.8" points="20,170 120,155 220,162 320,130 420,138 520,102 620,90 720,58 780,45" />
+              <circle cx="780" cy="45" r="5" fill="#00d4aa" />
+            </svg>
+          </div>
+        </div>
+      </section>
+
+      <!-- 4. Valuation & WACC -->
+      <section class="tab-panel" id="panel-valuation">
+        <div class="card">
+          <div class="card-title">
+            <span class="title-dot"><span class="dot" style="background:var(--yellow)"></span>기본적 지표 · WACC 할인율 분석</span>
+            <span class="up">ROE(18.4%) &gt; WACC(8.9%)</span>
+          </div>
+          <div class="reason-list">
+            <div class="reason-item"><strong>PER / PBR</strong>: 14.2x (업종 평균 대비 저평가) · PBR 2.1x</div>
+            <div class="reason-item"><strong>ROE / 영업이익률</strong>: ROE 18.4% · 영업이익률 26.8%</div>
+            <div class="reason-item"><strong>WACC 구성</strong>: Re 10.2% · Rd 3.8% · Beta 1.18 → <strong>WACC 8.91%</strong></div>
+            <div class="reason-item"><strong>추정 내재가치</strong>: 248,000 KRW (현재가 대비 +15.6% 여력)</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 5. Knowledge Graph -->
+      <section class="tab-panel" id="panel-graph">
+        <div class="card">
+          <div class="card-title">
+            <span class="title-dot"><span class="dot" style="background:var(--purple)"></span>Knowledge Graph · 밸류체인</span>
+            <span style="font-size:0.78rem;color:var(--muted)">컨트롤을 상단으로 분리해 범례와 겹침 방지</span>
+          </div>
+          <div class="kg-box">
+            <div class="kg-toolbar">
+              <span>노드 크기</span>
+              <input type="range" min="4" max="20" value="10" style="width:70px;accent-color:var(--blue)" />
+              <span>간격</span>
+              <input type="range" min="40" max="180" value="100" style="width:70px;accent-color:var(--green)" />
+            </div>
+            <svg viewBox="0 0 600 260" width="100%" height="100%">
+              <line x1="300" y1="130" x2="150" y2="70" stroke="rgba(148,163,184,0.35)" stroke-width="1.5" />
+              <line x1="300" y1="130" x2="450" y2="70" stroke="rgba(148,163,184,0.35)" stroke-width="1.5" />
+              <line x1="300" y1="130" x2="170" y2="195" stroke="rgba(148,163,184,0.35)" stroke-width="1.5" />
+              <line x1="300" y1="130" x2="430" y2="195" stroke="rgba(148,163,184,0.35)" stroke-width="1.5" />
+              <circle cx="300" cy="130" r="24" fill="#a78bfa" />
+              <text x="300" y="135" text-anchor="middle" fill="#fff" font-size="11" font-weight="700">SK하이닉스</text>
+              <circle cx="150" cy="70" r="16" fill="#ff4b6e" />
+              <text x="150" y="46" text-anchor="middle" fill="currentColor" font-size="11">HBM / AI</text>
+              <circle cx="450" cy="70" r="16" fill="#ff4b6e" />
+              <text x="450" y="46" text-anchor="middle" fill="currentColor" font-size="11">퀀트(+0.46)</text>
+              <circle cx="170" cy="195" r="14" fill="#3b82f6" />
+              <text x="170" y="224" text-anchor="middle" fill="currentColor" font-size="11">NVDA 밸류체인</text>
+              <circle cx="430" cy="195" r="14" fill="#fbbf24" />
+              <text x="430" y="224" text-anchor="middle" fill="currentColor" font-size="11">SMC 중립</text>
+            </svg>
+          </div>
+        </div>
+      </section>
+    </div>
+
+    <footer class="footer">
+      ⚠️ 본 샘플은 SIGNNITH UX 개선 제안용 인터랙티브 프로토타입입니다. 모든 수치는 시연용 예시 데이터입니다.
+    </footer>
+  </main>
+
+  <script>
+    const SAMPLES = {
+      hynix: {
+        name: '🇰🇷 SK하이닉스', ticker: '000660.KS', sector: '반도체',
+        price: '214,500 KRW', chg: '▲ +4,500 (+2.14%)', chgCls: 'up',
+        low: '148,200', high: '248,500', rangePct: 66,
+        badge: '▲ 매수 우위', badgeCls: 'signal-buy',
+        tech: '+0.42', fund: '+0.31', comb: '+0.38', adv: '+0.46',
+        conf: '78.4%', confNum: 78.4,
+        target: '242,000', targetPct: '+12.8%', stop: '198,000', stopPct: '-7.7%', rr: '2.3 : 1', rrTag: '✓ 진입 양호',
+        actionCls: '',
+        actions: [
+          '✅ <strong>분할 진입</strong>: 현재가 214,500 부근 2~3분할 매수 고려',
+          '🎯 <strong>목표</strong>: 242,000 도달 시 1차 차익실현',
+          '🛡️ <strong>손절</strong>: 198,000 이탈 시 추세 훼손으로 비중 축소'
+        ]
+      },
+      nvda: {
+        name: '🇺🇸 NVIDIA', ticker: 'NVDA', sector: 'AI 반도체',
+        price: '$142.80', chg: '▲ +3.10 (+2.22%)', chgCls: 'up',
+        low: '$75.60', high: '$152.89', rangePct: 87,
+        badge: '▲ 매수 우위', badgeCls: 'signal-buy',
+        tech: '+0.51', fund: '+0.28', comb: '+0.41', adv: '+0.54',
+        conf: '81.2%', confNum: 81.2,
+        target: '$162.00', targetPct: '+13.4%', stop: '$131.50', stopPct: '-7.9%', rr: '2.1 : 1', rrTag: '✓ 진입 양호',
+        actionCls: '',
+        actions: [
+          '✅ <strong>추세 추종</strong>: $140 지지 확인 시 분할 매수 유효',
+          '🎯 <strong>목표</strong>: $162.00 신고가 돌파 구간 차익실현',
+          '🛡️ <strong>손절</strong>: $131.50 하회 시 단기 모멘텀 약화 대응'
+        ]
+      },
+      samsung: {
+        name: '🇰🇷 삼성전자', ticker: '005930.KS', sector: '반도체·전자',
+        price: '56,800 KRW', chg: '▼ -400 (-0.70%)', chgCls: 'down',
+        low: '49,900', high: '88,800', rangePct: 18,
+        badge: '◆ 관망 유지', badgeCls: 'signal-hold',
+        tech: '-0.08', fund: '+0.15', comb: '+0.02', adv: '-0.04',
+        conf: '48.5%', confNum: 48.5,
+        target: '62,500', targetPct: '+10.0%', stop: '53,000', stopPct: '-6.7%', rr: '1.5 : 1', rrTag: '△ 보수적',
+        actionCls: 'hold',
+        actions: [
+          '⏸️ <strong>현금 대기</strong>: 통합 신호 ±0.25 돌파 전까지 방향성 확인 필요',
+          '👀 <strong>핵심 지지</strong>: 볼린저밴드 하단 54,200 지지 여부 주시'
+        ]
+      },
+      tsla: {
+        name: '🇺🇸 Tesla', ticker: 'TSLA', sector: '자동차·로보틱스',
+        price: '$312.40', chg: '▼ -6.80 (-2.13%)', chgCls: 'down',
+        low: '$138.80', high: '$358.64', rangePct: 79,
+        badge: '▼ 매도 고려', badgeCls: 'signal-sell',
+        tech: '-0.34', fund: '-0.18', comb: '-0.27', adv: '-0.31',
+        conf: '64.0%', confNum: 64.0,
+        target: '$278.00', targetPct: '-11.0%', stop: '$332.00', stopPct: '+6.3%', rr: '1.7 : 1', rrTag: '△ 주의',
+        actionCls: 'sell',
+        actions: [
+          '📤 <strong>비중 축소</strong>: 단기 과열 해소 구간, 반등 시 분할 차익실현 권장',
+          '🚫 <strong>신규 진입 보류</strong>: RSI 40 부근 + MACD 골든크로스 확인 후 재검토'
+        ]
+      }
+    };
+
+    let faved = false;
+
+    function toggleTheme() {
+      const isLight = document.documentElement.classList.toggle('light');
+      document.getElementById('theme-btn').textContent = isLight ? '☀️ 라이트' : '🌙 다크';
+    }
+
+    function toggleFav() {
+      faved = !faved;
+      document.getElementById('fav-toggle').textContent = faved ? '⭐ 즐겨찾기됨' : '☆ 즐겨찾기 추가';
+    }
+
+    function selectStock(key) {
+      const d = SAMPLES[key];
+      if (!d) return;
+      document.querySelectorAll('.ticker-chip').forEach(el => {
+        el.classList.toggle('active', el.dataset.key === key);
+      });
+      document.getElementById('ticker-input').value = `${d.name.replace(/^..\s/, '')} (${d.ticker})`;
+      document.getElementById('st-name').textContent = d.name;
+      document.getElementById('st-ticker').textContent = d.ticker;
+      document.getElementById('st-sector').textContent = d.sector;
+      document.getElementById('st-price').textContent = d.price;
+      const chgEl = document.getElementById('st-chg');
+      chgEl.textContent = d.chg;
+      chgEl.className = `price-chg ${d.chgCls}`;
+      const badgeEl = document.getElementById('st-badge');
+      badgeEl.textContent = d.badge;
+      badgeEl.className = `signal-pill ${d.badgeCls}`;
+      document.getElementById('st-low').textContent = d.low;
+      document.getElementById('st-high').textContent = d.high;
+      document.getElementById('st-range-fill').style.width = d.rangePct + '%';
+
+      document.getElementById('sc-tech').textContent = d.tech;
+      document.getElementById('sc-fund').textContent = d.fund;
+      document.getElementById('sc-comb').textContent = d.comb;
+      document.getElementById('sc-adv').textContent = d.adv;
+
+      document.getElementById('st-conf').textContent = d.conf;
+      document.getElementById('st-conf-bar').style.width = d.confNum + '%';
+      document.getElementById('st-target').textContent = d.target;
+      document.getElementById('st-target-pct').textContent = d.targetPct;
+      document.getElementById('st-stop').textContent = d.stop;
+      document.getElementById('st-stop-pct').textContent = d.stopPct;
+      document.getElementById('st-rr').textContent = d.rr;
+      document.getElementById('st-rr-tag').textContent = d.rrTag;
+
+      const ab = document.getElementById('action-box');
+      ab.className = 'action-box ' + d.actionCls;
+      document.getElementById('action-list').innerHTML = d.actions.map(a => `<li>${a}</li>`).join('');
+    }
+
+    function switchTab(id, btn) {
+      document.getElementById('panels-wrap').classList.remove('show-all');
+      document.getElementById('expand-all-btn').textContent = '전체 펼치기';
+      document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+      document.getElementById('panel-' + id).classList.add('active');
+    }
+
+    function toggleShowAll() {
+      const wrap = document.getElementById('panels-wrap');
+      const on = wrap.classList.toggle('show-all');
+      document.getElementById('expand-all-btn').textContent = on ? '탭으로 보기' : '전체 펼치기';
+    }
+
+    function simulateAnalyze() {
+      const banner = document.getElementById('progress-banner');
+      const bar = document.getElementById('progress-bar');
+      const s1 = document.getElementById('step-1');
+      const s2 = document.getElementById('step-2');
+      const s3 = document.getElementById('step-3');
+      [s1, s2, s3].forEach(s => s.classList.remove('done'));
+      banner.classList.add('show');
+      bar.style.width = '20%';
+      s1.classList.add('done');
+      setTimeout(() => { bar.style.width = '65%'; s2.classList.add('done'); }, 280);
+      setTimeout(() => { bar.style.width = '100%'; s3.classList.add('done'); }, 580);
+      setTimeout(() => { banner.classList.remove('show'); bar.style.width = '0%'; }, 950);
+    }
+  </script>
+</body>
+</html>

@@ -1,0 +1,1276 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SIGNNITH — Explore + Inline Deep-Dive UX</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Noto+Sans+KR:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg: #080a0f;
+      --surface: #11141d;
+      --surface2: #171b26;
+      --surface-hover: #1d2230;
+      --topbar: rgba(8, 10, 15, 0.84);
+      --border: rgba(255, 255, 255, 0.08);
+      --border2: rgba(255, 255, 255, 0.15);
+      --text: #f8fafc;
+      --text2: #cbd5e1;
+      --muted: #8b95a7;
+      --accent: #fc72ff;
+      --accent2: #00d4aa;
+      --blue: #3b82f6;
+      --purple: #a78bfa;
+      --up: #ff4b6e;
+      --down: #3b82f6;
+      --warn: #fbbf24;
+      --up-bg: rgba(255, 75, 110, 0.12);
+      --down-bg: rgba(59, 130, 246, 0.12);
+      --warn-bg: rgba(251, 191, 36, 0.12);
+      --shadow: 0 12px 32px rgba(0, 0, 0, 0.4);
+    }
+
+    html.light {
+      --bg: #f6f7fb;
+      --surface: #ffffff;
+      --surface2: #f1f4f9;
+      --surface-hover: #f8fafc;
+      --topbar: rgba(246, 247, 251, 0.88);
+      --border: rgba(15, 23, 42, 0.08);
+      --border2: rgba(15, 23, 42, 0.16);
+      --text: #0f172a;
+      --text2: #334155;
+      --muted: #64748b;
+      --accent: #d946ef;
+      --accent2: #059669;
+      --blue: #2563eb;
+      --purple: #7c3aed;
+      --up: #e11d48;
+      --down: #1d4ed8;
+      --warn: #d97706;
+      --up-bg: rgba(225, 29, 72, 0.08);
+      --down-bg: rgba(29, 78, 216, 0.08);
+      --warn-bg: rgba(217, 119, 6, 0.10);
+      --shadow: 0 10px 28px rgba(15, 23, 42, 0.07);
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+    body {
+      font-family: 'Space Grotesk', 'Noto Sans KR', -apple-system, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      font-variant-numeric: tabular-nums;
+      transition: background 0.2s ease, color 0.2s ease;
+    }
+
+    .ambient-glow {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: -1;
+      background:
+        radial-gradient(circle at 16% 0%, rgba(252, 114, 255, 0.08), transparent 36%),
+        radial-gradient(circle at 84% 6%, rgba(0, 212, 170, 0.07), transparent 34%);
+    }
+
+    /* Topbar */
+    .topbar {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      height: 62px;
+      padding: 0 28px;
+      background: var(--topbar);
+      backdrop-filter: blur(18px);
+      -webkit-backdrop-filter: blur(18px);
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+    }
+    .top-left { display: flex; align-items: center; gap: 22px; }
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-weight: 800;
+      font-size: 1.05rem;
+      letter-spacing: 0.03em;
+      color: var(--text);
+      text-decoration: none;
+    }
+    .brand-dot {
+      width: 28px; height: 28px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      display: grid;
+      place-items: center;
+      color: #fff;
+      font-size: 0.85rem;
+      font-weight: 800;
+    }
+    .nav { display: flex; gap: 4px; }
+    .nav-item {
+      padding: 7px 14px;
+      border-radius: 999px;
+      font-size: 0.86rem;
+      font-weight: 600;
+      color: var(--muted);
+      border: none;
+      background: transparent;
+      cursor: pointer;
+    }
+    .nav-item:hover, .nav-item.active { color: var(--text); background: var(--surface2); }
+
+    .top-search { flex: 1; max-width: 400px; position: relative; }
+    .top-search input {
+      width: 100%;
+      height: 38px;
+      border-radius: 999px;
+      border: 1px solid var(--border2);
+      background: var(--surface);
+      color: var(--text);
+      padding: 0 42px 0 36px;
+      font-family: inherit;
+      font-size: 0.86rem;
+      outline: none;
+    }
+    .top-search input:focus { border-color: var(--accent2); }
+    .top-search .s-ico { position: absolute; left: 13px; top: 50%; transform: translateY(-50%); color: var(--muted); font-size: 0.86rem; }
+    .top-search .kbd {
+      position: absolute; right: 11px; top: 50%; transform: translateY(-50%);
+      font-size: 0.7rem; color: var(--muted); background: var(--surface2);
+      border: 1px solid var(--border); border-radius: 6px; padding: 2px 6px;
+    }
+    .top-right { display: flex; align-items: center; gap: 8px; }
+    .btn-pill {
+      height: 35px;
+      padding: 0 13px;
+      border-radius: 999px;
+      border: 1px solid var(--border2);
+      background: var(--surface);
+      color: var(--text);
+      font-family: inherit;
+      font-size: 0.8rem;
+      font-weight: 600;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      white-space: nowrap;
+    }
+    .btn-pill:hover { border-color: var(--accent2); }
+
+    .wrap { max-width: 1280px; margin: 0 auto; padding: 24px 24px 80px; }
+
+    /* Header + Overview Stats */
+    .page-head {
+      display: flex;
+      align-items: flex-end;
+      justify-content: space-between;
+      gap: 16px;
+      margin-bottom: 18px;
+      flex-wrap: wrap;
+    }
+    .page-head h1 { font-size: 1.75rem; font-weight: 800; letter-spacing: -0.02em; }
+    .page-head p { font-size: 0.88rem; color: var(--muted); margin-top: 4px; }
+
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+      margin-bottom: 20px;
+    }
+    .stat-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 15px 18px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+    }
+    .stat-lbl { font-size: 0.76rem; color: var(--muted); font-weight: 600; }
+    .stat-val { font-size: 1.35rem; font-weight: 800; margin: 3px 0 2px; }
+    .stat-delta { font-size: 0.76rem; font-weight: 700; }
+    .up { color: var(--up); }
+    .down { color: var(--down); }
+    .mint { color: var(--accent2); }
+
+    /* Toolbar */
+    .toolbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      margin-bottom: 16px;
+      flex-wrap: wrap;
+    }
+    .filter-pills { display: flex; align-items: center; gap: 7px; overflow-x: auto; padding-bottom: 2px; }
+    .f-pill {
+      padding: 7px 14px;
+      border-radius: 999px;
+      border: 1px solid var(--border);
+      background: var(--surface);
+      color: var(--muted);
+      font-family: inherit;
+      font-size: 0.82rem;
+      font-weight: 600;
+      cursor: pointer;
+      white-space: nowrap;
+    }
+    .f-pill.active { background: var(--text); color: var(--bg); border-color: var(--text); }
+
+    .toolbar-right { display: flex; align-items: center; gap: 8px; }
+    .view-switcher {
+      display: inline-flex;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 999px;
+      padding: 3px;
+      gap: 3px;
+    }
+    .view-btn {
+      padding: 5px 12px;
+      border-radius: 999px;
+      border: none;
+      background: transparent;
+      color: var(--muted);
+      font-family: inherit;
+      font-size: 0.78rem;
+      font-weight: 700;
+      cursor: pointer;
+    }
+    .view-btn.active { background: var(--surface2); color: var(--text); }
+
+    /* Explore Feed: Full Masonry vs Compact Strip */
+    .cards-masonry { columns: 3 310px; column-gap: 16px; }
+    .cards-masonry.hide { display: none; }
+    .case-card {
+      break-inside: avoid;
+      margin-bottom: 16px;
+      background: var(--surface);
+      border: 1.5px solid var(--border);
+      border-radius: 18px;
+      overflow: hidden;
+      cursor: pointer;
+      transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+    }
+    .case-card:hover { transform: translateY(-3px); border-color: var(--border2); box-shadow: var(--shadow); }
+    .case-card.selected {
+      border-color: var(--accent2);
+      box-shadow: 0 0 0 3px rgba(0, 212, 170, 0.16), var(--shadow);
+    }
+
+    /* Compact 1-Row Strip Mode when detail is open */
+    .cards-masonry.compact {
+      columns: unset;
+      display: flex;
+      gap: 10px;
+      overflow-x: auto;
+      padding-bottom: 6px;
+    }
+    .cards-masonry.compact .case-card {
+      min-width: 210px;
+      margin-bottom: 0;
+      flex-shrink: 0;
+      border-radius: 14px;
+    }
+    .cards-masonry.compact .case-visual,
+    .cards-masonry.compact .case-thesis,
+    .cards-masonry.compact .tag-row { display: none; }
+    .cards-masonry.compact .case-body { padding: 12px 14px; }
+
+    .case-visual {
+      padding: 15px 16px 10px;
+      background-color: var(--surface2);
+      background-image: radial-gradient(circle, rgba(148, 163, 184, 0.22) 1px, transparent 1px);
+      background-size: 14px 14px;
+      border-bottom: 1px solid var(--border);
+    }
+    html.light .case-visual {
+      background-image: radial-gradient(circle, rgba(15, 23, 42, 0.14) 1px, transparent 1px);
+    }
+    .stat-spark {
+      width: 96px;
+      height: 42px;
+      border-radius: 10px;
+      padding: 4px;
+      background-image: radial-gradient(circle, rgba(148, 163, 184, 0.2) 1px, transparent 1px);
+      background-size: 10px 10px;
+      flex-shrink: 0;
+    }
+    .spark-line {
+      fill: none;
+      stroke-width: 2.2;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+      stroke-dasharray: 600;
+      stroke-dashoffset: 600;
+      animation: drawLine 0.85s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+    }
+    .spark-area {
+      opacity: 0;
+      animation: fadeArea 0.8s ease 0.15s forwards;
+    }
+    .case-top-row { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
+    .sig-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 0.74rem;
+      font-weight: 800;
+      padding: 4px 10px 4px 6px;
+      border-radius: 999px;
+    }
+    .sig-ico {
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      display: inline-grid;
+      place-items: center;
+      background: rgba(255, 255, 255, 0.14);
+      flex-shrink: 0;
+    }
+    html.light .sig-ico { background: rgba(15, 23, 42, 0.07); }
+    .sig-ico svg { width: 12px; height: 12px; display: block; }
+    .sig-buy { background: var(--up-bg); color: var(--up); }
+    .sig-sell { background: var(--down-bg); color: var(--down); }
+    .sig-hold { background: var(--warn-bg); color: var(--warn); }
+    .conf-badge { font-size: 0.72rem; font-weight: 700; color: var(--accent2); }
+    .case-body { padding: 14px 16px 16px; }
+    .case-title-row { display: flex; align-items: baseline; justify-content: space-between; gap: 8px; }
+    .case-title { font-size: 1.02rem; font-weight: 800; }
+    .case-price { font-size: 0.9rem; font-weight: 700; }
+    .case-thesis { font-size: 0.82rem; color: var(--muted); margin: 7px 0 10px; line-height: 1.5; }
+    .tag-row { display: flex; flex-wrap: wrap; gap: 5px; margin-bottom: 10px; }
+    .mini-tag { font-size: 0.7rem; font-weight: 600; padding: 3px 8px; border-radius: 6px; background: var(--surface2); color: var(--text2); }
+    .case-foot { display: flex; justify-content: space-between; padding-top: 9px; border-top: 1px solid var(--border); font-size: 0.76rem; color: var(--muted); }
+
+    /* Table View */
+    .table-wrap { display: none; background: var(--surface); border: 1px solid var(--border); border-radius: 18px; overflow-x: auto; }
+    .table-wrap.show { display: block; }
+    table { width: 100%; border-collapse: collapse; min-width: 780px; }
+    th { text-align: left; font-size: 0.74rem; font-weight: 700; color: var(--muted); padding: 12px 16px; border-bottom: 1px solid var(--border); }
+    td { padding: 13px 16px; border-bottom: 1px solid var(--border); font-size: 0.88rem; vertical-align: middle; }
+    tbody tr { cursor: pointer; transition: background 0.12s; }
+    tbody tr:hover { background: var(--surface-hover); }
+    tbody tr.selected { background: rgba(0, 212, 170, 0.08); }
+    .token-cell { display: flex; align-items: center; gap: 10px; }
+    .token-avatar { width: 32px; height: 32px; border-radius: 50%; background: var(--surface2); border: 1px solid var(--border2); display: grid; place-items: center; font-size: 0.74rem; font-weight: 800; }
+
+    /* ═══ INLINE DEEP-DIVE DETAIL SECTION (BELOW FEED) ═══ */
+    .detail-section {
+      display: none;
+      margin-top: 26px;
+      padding-top: 22px;
+      border-top: 1px dashed var(--border2);
+      animation: fadeSlide 0.25s ease;
+    }
+    .detail-section.open { display: block; }
+    @keyframes fadeSlide {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .detail-sticky-bar {
+      position: sticky;
+      top: 66px;
+      z-index: 60;
+      background: var(--topbar);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid var(--border2);
+      border-radius: 14px;
+      padding: 10px 16px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      flex-wrap: wrap;
+      margin-bottom: 16px;
+    }
+    .detail-stock-id { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+
+    .hero-grid { display: grid; grid-template-columns: 1.2fr 1fr; gap: 14px; }
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 20px;
+    }
+    .card-title {
+      display: flex; align-items: center; justify-content: space-between;
+      font-size: 0.8rem; font-weight: 700; color: var(--muted); margin-bottom: 12px;
+    }
+    .price-big { font-size: 2rem; font-weight: 800; letter-spacing: -0.02em; }
+    .range-bar { height: 6px; border-radius: 999px; background: var(--border2); margin: 8px 0 14px; overflow: hidden; }
+    .range-fill { height: 100%; border-radius: 999px; background: linear-gradient(90deg, var(--down), var(--up)); }
+
+    .score-strip { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
+    .score-box { background: var(--surface2); border: 1px solid var(--border); border-radius: 10px; padding: 10px 8px; text-align: center; }
+    .score-box-lbl { font-size: 0.72rem; color: var(--muted); }
+    .score-box-val { font-size: 0.98rem; font-weight: 800; margin-top: 3px; }
+
+    .kpi-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 12px; }
+    .kpi-item { background: var(--surface2); border: 1px solid var(--border); border-radius: 12px; padding: 12px; }
+    .kpi-lbl { font-size: 0.72rem; color: var(--muted); }
+    .kpi-val { font-size: 1.12rem; font-weight: 800; margin: 3px 0 2px; }
+
+    .action-box {
+      border-radius: 12px;
+      padding: 13px 15px;
+      border: 1px solid rgba(0, 212, 170, 0.28);
+      background: rgba(0, 212, 170, 0.08);
+      font-size: 0.84rem;
+      line-height: 1.6;
+    }
+    .action-box.sell { border-color: rgba(59, 130, 246, 0.28); background: rgba(59, 130, 246, 0.08); }
+    .action-box.hold { border-color: rgba(251, 191, 36, 0.28); background: rgba(251, 191, 36, 0.08); }
+
+    /* Result Tabs */
+    .tabs-bar {
+      margin-top: 16px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      overflow-x: auto;
+    }
+    .tab-group { display: flex; gap: 4px; }
+    .tab-btn {
+      padding: 8px 14px;
+      border-radius: 10px;
+      border: none;
+      background: transparent;
+      color: var(--muted);
+      font-family: inherit;
+      font-size: 0.82rem;
+      font-weight: 600;
+      cursor: pointer;
+      white-space: nowrap;
+    }
+    .tab-btn.active { background: var(--blue); color: #fff; }
+    .tab-panel { display: none; margin-top: 14px; }
+    .tab-panel.active { display: block; }
+    .show-all .tab-panel { display: block; }
+
+    .mtf-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
+    .mtf-cell { background: var(--surface2); border: 1px solid var(--border); border-radius: 12px; padding: 12px; text-align: center; }
+    .layer-7 { display: grid; grid-template-columns: repeat(7, 1fr); gap: 8px; }
+    .l-cell { background: var(--surface2); border: 1px solid var(--border); border-radius: 10px; padding: 10px 6px; text-align: center; }
+
+    /* ═══ UNISWAP-STYLE ANIMATED CHART ═══ */
+    .uni-chart-card {
+      margin-top: 14px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      padding: 18px 20px 14px;
+    }
+    .uni-chart-stage {
+      position: relative;
+      height: 250px;
+      border-radius: 12px;
+      background-image: radial-gradient(circle, rgba(148, 163, 184, 0.22) 1px, transparent 1px);
+      background-size: 18px 18px;
+      overflow: hidden;
+      cursor: crosshair;
+    }
+    html.light .uni-chart-stage {
+      background-image: radial-gradient(circle, rgba(15, 23, 42, 0.14) 1px, transparent 1px);
+    }
+    .uni-chart-svg { width: 100%; height: 100%; display: block; }
+    .uni-line-path {
+      fill: none;
+      stroke-width: 2.4;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+      stroke-dasharray: 2200;
+      stroke-dashoffset: 2200;
+      animation: drawLine 0.95s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+    }
+    .uni-area-path {
+      opacity: 0;
+      animation: fadeArea 0.9s ease 0.15s forwards;
+    }
+    @keyframes drawLine {
+      to { stroke-dashoffset: 0; }
+    }
+    @keyframes fadeArea {
+      to { opacity: 1; }
+    }
+    @keyframes pulseBeacon {
+      0%   { r: 4.5; opacity: 0.85; }
+      70%  { r: 14; opacity: 0; }
+      100% { r: 14; opacity: 0; }
+    }
+    .uni-beacon-ring {
+      animation: pulseBeacon 1.8s cubic-bezier(0.24, 0, 0.38, 1) infinite;
+    }
+    .uni-hover-tip {
+      position: absolute;
+      top: 10px;
+      left: 14px;
+      background: var(--surface2);
+      border: 1px solid var(--border2);
+      border-radius: 10px;
+      padding: 5px 11px;
+      font-size: 0.78rem;
+      font-weight: 700;
+      pointer-events: none;
+      opacity: 0;
+      transition: opacity 0.12s;
+    }
+    .uni-hover-tip.show { opacity: 1; }
+    .uni-chart-controls {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      margin-top: 12px;
+      flex-wrap: wrap;
+    }
+    .uni-pill-group {
+      display: inline-flex;
+      align-items: center;
+      gap: 2px;
+      padding: 3px;
+      border-radius: 999px;
+      border: 1px solid var(--border);
+      background: var(--surface2);
+    }
+    .uni-pill {
+      border: none;
+      background: transparent;
+      color: var(--muted);
+      font-family: inherit;
+      font-size: 0.75rem;
+      font-weight: 700;
+      padding: 5px 11px;
+      border-radius: 999px;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+    .uni-pill:hover { color: var(--text); }
+    .uni-pill.active {
+      background: var(--surface);
+      color: var(--text);
+      box-shadow: 0 1px 4px rgba(0,0,0,0.18);
+    }
+
+    @media (max-width: 900px) {
+      .stats-grid, .hero-grid { grid-template-columns: 1fr; }
+      .nav { display: none; }
+      .layer-7 { grid-template-columns: repeat(4, 1fr); }
+    }
+    @media (max-width: 720px) {
+      .topbar { padding: 0 14px; }
+      .top-search { display: none; }
+      .wrap { padding: 18px 14px 64px; }
+      .cards-masonry {
+        columns: unset;
+        display: flex;
+        gap: 12px;
+        overflow-x: auto;
+        scroll-snap-type: x mandatory;
+        padding-bottom: 6px;
+      }
+      .case-card { min-width: 270px; scroll-snap-align: start; margin-bottom: 0; }
+      .score-strip, .mtf-grid { grid-template-columns: repeat(2, 1fr); }
+      .kpi-3 { grid-template-columns: 1fr; }
+      .layer-7 { grid-template-columns: repeat(2, 1fr); }
+    }
+  </style>
+</head>
+<body>
+  <div class="ambient-glow"></div>
+
+  <header class="topbar">
+    <div class="top-left">
+      <a class="brand" href="#"><span class="brand-dot">S</span><span>SIGNNITH</span></a>
+      <nav class="nav">
+        <button class="nav-item active">Explore</button>
+        <button class="nav-item" onclick="alert('아카이브 이동')">아카이브</button>
+        <button class="nav-item" onclick="alert('종목 비교 이동')">비교</button>
+      </nav>
+    </div>
+    <div class="top-search">
+      <span class="s-ico">🔍</span>
+      <input id="search-input" type="text" placeholder="종목명(SK하이닉스) 또는 티커(NVDA) 검색..." oninput="renderFeed()" />
+      <span class="kbd">/</span>
+    </div>
+    <div class="top-right">
+      <button class="btn-pill" id="theme-btn" onclick="toggleTheme()">🌙 다크</button>
+    </div>
+  </header>
+
+  <main class="wrap">
+    <section class="page-head">
+      <div>
+        <h1>Explore Signals &amp; Cases</h1>
+        <p>카드를 클릭하면 상단 피드가 컴팩트하게 정리되고, 바로 아래에 상세 분석이 펼쳐집니다.</p>
+      </div>
+    </section>
+
+    <section class="stats-grid" id="stats-grid">
+      <div class="stat-card">
+        <div><div class="stat-lbl">매수 우위 시그널 비중</div><div class="stat-val">62.5%</div><div class="stat-delta up" style="display:inline-flex;align-items:center;gap:4px"><svg width="13" height="13" viewBox="0 0 16 16" fill="none"><path d="M2 12C5 12 6 8 9 7C11 6.3 12.5 5 14 3.5M14 3.5H10.5M14 3.5V7" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>+8.4% vs 지난주</div></div>
+        <div class="stat-spark" id="stat-spark-1"></div>
+      </div>
+      <div class="stat-card">
+        <div><div class="stat-lbl">평균 알고리즘 신뢰도</div><div class="stat-val">74.2%</div><div class="stat-delta mint">7-Layer 앙상블 활성</div></div>
+        <div class="stat-spark" id="stat-spark-2"></div>
+      </div>
+      <div class="stat-card">
+        <div><div class="stat-lbl">변곡점 임박(IPP) 감지</div><div class="stat-val">4 종목</div><div class="stat-delta down">BB 수축 · OBV 다이버전스</div></div>
+        <div class="stat-spark" id="stat-spark-3"></div>
+      </div>
+    </section>
+
+    <!-- Explore Filter & View Toolbar -->
+    <section class="toolbar">
+      <div class="filter-pills">
+        <button class="f-pill active" onclick="setFilter('all', this)">전체 (6)</button>
+        <button class="f-pill" onclick="setFilter('buy', this)">↗ 매수 우위</button>
+        <button class="f-pill" onclick="setFilter('highconf', this)">⚡ 고신뢰 70%+</button>
+        <button class="f-pill" onclick="setFilter('KR', this)">🇰🇷 국내 KRX</button>
+        <button class="f-pill" onclick="setFilter('US', this)">🇺🇸 미국 US</button>
+      </div>
+      <div class="toolbar-right">
+        <button class="btn-pill" id="compact-btn" onclick="toggleCompact()" style="display:none"><svg width="13" height="13" viewBox="0 0 16 16" fill="none"><path d="M4 6L8 10L12 6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>피드 펼치기</button>
+        <div class="view-switcher">
+          <button class="view-btn active" id="btn-view-cards" onclick="setView('cards')">🗂️ Cards</button>
+          <button class="view-btn" id="btn-view-table" onclick="setView('table')">📊 Table</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- Explore Feed -->
+    <section class="cards-masonry" id="cards-view"></section>
+    <section class="table-wrap" id="table-view">
+      <table>
+        <thead><tr><th>#</th><th>종목</th><th>현재가</th><th>등락률</th><th>7D 추세</th><th>신호</th><th>신뢰도</th><th>R:R</th></tr></thead>
+        <tbody id="table-body"></tbody>
+      </table>
+    </section>
+
+    <!-- ═══ INLINE DEEP-DIVE DETAIL SECTION ═══ -->
+    <section class="detail-section" id="detail-section">
+      <div class="detail-sticky-bar">
+        <div class="detail-stock-id">
+          <strong id="d-head-name" style="font-size:1.05rem">SK하이닉스</strong>
+          <span id="d-head-ticker" style="font-size:0.8rem;color:var(--muted)">000660.KS</span>
+          <span id="d-head-price" style="font-weight:700">214,500 KRW</span>
+          <span id="d-head-badge" class="sig-badge sig-buy">매수 우위</span>
+        </div>
+        <div style="display:flex;gap:8px;align-items:center">
+          <button class="btn-pill" onclick="alert('상세 리포트(report.html) 열기')">📄 리포트</button>
+          <button class="btn-pill" onclick="alert('관련 뉴스 보기')">📰 뉴스</button>
+          <button class="btn-pill" onclick="closeDetail()">✕ 닫기</button>
+        </div>
+      </div>
+
+      <!-- Executive Hero -->
+      <div class="hero-grid">
+        <div class="card">
+          <div class="card-title"><span>현재가 · 4대 점수 요약</span><span id="d-sector" style="color:var(--text2)">반도체</span></div>
+          <div style="display:flex;align-items:baseline;gap:12px;margin-bottom:8px">
+            <span class="price-big" id="d-price">214,500 KRW</span>
+            <span id="d-chg" class="up" style="font-weight:700">+2.14%</span>
+          </div>
+          <div style="display:flex;justify-content:space-between;font-size:0.76rem;color:var(--muted)">
+            <span>52주 저가 <strong id="d-low">148,200</strong></span>
+            <span>52주 고가 <strong id="d-high">248,500</strong></span>
+          </div>
+          <div class="range-bar"><div class="range-fill" id="d-range" style="width:66%"></div></div>
+          <div class="score-strip">
+            <div class="score-box"><div class="score-box-lbl">기술적</div><div class="score-box-val up" id="d-tech">+0.42</div></div>
+            <div class="score-box"><div class="score-box-lbl">기본적</div><div class="score-box-val up" id="d-fund">+0.31</div></div>
+            <div class="score-box"><div class="score-box-lbl">통합</div><div class="score-box-val up" id="d-comb">+0.38</div></div>
+            <div class="score-box"><div class="score-box-lbl">고급 7L</div><div class="score-box-val up" id="d-adv">+0.46</div></div>
+          </div>
+        </div>
+
+        <div class="card" style="display:flex;flex-direction:column;justify-content:space-between">
+          <div>
+            <div class="card-title"><span>대응 전략 · 신뢰도</span><strong class="mint" id="d-conf">78.4%</strong></div>
+            <div class="kpi-3">
+              <div class="kpi-item"><div class="kpi-lbl">목표가</div><div class="kpi-val up" id="d-target">242,000</div></div>
+              <div class="kpi-item"><div class="kpi-lbl">손절가</div><div class="kpi-val down" id="d-stop">198,000</div></div>
+              <div class="kpi-item"><div class="kpi-lbl">R:R 비율</div><div class="kpi-val mint" id="d-rr">2.3:1</div></div>
+            </div>
+            <div class="action-box" id="d-action"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Uniswap-style Interactive Animated Chart -->
+      <div class="uni-chart-card">
+        <div class="card-title" style="margin-bottom:8px">
+          <span>실시간 가격 · 시그널 추이 (마우스를 올려 시점별 값 확인)</span>
+          <span id="uni-chart-meta" class="mint" style="font-size:0.78rem">Price · 1D</span>
+        </div>
+        <div class="uni-chart-stage" id="uni-chart-stage">
+          <div class="uni-hover-tip" id="uni-hover-tip"></div>
+          <svg class="uni-chart-svg" id="uni-chart-svg" viewBox="0 0 860 250" preserveAspectRatio="none"></svg>
+        </div>
+        <div class="uni-chart-controls">
+          <div class="uni-pill-group" id="uni-tf-group">
+            <button class="uni-pill" onclick="setChartTf('1H', this)">1H</button>
+            <button class="uni-pill active" onclick="setChartTf('1D', this)">1D</button>
+            <button class="uni-pill" onclick="setChartTf('1W', this)">1W</button>
+            <button class="uni-pill" onclick="setChartTf('1M', this)">1M</button>
+            <button class="uni-pill" onclick="setChartTf('1Y', this)">1Y</button>
+            <button class="uni-pill" onclick="setChartTf('All', this)">All</button>
+          </div>
+          <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+            <div class="uni-pill-group" id="uni-type-group">
+              <button class="uni-pill active" onclick="setChartType('line', this)">📈</button>
+              <button class="uni-pill" onclick="setChartType('bar', this)">📊</button>
+            </div>
+            <div class="uni-pill-group" id="uni-metric-group">
+              <button class="uni-pill active" onclick="setChartMetric('Price', this)">Price</button>
+              <button class="uni-pill" onclick="setChartMetric('Volume', this)">Volume</button>
+              <button class="uni-pill" onclick="setChartMetric('Confidence', this)">신뢰도</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Sticky Result Tabs -->
+      <div class="tabs-bar">
+        <div class="tab-group">
+          <button class="tab-btn active" onclick="switchTab('summary', this)">📊 요약 · 추세</button>
+          <button class="tab-btn" onclick="switchTab('signals', this)">🧠 고급 시그널 (7L)</button>
+          <button class="tab-btn" onclick="switchTab('charts', this)">📈 차트 · 패턴</button>
+          <button class="tab-btn" onclick="switchTab('valuation', this)">📐 밸류에이션 · WACC</button>
+          <button class="tab-btn" onclick="switchTab('graph', this)">🕸️ Knowledge Graph</button>
+        </div>
+        <button class="btn-pill" id="expand-btn" onclick="toggleShowAll()">전체 펼치기</button>
+      </div>
+
+      <div id="panels-wrap">
+        <div class="tab-panel active" id="panel-summary">
+          <div class="card">
+            <div class="card-title"><span>기간별 추세 · 멀티 타임프레임</span><span class="up">중장기 정배열 우위</span></div>
+            <div class="mtf-grid" id="d-mtf"></div>
+          </div>
+        </div>
+        <div class="tab-panel" id="panel-signals">
+          <div class="card">
+            <div class="card-title"><span>7-Layer 고급 분석 시그널</span><span class="mint">앙상블 판정</span></div>
+            <div class="layer-7" id="d-layers"></div>
+          </div>
+        </div>
+        <div class="tab-panel" id="panel-charts">
+          <div class="card">
+            <div class="card-title"><span>종가 · 볼린저밴드 &amp; 패턴</span><span style="color:var(--muted)">상승 추세 채널</span></div>
+            <div id="d-chart-svg" style="background:var(--surface2);border-radius:12px;padding:14px"></div>
+          </div>
+        </div>
+        <div class="tab-panel" id="panel-valuation">
+          <div class="card">
+            <div class="card-title"><span>기본적 지표 · WACC 할인율</span><span class="mint">가치 창출 분석</span></div>
+            <p id="d-val" style="font-size:0.88rem;color:var(--text2);line-height:1.7"></p>
+          </div>
+        </div>
+        <div class="tab-panel" id="panel-graph">
+          <div class="card">
+            <div class="card-title"><span>Knowledge Graph · 밸류체인</span><span style="color:var(--muted)">연관 지표 네트워크</span></div>
+            <svg viewBox="0 0 600 220" width="100%" height="220" style="background:var(--surface2);border-radius:12px">
+              <line x1="300" y1="110" x2="150" y2="55" stroke="rgba(148,163,184,0.35)" stroke-width="1.5"/>
+              <line x1="300" y1="110" x2="450" y2="55" stroke="rgba(148,163,184,0.35)" stroke-width="1.5"/>
+              <line x1="300" y1="110" x2="170" y2="170" stroke="rgba(148,163,184,0.35)" stroke-width="1.5"/>
+              <line x1="300" y1="110" x2="430" y2="170" stroke="rgba(148,163,184,0.35)" stroke-width="1.5"/>
+              <circle cx="300" cy="110" r="22" fill="#a78bfa"/>
+              <text id="kg-center-txt" x="300" y="114" text-anchor="middle" fill="#fff" font-size="11" font-weight="700">SK하이닉스</text>
+              <circle cx="150" cy="55" r="14" fill="#ff4b6e"/><text x="150" y="34" text-anchor="middle" fill="currentColor" font-size="11">퀀트 팩터</text>
+              <circle cx="450" cy="55" r="14" fill="#ff4b6e"/><text x="450" y="34" text-anchor="middle" fill="currentColor" font-size="11">엘리어트</text>
+              <circle cx="170" cy="170" r="13" fill="#3b82f6"/><text x="170" y="196" text-anchor="middle" fill="currentColor" font-size="11">WACC</text>
+              <circle cx="430" cy="170" r="13" fill="#fbbf24"/><text x="430" y="196" text-anchor="middle" fill="currentColor" font-size="11">SMC</text>
+            </svg>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    const DATA = [
+      {
+        id: 'hynix', rank: 1, market: 'KR', name: 'SK하이닉스', ticker: '000660.KS', sector: '반도체',
+        price: '214,500 KRW', chg: '+2.14%', isUp: true, signal: 'buy', iconType: 'curve-up', sigLabel: '매수 우위',
+        conf: 78.4, rr: '2.3:1', target: '242,000', stop: '198,000', low: '148,200', high: '248,500', range: 66,
+        scores: ['+0.42', '+0.31', '+0.38', '+0.46'],
+        thesis: '엘리어트 3파 진행 + OBV 상승 다이버전스. ROE 18.4%로 WACC(8.9%) 대비 가치 창출 구간.',
+        tags: ['7-Layer +0.46', 'IPP +24', '일목 구름위'],
+        pts: [28, 26, 29, 22, 19, 14, 10, 6],
+        action: '✅ <b>분할 진입</b>: 214,500 부근 2~3분할 매수 고려<br>🎯 <b>목표</b>: 242,000 1차 차익실현 · 🛡️ <b>손절</b>: 198,000 이탈 시 비중 축소',
+        val: 'PER 14.2x (업종 평균 대비 저평가) · PBR 2.1x · ROE 18.4% · WACC 8.91% → 추정 내재가치 248,000 KRW'
+      },
+      {
+        id: 'nvda', rank: 2, market: 'US', name: 'NVIDIA', ticker: 'NVDA', sector: 'AI 반도체',
+        price: '$142.80', chg: '+2.22%', isUp: true, signal: 'buy', iconType: 'arrow-up', sigLabel: '매수 우위',
+        conf: 81.2, rr: '2.1:1', target: '$162.00', stop: '$131.50', low: '$75.60', high: '$152.89', range: 87,
+        scores: ['+0.51', '+0.28', '+0.41', '+0.54'],
+        thesis: '기관 수급(SMC) BOS 돌파 후 추세 지속. 모멘텀 퀀트 팩터 Z-Score +1.41σ.',
+        tags: ['7-Layer +0.54', 'SMC BOS', '정배열'],
+        pts: [30, 27, 24, 25, 18, 13, 11, 5],
+        action: '✅ <b>추세 추종</b>: $140 지지 확인 시 분할 매수 유효<br>🎯 <b>목표</b>: $162.00 · 🛡️ <b>손절</b>: $131.50 하회 시 모멘텀 약화 대응',
+        val: 'PER 44.5x · ROE 68.2% · WACC 9.40% → 고성장 프리미엄 대비 ROIC 압도적 우위'
+      },
+      {
+        id: 'hanmi', rank: 3, market: 'KR', name: '한미반도체', ticker: '042700.KS', sector: '반도체 장비',
+        price: '108,400 KRW', chg: '+3.83%', isUp: true, signal: 'buy', iconType: 'breakout', sigLabel: '돌파 매수',
+        conf: 73.5, rr: '2.5:1', target: '126,000', stop: '99,500', low: '68,200', high: '142,000', range: 54,
+        scores: ['+0.45', '+0.22', '+0.36', '+0.49'],
+        thesis: '볼린저밴드 스퀴즈 해소 초기 + 거래량 1.8x 급증. 단기 돌파 시그널 포착.',
+        tags: ['BB 스퀴즈', '거래량 1.8x', 'IPP +21'],
+        pts: [32, 31, 30, 28, 25, 16, 12, 4],
+        action: '✅ <b>돌파 매수</b>: 거래량 동반 돌파 유지 시 추세 추종<br>🎯 <b>목표</b>: 126,000 · 🛡️ <b>손절</b>: 99,500',
+        val: 'PER 28.1x · ROE 24.6% · WACC 9.15% → 고수익성 장비주 프리미엄 구간'
+      },
+      {
+        id: 'samsung', rank: 4, market: 'KR', name: '삼성전자', ticker: '005930.KS', sector: '반도체·전자',
+        price: '56,800 KRW', chg: '-0.70%', isUp: false, signal: 'hold', iconType: 'wave', sigLabel: '관망 유지',
+        conf: 48.5, rr: '1.5:1', target: '62,500', stop: '53,000', low: '49,900', high: '88,800', range: 18,
+        scores: ['-0.08', '+0.15', '+0.02', '-0.04'],
+        thesis: '밸류에이션(PER 11.2x)은 저평가 구간이나 단기 이동평균 역배열로 방향성 탐색 중.',
+        tags: ['저평가 PER', '역배열', '관망'],
+        pts: [14, 16, 15, 20, 22, 21, 24, 23],
+        action: '⏸️ <b>현금 대기</b>: 통합 신호 ±0.25 돌파 전까지 관망<br>👀 <b>지지 주시</b>: BB 하단 54,200 지지 여부 확인',
+        val: 'PER 11.2x · PBR 1.05x · ROE 9.8% · WACC 8.50% → 역사적 저평가이나 모멘텀 부재'
+      },
+      {
+        id: 'msft', rank: 5, market: 'US', name: 'Microsoft', ticker: 'MSFT', sector: '클라우드·AI',
+        price: '$428.50', chg: '+0.95%', isUp: true, signal: 'buy', iconType: 'arc-up', sigLabel: '매수 고려',
+        conf: 71.0, rr: '2.0:1', target: '$468.00', stop: '$408.00', low: '$366.50', high: '$468.35', range: 61,
+        scores: ['+0.29', '+0.35', '+0.32', '+0.34'],
+        thesis: '장기 상승 채널 하단 반등 + 안정적 WACC 스프레드(ROIC 22.1% vs WACC 8.2%).',
+        tags: ['WACC 우량', '채널 하단', '장기 적합'],
+        pts: [24, 26, 22, 20, 17, 15, 12, 9],
+        action: '✅ <b>분할 매수</b>: 장기 포트폴리오 비중 확대 유효<br>🎯 <b>목표</b>: $468.00 · 🛡️ <b>손절</b>: $408.00',
+        val: 'PER 33.4x · ROE 35.1% · WACC 8.20% → 장기 복리 가치 창출 모델'
+      },
+      {
+        id: 'tsla', rank: 6, market: 'US', name: 'Tesla', ticker: 'TSLA', sector: '자동차·로보틱스',
+        price: '$312.40', chg: '-2.13%', isUp: false, signal: 'sell', iconType: 'curve-down', sigLabel: '매도 고려',
+        conf: 64.0, rr: '1.7:1', target: '$278.00', stop: '$332.00', low: '$138.80', high: '$358.64', range: 79,
+        scores: ['-0.34', '-0.18', '-0.27', '-0.31'],
+        thesis: '단기 급등 후 RSI 과매수 해소 구간. MACD 히스토그램 하락 전환 감지.',
+        tags: ['과열 해소', 'MACD 약세', '단기 주의'],
+        pts: [8, 6, 10, 14, 18, 22, 26, 29],
+        action: '📤 <b>비중 축소</b>: 반등 시 분할 차익실현 권장<br>🚫 <b>신규 매수 보류</b>: MACD 골든크로스 대기',
+        val: 'PER 72.0x · ROE 19.2% · WACC 10.40% → 밸류에이션 부담으로 단기 변동성 확대'
+      }
+    ];
+
+    function sigIconSvg(type) {
+      const icons = {
+        'curve-up':   '<svg viewBox="0 0 16 16" fill="none"><path d="M2 12C5.5 12 6.5 7.5 9.5 6.5C11.5 5.8 12.8 4.5 14 3M14 3H10.5M14 3V6.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>',
+        'arrow-up':   '<svg viewBox="0 0 16 16" fill="none"><path d="M3.5 12.5L12.5 3.5M12.5 3.5H6.5M12.5 3.5V9.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>',
+        'breakout':   '<svg viewBox="0 0 16 16" fill="none"><path d="M2 11.5H6.5C7.5 11.5 8.5 10.5 9.5 8L13.5 3M13.5 3H10M13.5 3V6.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>',
+        'arc-up':     '<svg viewBox="0 0 16 16" fill="none"><path d="M2.5 12C4.5 7.5 8.5 5 13.5 4.5M13.5 4.5L10.8 2.5M13.5 4.5L11.2 7" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>',
+        'wave':       '<svg viewBox="0 0 16 16" fill="none"><path d="M2 8C4 5.5 6 5.5 8 8C10 10.5 12 10.5 14 8" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>',
+        'curve-down': '<svg viewBox="0 0 16 16" fill="none"><path d="M3.5 5.5L8 10L12.5 5.5" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/><path d="M4.5 9.2L8 12.7L11.5 9.2" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" opacity="0.55"/></svg>'
+      };
+      return `<span class="sig-ico">${icons[type] || icons['arrow-up']}</span>`;
+    }
+
+    function sigBadgeHtml(d) {
+      const sigCls = d.signal === 'buy' ? 'sig-buy' : d.signal === 'sell' ? 'sig-sell' : 'sig-hold';
+      return `<span class="sig-badge ${sigCls}">${sigIconSvg(d.iconType)}${d.sigLabel}</span>`;
+    }
+
+    let curFilter = 'all';
+    let curView = 'cards';
+    let selectedId = null;
+    let isCompact = false;
+
+    let sparkUid = 0;
+    function sparkSvg(pts, color, h = 46, showBeacon = true) {
+      const w = 220, pad = 6;
+      const step = (w - pad * 2) / (pts.length - 1);
+      const mapped = pts.map((y, i) => ({
+        x: pad + i * step,
+        y: Math.max(4, Math.min(h - 4, y * (h / 36)))
+      }));
+      let d = `M ${mapped[0].x.toFixed(1)},${mapped[0].y.toFixed(1)}`;
+      for (let i = 1; i < mapped.length; i++) {
+        const cx = ((mapped[i - 1].x + mapped[i].x) / 2).toFixed(1);
+        d += ` C ${cx},${mapped[i - 1].y.toFixed(1)} ${cx},${mapped[i].y.toFixed(1)} ${mapped[i].x.toFixed(1)},${mapped[i].y.toFixed(1)}`;
+      }
+      const areaD = `${d} L ${mapped[mapped.length - 1].x.toFixed(1)},${h} L ${mapped[0].x.toFixed(1)},${h} Z`;
+      const last = mapped[mapped.length - 1];
+      const gid = 'sg_' + (++sparkUid);
+      const beacon = showBeacon
+        ? `<circle class="uni-beacon-ring" cx="${last.x.toFixed(1)}" cy="${last.y.toFixed(1)}" r="4" fill="${color}"/>
+           <circle cx="${last.x.toFixed(1)}" cy="${last.y.toFixed(1)}" r="3.2" fill="${color}" stroke="var(--surface)" stroke-width="1.5"/>`
+        : '';
+      return `<svg viewBox="0 0 ${w} ${h}" width="100%" height="${h}" style="display:block;overflow:visible">
+        <defs>
+          <linearGradient id="${gid}" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stop-color="${color}" stop-opacity="0.26"/>
+            <stop offset="100%" stop-color="${color}" stop-opacity="0"/>
+          </linearGradient>
+        </defs>
+        <path class="spark-area" d="${areaD}" fill="url(#${gid})"/>
+        <path class="spark-line" d="${d}" stroke="${color}"/>
+        ${beacon}
+      </svg>`;
+    }
+
+    function renderStatSparks() {
+      document.getElementById('stat-spark-1').innerHTML = sparkSvg([30, 26, 27, 18, 14, 7], 'var(--up)', 34, true);
+      document.getElementById('stat-spark-2').innerHTML = sparkSvg([24, 20, 22, 14, 12, 8], 'var(--accent2)', 34, true);
+      document.getElementById('stat-spark-3').innerHTML = sparkSvg([14, 18, 24, 20, 16, 10], 'var(--blue)', 34, true);
+    }
+
+    function getFiltered() {
+      const q = document.getElementById('search-input').value.trim().toLowerCase();
+      return DATA.filter(d => {
+        if (curFilter === 'buy' && d.signal !== 'buy') return false;
+        if (curFilter === 'highconf' && d.conf < 70) return false;
+        if (curFilter === 'KR' && d.market !== 'KR') return false;
+        if (curFilter === 'US' && d.market !== 'US') return false;
+        if (q && !d.name.toLowerCase().includes(q) && !d.ticker.toLowerCase().includes(q) && !d.sector.toLowerCase().includes(q)) return false;
+        return true;
+      });
+    }
+
+    function renderFeed() {
+      const rows = getFiltered();
+      const cardsEl = document.getElementById('cards-view');
+      const tbody = document.getElementById('table-body');
+
+      cardsEl.classList.toggle('compact', isCompact && curView === 'cards');
+
+      cardsEl.innerHTML = rows.map(d => {
+        const lineCol = d.isUp ? 'var(--up)' : 'var(--down)';
+        const selCls = d.id === selectedId ? 'selected' : '';
+        return `<article class="case-card ${selCls}" onclick="selectStock('${d.id}')">
+          <div class="case-visual">
+            <div class="case-top-row">
+              ${sigBadgeHtml(d)}
+              <span class="conf-badge">신뢰도 ${d.conf}%</span>
+            </div>
+            ${sparkSvg(d.pts, lineCol, 46)}
+          </div>
+          <div class="case-body">
+            <div class="case-title-row">
+              <div class="case-title">${d.name}</div>
+              <div class="case-price ${d.isUp ? 'up' : 'down'}">${d.chg}</div>
+            </div>
+            <div style="font-size:0.76rem;color:var(--muted);margin-top:2px">${d.ticker} · ${d.price}</div>
+            <p class="case-thesis">${d.thesis}</p>
+            <div class="tag-row">${d.tags.map(t => `<span class="mini-tag">${t}</span>`).join('')}</div>
+            <div class="case-foot"><span>목표 ${d.target}</span><strong>R:R ${d.rr}</strong></div>
+          </div>
+        </article>`;
+      }).join('');
+
+      tbody.innerHTML = rows.map(d => {
+        const lineCol = d.isUp ? 'var(--up)' : 'var(--down)';
+        const selCls = d.id === selectedId ? 'selected' : '';
+        return `<tr class="${selCls}" onclick="selectStock('${d.id}')">
+          <td style="color:var(--muted)">${d.rank}</td>
+          <td><div class="token-cell"><div class="token-avatar">${d.market}</div><div><div style="font-weight:700">${d.name}</div><div style="font-size:0.74rem;color:var(--muted)">${d.ticker} · ${d.sector}</div></div></div></td>
+          <td style="font-weight:700">${d.price}</td>
+          <td class="${d.isUp ? 'up' : 'down'}" style="font-weight:700">${d.chg}</td>
+          <td style="width:120px">${sparkSvg(d.pts, lineCol, 28)}</td>
+          <td>${sigBadgeHtml(d)}</td>
+          <td class="mint" style="font-weight:700">${d.conf}%</td>
+          <td style="font-weight:700">${d.rr}</td>
+        </tr>`;
+      }).join('');
+    }
+
+    const CHEV_DOWN = '<svg width="13" height="13" viewBox="0 0 16 16" fill="none"><path d="M4 6L8 10L12 6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+    const CHEV_UP = '<svg width="13" height="13" viewBox="0 0 16 16" fill="none"><path d="M4 10L8 6L12 10" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+
+    function selectStock(id) {
+      selectedId = id;
+      isCompact = true;
+      document.getElementById('stats-grid').style.display = 'none';
+      const cbtn = document.getElementById('compact-btn');
+      cbtn.style.display = 'inline-flex';
+      cbtn.innerHTML = CHEV_DOWN + '피드 펼치기';
+
+      renderFeed();
+      renderDetail(id);
+
+      const sec = document.getElementById('detail-section');
+      sec.classList.add('open');
+      sec.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+
+    function renderDetail(id) {
+      const d = DATA.find(x => x.id === id) || DATA[0];
+      const sigCls = d.signal === 'buy' ? 'sig-buy' : d.signal === 'sell' ? 'sig-sell' : 'sig-hold';
+
+      document.getElementById('d-head-name').textContent = d.name;
+      document.getElementById('d-head-ticker').textContent = d.ticker;
+      document.getElementById('d-head-price').textContent = d.price;
+      const hb = document.getElementById('d-head-badge');
+      hb.outerHTML = sigBadgeHtml(d).replace('<span class="sig-badge', '<span id="d-head-badge" class="sig-badge');
+
+      document.getElementById('d-sector').textContent = d.sector;
+      document.getElementById('d-price').textContent = d.price;
+      const chg = document.getElementById('d-chg');
+      chg.textContent = d.chg;
+      chg.className = d.isUp ? 'up' : 'down';
+      document.getElementById('d-low').textContent = d.low;
+      document.getElementById('d-high').textContent = d.high;
+      document.getElementById('d-range').style.width = d.range + '%';
+
+      ['d-tech', 'd-fund', 'd-comb', 'd-adv'].forEach((elId, i) => {
+        const el = document.getElementById(elId);
+        el.textContent = d.scores[i];
+        el.className = 'score-box-val ' + (d.scores[i].startsWith('+') ? 'up' : 'down');
+      });
+
+      document.getElementById('d-conf').textContent = d.conf + '%';
+      document.getElementById('d-target').textContent = d.target;
+      document.getElementById('d-stop').textContent = d.stop;
+      document.getElementById('d-rr').textContent = d.rr;
+
+      const ab = document.getElementById('d-action');
+      ab.className = 'action-box ' + (d.signal === 'sell' ? 'sell' : d.signal === 'hold' ? 'hold' : '');
+      ab.innerHTML = d.action;
+
+      document.getElementById('d-mtf').innerHTML = [
+        ['1주', d.isUp ? '+3.2%' : '-1.4%', d.isUp],
+        ['1개월', d.isUp ? '+8.7%' : '-3.1%', d.isUp],
+        ['3개월', '+14.2%', true],
+        ['6개월', '+22.8%', true]
+      ].map(([tf, r, u]) => `<div class="mtf-cell"><div style="font-size:0.72rem;color:var(--muted)">${tf}</div><div class="${u ? 'up' : 'down'}" style="font-size:1.1rem;font-weight:800;margin-top:4px">${r}</div></div>`).join('');
+
+      document.getElementById('d-layers').innerHTML = ['캔들', '파동', '일목', 'SMC', '퀀트', 'WACC', 'IPP'].map((nm, idx) => {
+        const c = d.signal === 'buy' ? 'var(--up)' : d.signal === 'sell' ? 'var(--down)' : 'var(--warn)';
+        const lbl = d.signal === 'buy' ? '매수' : d.signal === 'sell' ? '매도' : '중립';
+        return `<div class="l-cell"><div style="font-size:0.72rem;color:var(--muted)">${nm}</div><div style="font-weight:800;margin-top:4px;color:${idx === 3 ? 'var(--warn)' : c}">${idx === 3 ? '중립' : lbl}</div></div>`;
+      }).join('');
+
+      document.getElementById('d-chart-svg').innerHTML = sparkSvg(d.pts, d.isUp ? 'var(--up)' : 'var(--down)', 150);
+      document.getElementById('d-val').textContent = d.val;
+      document.getElementById('kg-center-txt').textContent = d.name;
+      renderUniChart(d);
+    }
+
+    let chartTf = '1D';
+    let chartType = 'line';
+    let chartMetric = 'Price';
+    let activePoints = [];
+
+    function setChartTf(tf, btn) {
+      chartTf = tf;
+      btn.parentElement.querySelectorAll('.uni-pill').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      if (selectedId) renderUniChart(DATA.find(x => x.id === selectedId));
+    }
+    function setChartType(t, btn) {
+      chartType = t;
+      btn.parentElement.querySelectorAll('.uni-pill').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      if (selectedId) renderUniChart(DATA.find(x => x.id === selectedId));
+    }
+    function setChartMetric(m, btn) {
+      chartMetric = m;
+      btn.parentElement.querySelectorAll('.uni-pill').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      if (selectedId) renderUniChart(DATA.find(x => x.id === selectedId));
+    }
+
+    function renderUniChart(d) {
+      document.getElementById('uni-chart-meta').textContent = `${chartMetric} · ${chartTf}`;
+      const svg = document.getElementById('uni-chart-svg');
+      const W = 860, H = 250, padL = 16, padR = 68, padT = 22, padB = 34;
+      const plotW = W - padL - padR, plotH = H - padT - padB;
+      const seed = d.rank * 17 + chartTf.charCodeAt(0) + chartMetric.charCodeAt(0);
+      const n = 48;
+      const vals = [];
+      let cur = 50;
+      for (let i = 0; i < n; i++) {
+        const wave = Math.sin((i + seed) * 0.42) * 8 + Math.cos((i * 1.3 + seed) * 0.25) * 6;
+        const spike = (i === 34) ? (d.isUp ? -24 : 22) : (i === 35 ? (d.isUp ? 18 : -16) : 0);
+        const trend = d.isUp ? (i / n) * 26 : -(i / n) * 22;
+        cur = Math.max(10, Math.min(95, 45 + wave + trend + spike));
+        vals.push(cur);
+      }
+      const minV = Math.min(...vals) - 6;
+      const maxV = Math.max(...vals) + 6;
+      const pts = vals.map((v, i) => ({
+        x: padL + (i / (n - 1)) * plotW,
+        y: padT + (1 - (v - minV) / (maxV - minV)) * plotH,
+        v
+      }));
+      activePoints = pts;
+
+      const strokeCol = chartMetric === 'Confidence' ? '#00d4aa' : (d.isUp ? '#6366f1' : '#3b82f6');
+      const gradId = 'uniGrad_' + Date.now();
+
+      // Smooth cubic path
+      let lineD = `M ${pts[0].x.toFixed(1)},${pts[0].y.toFixed(1)}`;
+      for (let i = 1; i < pts.length; i++) {
+        const cx = ((pts[i - 1].x + pts[i].x) / 2).toFixed(1);
+        lineD += ` C ${cx},${pts[i - 1].y.toFixed(1)} ${cx},${pts[i].y.toFixed(1)} ${pts[i].x.toFixed(1)},${pts[i].y.toFixed(1)}`;
+      }
+      const areaD = `${lineD} L ${pts[pts.length - 1].x.toFixed(1)},${H - padB} L ${pts[0].x.toFixed(1)},${H - padB} Z`;
+      const last = pts[pts.length - 1];
+
+      // Y-axis ticks
+      const yTicks = [0.15, 0.4, 0.65, 0.9].map(r => {
+        const y = padT + r * plotH;
+        const label = chartMetric === 'Confidence' ? `${(85 - r * 30).toFixed(0)}%`
+          : chartMetric === 'Volume' ? `${(4.2 - r * 2.5).toFixed(1)}M`
+          : (d.market === 'US' ? `$${(155 - r * 30).toFixed(2)}` : `${Math.round(230 - r * 40)}K`);
+        return `<text x="${W - padR + 10}" y="${y.toFixed(1)}" fill="var(--muted)" font-size="11" dominant-baseline="middle">${label}</text>`;
+      }).join('');
+
+      // X-axis ticks
+      const xLabels = ['12:00 AM', '4:00 AM', '8:00 AM', '12:00 PM', '4:00 PM', '8:00 PM', '11:53 PM'];
+      const xTicks = xLabels.map((lbl, idx) => {
+        const x = padL + (idx / (xLabels.length - 1)) * plotW;
+        return `<text x="${x.toFixed(1)}" y="${H - 10}" fill="var(--muted)" font-size="10.5" text-anchor="${idx === 0 ? 'start' : idx === xLabels.length - 1 ? 'end' : 'middle'}">${lbl}</text>`;
+      }).join('');
+
+      let bodySvg = '';
+      if (chartType === 'bar') {
+        const bw = (plotW / n) * 0.68;
+        bodySvg = pts.map((p, idx) => {
+          const bh = Math.max(4, (H - padB) - p.y);
+          return `<rect x="${(p.x - bw / 2).toFixed(1)}" y="${p.y.toFixed(1)}" width="${bw.toFixed(1)}" height="${bh.toFixed(1)}" rx="2" fill="${strokeCol}" opacity="0.72">
+            <animate attributeName="height" from="0" to="${bh.toFixed(1)}" dur="0.45s" begin="${(idx * 0.008).toFixed(3)}s" fill="freeze"/>
+            <animate attributeName="y" from="${H - padB}" to="${p.y.toFixed(1)}" dur="0.45s" begin="${(idx * 0.008).toFixed(3)}s" fill="freeze"/>
+          </rect>`;
+        }).join('');
+      } else {
+        bodySvg = `
+          <defs>
+            <linearGradient id="${gradId}" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stop-color="${strokeCol}" stop-opacity="0.28"/>
+              <stop offset="100%" stop-color="${strokeCol}" stop-opacity="0"/>
+            </linearGradient>
+          </defs>
+          <path class="uni-area-path" d="${areaD}" fill="url(#${gradId})"/>
+          <path class="uni-line-path" d="${lineD}" stroke="${strokeCol}"/>
+          <circle class="uni-beacon-ring" cx="${last.x.toFixed(1)}" cy="${last.y.toFixed(1)}" r="5" fill="${strokeCol}"/>
+          <circle cx="${last.x.toFixed(1)}" cy="${last.y.toFixed(1)}" r="4.5" fill="${strokeCol}" stroke="var(--surface)" stroke-width="2"/>
+        `;
+      }
+
+      svg.innerHTML = `
+        ${bodySvg}
+        ${yTicks}
+        ${xTicks}
+        <line id="uni-cross-x" x1="0" y1="${padT}" x2="0" y2="${H - padB}" stroke="var(--muted)" stroke-dasharray="3 3" stroke-opacity="0.6" style="display:none"/>
+        <circle id="uni-cross-dot" cx="0" cy="0" r="5" fill="${strokeCol}" stroke="#fff" stroke-width="2" style="display:none"/>
+      `;
+    }
+
+    const chartStage = document.getElementById('uni-chart-stage');
+    chartStage.addEventListener('mousemove', e => {
+      if (!activePoints.length) return;
+      const rect = chartStage.getBoundingClientRect();
+      const relX = ((e.clientX - rect.left) / rect.width) * 860;
+      let best = activePoints[0], minDist = Infinity;
+      for (const p of activePoints) {
+        const dist = Math.abs(p.x - relX);
+        if (dist < minDist) { minDist = dist; best = p; }
+      }
+      const cx = document.getElementById('uni-cross-x');
+      const cd = document.getElementById('uni-cross-dot');
+      const tip = document.getElementById('uni-hover-tip');
+      if (cx && cd) {
+        cx.setAttribute('x1', best.x); cx.setAttribute('x2', best.x); cx.style.display = 'block';
+        cd.setAttribute('cx', best.x); cd.setAttribute('cy', best.y); cd.style.display = 'block';
+      }
+      const valTxt = chartMetric === 'Confidence' ? `${(50 + best.v * 0.4).toFixed(1)}%`
+        : chartMetric === 'Volume' ? `${(1.2 + best.v * 0.04).toFixed(2)}M`
+        : `지수 ${best.v.toFixed(1)}`;
+      tip.textContent = `${chartTf} · ${chartMetric}: ${valTxt}`;
+      tip.classList.add('show');
+    });
+    chartStage.addEventListener('mouseleave', () => {
+      const cx = document.getElementById('uni-cross-x');
+      const cd = document.getElementById('uni-cross-dot');
+      if (cx) cx.style.display = 'none';
+      if (cd) cd.style.display = 'none';
+      document.getElementById('uni-hover-tip').classList.remove('show');
+    });
+
+    function toggleCompact() {
+      isCompact = !isCompact;
+      document.getElementById('stats-grid').style.display = isCompact ? 'none' : 'grid';
+      document.getElementById('compact-btn').innerHTML = isCompact ? (CHEV_DOWN + '피드 펼치기') : (CHEV_UP + '피드 접기');
+      renderFeed();
+    }
+
+    function closeDetail() {
+      selectedId = null;
+      isCompact = false;
+      document.getElementById('detail-section').classList.remove('open');
+      document.getElementById('stats-grid').style.display = 'grid';
+      document.getElementById('compact-btn').style.display = 'none';
+      renderFeed();
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function setFilter(f, btn) {
+      curFilter = f;
+      document.querySelectorAll('.f-pill').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      renderFeed();
+    }
+
+    function setView(v) {
+      curView = v;
+      document.getElementById('btn-view-cards').classList.toggle('active', v === 'cards');
+      document.getElementById('btn-view-table').classList.toggle('active', v === 'table');
+      document.getElementById('cards-view').classList.toggle('hide', v !== 'cards');
+      document.getElementById('table-view').classList.toggle('show', v === 'table');
+    }
+
+    function switchTab(id, btn) {
+      document.getElementById('panels-wrap').classList.remove('show-all');
+      document.getElementById('expand-btn').textContent = '전체 펼치기';
+      document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+      document.getElementById('panel-' + id).classList.add('active');
+    }
+
+    function toggleShowAll() {
+      const wrap = document.getElementById('panels-wrap');
+      const on = wrap.classList.toggle('show-all');
+      document.getElementById('expand-btn').textContent = on ? '탭으로 보기' : '전체 펼치기';
+    }
+
+    function toggleTheme() {
+      const isLight = document.documentElement.classList.toggle('light');
+      document.getElementById('theme-btn').textContent = isLight ? '☀️ 라이트' : '🌙 다크';
+    }
+
+    document.addEventListener('keydown', e => {
+      if (e.key === '/' && document.activeElement.tagName !== 'INPUT') {
+        e.preventDefault();
+        document.getElementById('search-input').focus();
+      }
+    });
+
+    renderStatSparks();
+    renderFeed();
+  </script>
+</body>
+</html>

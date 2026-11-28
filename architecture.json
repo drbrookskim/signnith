@@ -1,0 +1,189 @@
+{
+  "schema_version": 1,
+  "diagram_type": "architecture",
+  "meta": {
+    "title": "Signnith Quantitative Signal Architecture",
+    "output": "architecture.html",
+    "quality_profile": "showcase",
+    "views": [
+      {
+        "id": "pwa-experience",
+        "label": "PWA Signal & Confidence Experience",
+        "focus": ["user_pwa", "pwa_client", "sw_cache", "chart_renderer", "local_reports"],
+        "note": "사용자 PWA 인터페이스에서 실시간 신호 신뢰도 게이지 및 리포트 아카이브로 이어지는 클라이언트 구조"
+      },
+      {
+        "id": "quant-backtest",
+        "label": "Quantitative Signal & Backtesting Engine",
+        "focus": ["quant_engine", "backtest_suite", "market_yfinance", "chart_renderer"],
+        "note": "Python 퀀트 엔진을 통한 역사적 데이터 시뮬레이션, 전략 재보정(Recalibrate) 및 파라미터 최적화"
+      }
+    ]
+  },
+  "components": [
+    {
+      "id": "user_pwa",
+      "type": "external",
+      "label": "Trader / User",
+      "sublabel": "Mobile & Desktop PWA",
+      "pos": [30, 195],
+      "size": [120, 56]
+    },
+    {
+      "id": "pwa_client",
+      "type": "frontend",
+      "label": "Signnith PWA",
+      "sublabel": "HTML5 / Tailwind UI",
+      "pos": [220, 195],
+      "size": [130, 56]
+    },
+    {
+      "id": "sw_cache",
+      "type": "cloud",
+      "label": "Service Worker",
+      "sublabel": "Offline Asset Cache",
+      "pos": [220, 70],
+      "size": [130, 56]
+    },
+    {
+      "id": "chart_renderer",
+      "type": "frontend",
+      "label": "Confidence Engine",
+      "sublabel": "Signal Gauges & Canvas",
+      "pos": [440, 90],
+      "size": [140, 56]
+    },
+    {
+      "id": "quant_engine",
+      "type": "backend",
+      "label": "Signnith Engine",
+      "sublabel": "Quantitative Logic",
+      "pos": [440, 290],
+      "size": [140, 56]
+    },
+    {
+      "id": "local_reports",
+      "type": "database",
+      "label": "Report Storage",
+      "sublabel": "Archive & Compare",
+      "pos": [660, 90],
+      "size": [140, 56]
+    },
+    {
+      "id": "backtest_suite",
+      "type": "backend",
+      "label": "Backtest Runner",
+      "sublabel": "Historical Simulation",
+      "pos": [660, 290],
+      "size": [140, 56]
+    },
+    {
+      "id": "market_yfinance",
+      "type": "external",
+      "label": "Market Feed",
+      "sublabel": "yfinance & OHLCV CSV",
+      "pos": [880, 290],
+      "size": [130, 56]
+    }
+  ],
+  "boundaries": [
+    {
+      "kind": "region",
+      "label": "Signnith PWA Client Web Platform",
+      "wraps": ["pwa_client", "sw_cache", "chart_renderer", "local_reports"]
+    },
+    {
+      "kind": "security-group",
+      "label": "Quantitative Backtesting Pipeline (backtest/)",
+      "wraps": ["quant_engine", "backtest_suite"]
+    }
+  ],
+  "connections": [
+    {
+      "id": "user-pwa-flow",
+      "from": "user_pwa",
+      "to": "pwa_client",
+      "label": "Signal View",
+      "variant": "emphasis",
+      "fromSide": "right",
+      "toSide": "left"
+    },
+    {
+      "id": "pwa-sw-flow",
+      "from": "pwa_client",
+      "to": "sw_cache",
+      "label": "Offline Cache",
+      "fromSide": "top",
+      "toSide": "bottom"
+    },
+    {
+      "id": "pwa-chart-flow",
+      "from": "pwa_client",
+      "to": "chart_renderer",
+      "label": "Confidence",
+      "fromSide": "right",
+      "toSide": "left"
+    },
+    {
+      "id": "chart-store-flow",
+      "from": "chart_renderer",
+      "to": "local_reports",
+      "label": "Save Report",
+      "fromSide": "right",
+      "toSide": "left"
+    },
+    {
+      "id": "quant-backtest-flow",
+      "from": "quant_engine",
+      "to": "backtest_suite",
+      "label": "Simulate",
+      "variant": "emphasis",
+      "fromSide": "right",
+      "toSide": "left"
+    },
+    {
+      "id": "backtest-data-flow",
+      "from": "backtest_suite",
+      "to": "market_yfinance",
+      "label": "OHLCV Candles",
+      "fromSide": "right",
+      "toSide": "left"
+    },
+    {
+      "id": "quant-calib-flow",
+      "from": "quant_engine",
+      "to": "chart_renderer",
+      "label": "Tuned Weights",
+      "variant": "dashed",
+      "fromSide": "top",
+      "toSide": "bottom",
+      "labelAt": [510, 180]
+    }
+  ],
+  "cards": [
+    {
+      "dot": "cyan",
+      "title": "PWA Web Experience",
+      "items": [
+        "서비스 워커 기반 오프라인 캐싱 및 모바일 홈 화면 설치(PWA) 지원",
+        "신호 신뢰도 게이지(Confidence) 및 종목 간 다차원 비교 분석(Compare) 뷰"
+      ]
+    },
+    {
+      "dot": "emerald",
+      "title": "Quantitative Signal Engine",
+      "items": [
+        "모멘텀, 이동평균 크로스, 변동성 채널 결합 퀀트 알고리즘(signnith_engine.py)",
+        "신호 정확도 검증을 위한 신뢰 구간 점수화 및 리스크 가중치 반영"
+      ]
+    },
+    {
+      "dot": "violet",
+      "title": "Backtesting & Optimization",
+      "items": [
+        "yfinance 기반 역사적 캔들 수집 및 백테스팅 파이프라인(backtest.py)",
+        "전략 파라미터 재보정(recalibrate.py)을 통한 승률 및 최대 낙폭(MDD) 최적화"
+      ]
+    }
+  ]
+}

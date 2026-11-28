@@ -1,0 +1,651 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SIGNNITH — Cockpit Bento UX</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Noto+Sans+KR:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg: #090b10;
+      --rail: #0d1017;
+      --tile: #121620;
+      --tile2: #171c28;
+      --border: rgba(255, 255, 255, 0.07);
+      --border2: rgba(255, 255, 255, 0.14);
+      --text: #f1f5f9;
+      --text2: #cbd5e1;
+      --muted: #7c879b;
+      --mint: #00d4aa;
+      --blue: #3b82f6;
+      --purple: #a78bfa;
+      --up: #ff4b6e;
+      --down: #3b82f6;
+      --warn: #fbbf24;
+      --up-bg: rgba(255, 75, 110, 0.12);
+      --down-bg: rgba(59, 130, 246, 0.12);
+      --warn-bg: rgba(251, 191, 36, 0.12);
+    }
+    html.light {
+      --bg: #f1f3f7;
+      --rail: #ffffff;
+      --tile: #ffffff;
+      --tile2: #f4f6fa;
+      --border: rgba(15, 23, 42, 0.08);
+      --border2: rgba(15, 23, 42, 0.15);
+      --text: #0f172a;
+      --text2: #334155;
+      --muted: #64748b;
+      --mint: #059669;
+      --blue: #2563eb;
+      --purple: #7c3aed;
+      --up: #e11d48;
+      --down: #1d4ed8;
+      --warn: #d97706;
+      --up-bg: rgba(225, 29, 72, 0.08);
+      --down-bg: rgba(29, 78, 216, 0.08);
+      --warn-bg: rgba(217, 119, 6, 0.10);
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Space Grotesk', 'Noto Sans KR', -apple-system, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      font-variant-numeric: tabular-nums;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* Compact Command Topbar */
+    .cmd-bar {
+      height: 54px;
+      padding: 0 20px;
+      background: var(--rail);
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 14px;
+      position: sticky;
+      top: 0;
+      z-index: 50;
+    }
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 9px;
+      font-weight: 800;
+      font-size: 0.98rem;
+      letter-spacing: 0.04em;
+    }
+    .brand-icon {
+      width: 24px; height: 24px;
+      border-radius: 6px;
+      background: linear-gradient(135deg, var(--mint), var(--blue));
+      display: grid;
+      place-items: center;
+      color: #fff;
+      font-size: 0.78rem;
+    }
+    .cmd-trigger {
+      flex: 1;
+      max-width: 440px;
+      height: 34px;
+      background: var(--tile2);
+      border: 1px solid var(--border2);
+      border-radius: 9px;
+      padding: 0 12px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      color: var(--muted);
+      font-size: 0.82rem;
+      cursor: pointer;
+    }
+    .cmd-trigger:hover { border-color: var(--mint); }
+    .kbd {
+      font-size: 0.7rem;
+      padding: 2px 6px;
+      border-radius: 5px;
+      background: var(--tile);
+      border: 1px solid var(--border);
+    }
+    .seg-group {
+      display: inline-flex;
+      background: var(--tile2);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 2px;
+      gap: 2px;
+    }
+    .seg-btn {
+      border: none;
+      background: transparent;
+      color: var(--muted);
+      font-family: inherit;
+      font-size: 0.76rem;
+      font-weight: 700;
+      padding: 5px 10px;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+    .seg-btn.active { background: var(--tile); color: var(--text); box-shadow: 0 1px 3px rgba(0,0,0,0.2); }
+
+    /* Split Workspace */
+    .workspace {
+      flex: 1;
+      display: grid;
+      grid-template-columns: 270px 1fr;
+      min-height: calc(100vh - 54px);
+    }
+
+    /* Left Watchlist Rail */
+    .rail {
+      background: var(--rail);
+      border-right: 1px solid var(--border);
+      padding: 16px 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+    .rail-head {
+      font-size: 0.72rem;
+      font-weight: 700;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      padding: 4px 10px 8px;
+      display: flex;
+      justify-content: space-between;
+    }
+    .watch-item {
+      padding: 10px 12px;
+      border-radius: 10px;
+      border: 1px solid transparent;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      transition: background 0.12s, border-color 0.12s;
+    }
+    .watch-item:hover { background: var(--tile2); }
+    .watch-item.active {
+      background: var(--tile2);
+      border-color: var(--border2);
+    }
+    .w-left { display: flex; align-items: center; gap: 9px; }
+    .w-dot { width: 8px; height: 8px; border-radius: 50%; }
+    .w-name { font-size: 0.86rem; font-weight: 700; }
+    .w-sub { font-size: 0.72rem; color: var(--muted); }
+    .w-right { text-align: right; }
+    .w-chg { font-size: 0.8rem; font-weight: 700; }
+    .w-conf { font-size: 0.7rem; color: var(--muted); }
+
+    /* Bento Canvas */
+    .bento {
+      padding: 18px;
+      display: grid;
+      grid-template-columns: repeat(12, 1fr);
+      gap: 14px;
+      align-content: start;
+    }
+    .tile {
+      background: var(--tile);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 18px;
+    }
+    .span-8 { grid-column: span 8; }
+    .span-4 { grid-column: span 4; }
+    .span-6 { grid-column: span 6; }
+    .span-12 { grid-column: span 12; }
+
+    .tile-lbl {
+      font-size: 0.75rem;
+      font-weight: 700;
+      color: var(--muted);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 12px;
+    }
+
+    .up { color: var(--up); }
+    .down { color: var(--down); }
+    .mint { color: var(--mint); }
+    .badge {
+      padding: 4px 10px;
+      border-radius: 999px;
+      font-size: 0.76rem;
+      font-weight: 800;
+    }
+    .b-buy { background: var(--up-bg); color: var(--up); }
+    .b-sell { background: var(--down-bg); color: var(--down); }
+    .b-hold { background: var(--warn-bg); color: var(--warn); }
+
+    /* Hero Price + Target/Stop Chart */
+    .hero-top {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 12px;
+      flex-wrap: wrap;
+    }
+    .hero-price { font-size: 1.9rem; font-weight: 800; letter-spacing: -0.02em; }
+    .chart-box {
+      background: var(--tile2);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 12px;
+      position: relative;
+    }
+
+    /* Confidence Ring */
+    .ring-wrap {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      margin-bottom: 14px;
+    }
+    .bar-list { display: flex; flex-direction: column; gap: 9px; }
+    .bar-row { font-size: 0.78rem; }
+    .bar-meta { display: flex; justify-content: space-between; margin-bottom: 4px; color: var(--text2); }
+    .bar-track { height: 6px; border-radius: 999px; background: var(--tile2); overflow: hidden; }
+    .bar-fill { height: 100%; border-radius: 999px; }
+
+    /* R:R Visual Bar */
+    .rr-visual {
+      display: flex;
+      height: 10px;
+      border-radius: 999px;
+      overflow: hidden;
+      margin: 10px 0;
+      background: var(--tile2);
+    }
+    .rr-loss { background: var(--down); }
+    .rr-gain { background: var(--up); }
+
+    /* 7-Layer Heatmap */
+    .matrix-7 {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 8px;
+    }
+    .m-cell {
+      background: var(--tile2);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 10px 6px;
+      text-align: center;
+    }
+    .m-name { font-size: 0.72rem; color: var(--muted); }
+    .m-val { font-size: 0.84rem; font-weight: 800; margin-top: 4px; }
+
+    /* MTF Strip */
+    .mtf-4 {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 8px;
+    }
+    .mtf-box {
+      background: var(--tile2);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 10px;
+      text-align: center;
+    }
+
+    /* Command Palette Modal */
+    .palette-bg {
+      display: none;
+      position: fixed;
+      inset: 0;
+      z-index: 200;
+      background: rgba(0, 0, 0, 0.6);
+      backdrop-filter: blur(6px);
+      align-items: flex-start;
+      justify-content: center;
+      padding-top: 12vh;
+    }
+    .palette-bg.open { display: flex; }
+    .palette {
+      width: 100%;
+      max-width: 520px;
+      background: var(--tile);
+      border: 1px solid var(--border2);
+      border-radius: 16px;
+      overflow: hidden;
+      box-shadow: 0 24px 64px rgba(0,0,0,0.55);
+    }
+    .palette input {
+      width: 100%;
+      padding: 16px 18px;
+      border: none;
+      border-bottom: 1px solid var(--border);
+      background: transparent;
+      color: var(--text);
+      font-family: inherit;
+      font-size: 0.95rem;
+      outline: none;
+    }
+    .palette-list { max-height: 280px; overflow-y: auto; padding: 8px; }
+    .p-item {
+      padding: 10px 12px;
+      border-radius: 10px;
+      cursor: pointer;
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.88rem;
+    }
+    .p-item:hover { background: var(--tile2); }
+
+    @media (max-width: 1024px) {
+      .workspace { grid-template-columns: 1fr; }
+      .rail {
+        flex-direction: row;
+        overflow-x: auto;
+        border-right: none;
+        border-bottom: 1px solid var(--border);
+        padding: 10px 14px;
+      }
+      .rail-head { display: none; }
+      .watch-item { min-width: 165px; flex-shrink: 0; border: 1px solid var(--border); }
+      .span-8, .span-4, .span-6 { grid-column: span 12; }
+      .matrix-7 { grid-template-columns: repeat(4, 1fr); }
+    }
+    @media (max-width: 600px) {
+      .seg-group { display: none; }
+      .mtf-4 { grid-template-columns: repeat(2, 1fr); }
+      .matrix-7 { grid-template-columns: repeat(2, 1fr); }
+    }
+  </style>
+</head>
+<body>
+  <header class="cmd-bar">
+    <div class="brand">
+      <span class="brand-icon">S</span>
+      <span>SIGNNITH</span>
+    </div>
+
+    <button class="cmd-trigger" onclick="openPalette()">
+      <span>🔍 종목 검색 또는 빠른 이동…</span>
+      <span class="kbd">⌘K / /</span>
+    </button>
+
+    <div style="display:flex;align-items:center;gap:8px">
+      <div class="seg-group" id="tf-seg">
+        <button class="seg-btn" onclick="setSeg(this)">3M</button>
+        <button class="seg-btn active" onclick="setSeg(this)">6M</button>
+        <button class="seg-btn" onclick="setSeg(this)">1Y</button>
+      </div>
+      <button class="seg-btn" style="background:var(--tile2);border:1px solid var(--border)" onclick="toggleTheme()" id="theme-btn">🌙</button>
+    </div>
+  </header>
+
+  <div class="workspace">
+    <!-- Left Watchlist Rail -->
+    <aside class="rail" id="rail">
+      <div class="rail-head"><span>관심 · 분석 종목</span><span>↑↓ 이동</span></div>
+    </aside>
+
+    <!-- Bento Cockpit -->
+    <main class="bento">
+      <!-- Tile 1: Hero Price + Target/Stop Chart (8 cols) -->
+      <section class="tile span-8">
+        <div class="hero-top">
+          <div>
+            <div style="display:flex;align-items:center;gap:8px">
+              <h1 id="b-name" style="font-size:1.35rem;font-weight:800">SK하이닉스</h1>
+              <span id="b-ticker" style="font-size:0.82rem;color:var(--muted)">000660.KS</span>
+              <span id="b-badge" class="badge b-buy">▲ 매수 우위</span>
+            </div>
+            <div style="display:flex;align-items:baseline;gap:10px;margin-top:6px">
+              <span class="hero-price" id="b-price">214,500 KRW</span>
+              <span id="b-chg" class="up" style="font-weight:700;font-size:0.95rem">+2.14%</span>
+            </div>
+          </div>
+          <div style="text-align:right;font-size:0.8rem;color:var(--muted)">
+            <div>목표가 <strong id="b-target" class="up">242,000</strong></div>
+            <div style="margin-top:2px">손절가 <strong id="b-stop" class="down">198,000</strong></div>
+          </div>
+        </div>
+
+        <div class="chart-box" id="b-chart"></div>
+      </section>
+
+      <!-- Tile 2: Confidence Ring + 4-Score Bars (4 cols) -->
+      <section class="tile span-4">
+        <div class="tile-lbl"><span>알고리즘 신뢰도 · 4대 점수</span><span class="mint">7-Layer</span></div>
+        <div class="ring-wrap">
+          <svg width="72" height="72" viewBox="0 0 72 72">
+            <circle cx="36" cy="36" r="29" fill="none" stroke="var(--tile2)" stroke-width="7" />
+            <circle id="ring-arc" cx="36" cy="36" r="29" fill="none" stroke="var(--mint)" stroke-width="7"
+              stroke-linecap="round" stroke-dasharray="182" stroke-dashoffset="39" transform="rotate(-90 36 36)" />
+            <text id="ring-txt" x="36" y="40" text-anchor="middle" fill="currentColor" font-size="13" font-weight="800">78%</text>
+          </svg>
+          <div>
+            <div style="font-size:0.82rem;color:var(--muted)">종합 판정</div>
+            <div id="b-verdict" style="font-size:1.05rem;font-weight:800;margin-top:2px">매수 우위 구간</div>
+          </div>
+        </div>
+        <div class="bar-list" id="b-bars"></div>
+      </section>
+
+      <!-- Tile 3: Action Playbook & R:R (6 cols) -->
+      <section class="tile span-6">
+        <div class="tile-lbl"><span>🎯 Action Playbook · R:R</span><strong id="b-rr" class="mint">2.3 : 1</strong></div>
+        <div class="rr-visual">
+          <div class="rr-loss" style="width:30%"></div>
+          <div class="rr-gain" style="width:70%"></div>
+        </div>
+        <div style="display:flex;justify-content:space-between;font-size:0.75rem;color:var(--muted);margin-bottom:12px">
+          <span>리스크 -7.7%</span>
+          <span>기대수익 +12.8%</span>
+        </div>
+        <div id="b-action" style="font-size:0.85rem;color:var(--text2);line-height:1.65"></div>
+      </section>
+
+      <!-- Tile 4: Multi-Timeframe & WACC (6 cols) -->
+      <section class="tile span-6">
+        <div class="tile-lbl"><span>기간별 추세 · 밸류에이션</span><span id="b-wacc" class="up">ROE &gt; WACC</span></div>
+        <div class="mtf-4" id="b-mtf"></div>
+        <div id="b-val-note" style="margin-top:12px;font-size:0.8rem;color:var(--muted)"></div>
+      </section>
+
+      <!-- Tile 5: 7-Layer Signal Matrix (12 cols) -->
+      <section class="tile span-12">
+        <div class="tile-lbl"><span>7-Layer 시그널 매트릭스</span><span style="font-size:0.74rem">캔들 · 파동 · 일목 · SMC · 퀀트 · WACC · IPP</span></div>
+        <div class="matrix-7" id="b-matrix"></div>
+      </section>
+    </main>
+  </div>
+
+  <!-- Command Palette -->
+  <div class="palette-bg" id="palette-bg" onclick="if(event.target===this) closePalette()">
+    <div class="palette">
+      <input id="palette-input" type="text" placeholder="종목명 또는 티커 입력…" oninput="filterPalette()" />
+      <div class="palette-list" id="palette-list"></div>
+    </div>
+  </div>
+
+  <script>
+    const ITEMS = [
+      {
+        id: 'hynix', name: 'SK하이닉스', ticker: '000660.KS', price: '214,500 KRW', chg: '+2.14%', up: true,
+        sig: 'buy', sigLbl: '▲ 매수 우위', conf: 78, target: '242,000', stop: '198,000', rr: '2.3 : 1',
+        verdict: '매수 우위 구간',
+        scores: [['기술적', '+0.42', 71], ['기본적', '+0.31', 65], ['통합', '+0.38', 69], ['고급 7L', '+0.46', 73]],
+        pts: [150, 145, 148, 128, 118, 96, 82, 62],
+        action: '✅ <b>분할 진입</b>: 214,500 부근 2~3분할 매수<br>🎯 <b>목표</b>: 242,000 1차 차익실현 · 🛡️ <b>손절</b>: 198,000',
+        mtf: [['1주', '+3.2%', true], ['1개월', '+8.7%', true], ['3개월', '+16.4%', true], ['6개월', '+24.1%', true]],
+        val: 'PER 14.2x · ROE 18.4% vs WACC 8.91% (가치 창출 구간)',
+        layers: [['캔들', '매수', true], ['파동', '3파', true], ['일목', '구름위', true], ['SMC', '중립', null], ['퀀트', '+1.2σ', true], ['WACC', '우량', true], ['IPP', '+24', true]]
+      },
+      {
+        id: 'nvda', name: 'NVIDIA', ticker: 'NVDA', price: '$142.80', chg: '+2.22%', up: true,
+        sig: 'buy', sigLbl: '▲ 매수 우위', conf: 81, target: '$162.00', stop: '$131.50', rr: '2.1 : 1',
+        verdict: '강한 상승 추세',
+        scores: [['기술적', '+0.51', 76], ['기본적', '+0.28', 64], ['통합', '+0.41', 71], ['고급 7L', '+0.54', 77]],
+        pts: [160, 148, 138, 142, 115, 92, 78, 54],
+        action: '✅ <b>추세 추종</b>: $140 지지 확인 시 분할 매수 유효<br>🎯 <b>목표</b>: $162.00 · 🛡️ <b>손절</b>: $131.50',
+        mtf: [['1주', '+4.1%', true], ['1개월', '+11.2%', true], ['3개월', '+22.8%', true], ['6개월', '+38.4%', true]],
+        val: '모멘텀 Z-Score +1.41σ · 기관 수급(BOS) 지속',
+        layers: [['캔들', '매수', true], ['파동', '3파', true], ['일목', '호전', true], ['SMC', 'BOS', true], ['퀀트', '+1.4σ', true], ['WACC', '양호', true], ['IPP', '+18', null]]
+      },
+      {
+        id: 'samsung', name: '삼성전자', ticker: '005930.KS', price: '56,800 KRW', chg: '-0.70%', up: false,
+        sig: 'hold', sigLbl: '◆ 관망 유지', conf: 49, target: '62,500', stop: '53,000', rr: '1.5 : 1',
+        verdict: '방향성 탐색 중',
+        scores: [['기술적', '-0.08', 46], ['기본적', '+0.15', 58], ['통합', '+0.02', 51], ['고급 7L', '-0.04', 48]],
+        pts: [72, 78, 84, 96, 108, 104, 112, 109],
+        action: '⏸️ <b>현금 대기</b>: 통합 신호 ±0.25 돌파 전까지 관망<br>👀 <b>지지 주시</b>: BB 하단 54,200 이탈 여부 확인',
+        mtf: [['1주', '-0.9%', false], ['1개월', '-3.2%', false], ['3개월', '-8.4%', false], ['6개월', '-14.1%', false]],
+        val: 'PER 11.2x 저평가 영역이나 단기 이평 역배열',
+        layers: [['캔들', '중립', null], ['파동', '조정', false], ['일목', '구름아래', false], ['SMC', '중립', null], ['퀀트', '-0.2σ', false], ['WACC', '적정', null], ['IPP', '+6', null]]
+      },
+      {
+        id: 'tsla', name: 'Tesla', ticker: 'TSLA', price: '$312.40', chg: '-2.13%', up: false,
+        sig: 'sell', sigLbl: '▼ 매도 고려', conf: 64, target: '$278.00', stop: '$332.00', rr: '1.7 : 1',
+        verdict: '단기 과열 해소',
+        scores: [['기술적', '-0.34', 33], ['기본적', '-0.18', 41], ['통합', '-0.27', 37], ['고급 7L', '-0.31', 35]],
+        pts: [52, 48, 60, 74, 92, 110, 126, 138],
+        action: '📤 <b>비중 축소</b>: 반등 시 분할 차익실현 권장<br>🚫 <b>신규 진입 보류</b>: MACD 골든크로스 대기',
+        mtf: [['1주', '-3.5%', false], ['1개월', '+2.1%', true], ['3개월', '+19.0%', true], ['6개월', '+28.5%', true]],
+        val: '단기 RSI 과매수 이탈 · MACD 히스토그램 약세 전환',
+        layers: [['캔들', '매도', false], ['파동', '5파후', false], ['일목', '이탈', false], ['SMC', '중립', null], ['퀀트', '-0.8σ', false], ['WACC', '고평가', false], ['IPP', '-22', false]]
+      }
+    ];
+
+    let curIdx = 0;
+
+    function renderRail() {
+      const rail = document.getElementById('rail');
+      const head = rail.querySelector('.rail-head').outerHTML;
+      rail.innerHTML = head + ITEMS.map((it, idx) => {
+        const dotCol = it.sig === 'buy' ? 'var(--up)' : it.sig === 'sell' ? 'var(--down)' : 'var(--warn)';
+        return `<div class="watch-item ${idx === curIdx ? 'active' : ''}" onclick="selectIdx(${idx})">
+          <div class="w-left">
+            <span class="w-dot" style="background:${dotCol}"></span>
+            <div>
+              <div class="w-name">${it.name}</div>
+              <div class="w-sub">${it.ticker}</div>
+            </div>
+          </div>
+          <div class="w-right">
+            <div class="w-chg ${it.up ? 'up' : 'down'}">${it.chg}</div>
+            <div class="w-conf">신뢰 ${it.conf}%</div>
+          </div>
+        </div>`;
+      }).join('');
+    }
+
+    function selectIdx(idx) {
+      curIdx = idx;
+      const d = ITEMS[idx];
+      renderRail();
+
+      document.getElementById('b-name').textContent = d.name;
+      document.getElementById('b-ticker').textContent = d.ticker;
+      const badge = document.getElementById('b-badge');
+      badge.textContent = d.sigLbl;
+      badge.className = 'badge ' + (d.sig === 'buy' ? 'b-buy' : d.sig === 'sell' ? 'b-sell' : 'b-hold');
+      document.getElementById('b-price').textContent = d.price;
+      const chg = document.getElementById('b-chg');
+      chg.textContent = d.chg;
+      chg.className = d.up ? 'up' : 'down';
+      document.getElementById('b-target').textContent = d.target;
+      document.getElementById('b-stop').textContent = d.stop;
+
+      // SVG Chart with Target / Stop lines
+      const col = d.up ? 'var(--up)' : 'var(--down)';
+      const pts = d.pts.map((y, i) => `${20 + i * 95},${y}`).join(' ');
+      document.getElementById('b-chart').innerHTML = `
+        <svg viewBox="0 0 720 180" width="100%" height="180" style="display:block">
+          <line x1="10" y1="36" x2="710" y2="36" stroke="var(--up)" stroke-dasharray="5 5" stroke-opacity="0.55" />
+          <text x="14" y="30" fill="var(--up)" font-size="11" font-weight="700">목표가 ${d.target}</text>
+          <line x1="10" y1="152" x2="710" y2="152" stroke="var(--down)" stroke-dasharray="5 5" stroke-opacity="0.55" />
+          <text x="14" y="146" fill="var(--down)" font-size="11" font-weight="700">손절가 ${d.stop}</text>
+          <polyline fill="none" stroke="${col}" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" points="${pts}" />
+        </svg>`;
+
+      // Ring
+      const offset = 182 - (182 * d.conf / 100);
+      document.getElementById('ring-arc').setAttribute('stroke-dashoffset', offset.toFixed(1));
+      document.getElementById('ring-txt').textContent = d.conf + '%';
+      document.getElementById('b-verdict').textContent = d.verdict;
+
+      // Bars
+      document.getElementById('b-bars').innerHTML = d.scores.map(([lbl, val, pct]) => {
+        const c = val.startsWith('+') ? 'var(--up)' : 'var(--down)';
+        return `<div class="bar-row">
+          <div class="bar-meta"><span>${lbl}</span><strong style="color:${c}">${val}</strong></div>
+          <div class="bar-track"><div class="bar-fill" style="width:${pct}%;background:${c}"></div></div>
+        </div>`;
+      }).join('');
+
+      document.getElementById('b-rr').textContent = d.rr;
+      document.getElementById('b-action').innerHTML = d.action;
+
+      document.getElementById('b-mtf').innerHTML = d.mtf.map(([tf, r, u]) => `
+        <div class="mtf-box">
+          <div style="font-size:0.72rem;color:var(--muted)">${tf}</div>
+          <div class="${u ? 'up' : 'down'}" style="font-size:1rem;font-weight:800;margin-top:4px">${r}</div>
+        </div>`).join('');
+      document.getElementById('b-val-note').textContent = d.val;
+
+      document.getElementById('b-matrix').innerHTML = d.layers.map(([nm, v, st]) => {
+        const c = st === true ? 'var(--up)' : st === false ? 'var(--down)' : 'var(--warn)';
+        return `<div class="m-cell"><div class="m-name">${nm}</div><div class="m-val" style="color:${c}">${v}</div></div>`;
+      }).join('');
+    }
+
+    function setSeg(btn) {
+      btn.parentElement.querySelectorAll('.seg-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+    }
+
+    function toggleTheme() {
+      const l = document.documentElement.classList.toggle('light');
+      document.getElementById('theme-btn').textContent = l ? '☀️' : '🌙';
+    }
+
+    function openPalette() {
+      document.getElementById('palette-bg').classList.add('open');
+      const inp = document.getElementById('palette-input');
+      inp.value = '';
+      filterPalette();
+      setTimeout(() => inp.focus(), 30);
+    }
+    function closePalette() { document.getElementById('palette-bg').classList.remove('open'); }
+    function filterPalette() {
+      const q = document.getElementById('palette-input').value.trim().toLowerCase();
+      const list = ITEMS.map((it, i) => ({ ...it, i }))
+        .filter(it => !q || it.name.toLowerCase().includes(q) || it.ticker.toLowerCase().includes(q));
+      document.getElementById('palette-list').innerHTML = list.map(it => `
+        <div class="p-item" onclick="selectIdx(${it.i});closePalette()">
+          <span><strong>${it.name}</strong> <span style="color:var(--muted)">${it.ticker}</span></span>
+          <span class="${it.up ? 'up' : 'down'}">${it.chg}</span>
+        </div>`).join('');
+    }
+
+    document.addEventListener('keydown', e => {
+      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k' || (e.key === '/' && document.activeElement.tagName !== 'INPUT')) {
+        e.preventDefault(); openPalette();
+      } else if (e.key === 'Escape') {
+        closePalette();
+      } else if (e.key === 'ArrowDown' && !document.getElementById('palette-bg').classList.contains('open')) {
+        e.preventDefault(); selectIdx((curIdx + 1) % ITEMS.length);
+      } else if (e.key === 'ArrowUp' && !document.getElementById('palette-bg').classList.contains('open')) {
+        e.preventDefault(); selectIdx((curIdx - 1 + ITEMS.length) % ITEMS.length);
+      }
+    });
+
+    selectIdx(0);
+  </script>
+</body>
+</html>

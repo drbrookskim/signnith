@@ -1,0 +1,1504 @@
+<!DOCTYPE html>
+<html lang="ko" class="light">
+<head>
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-H36GJE20EL"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'G-H36GJE20EL');
+</script>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover"/>
+<title>SIGNNITH · 아카이브</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Noto+Sans+KR:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+
+  /* iOS Safari: body overflow:hidden만으로는 터치 스크롤을 막지 못함
+     html까지 함께 잠가야 body-level 스크롤이 완전히 차단됨 */
+  html {
+    height: 100%;
+    overflow: hidden;
+    overscroll-behavior: none;
+  }
+
+  /* ── CSS 변수: 다크 모드 (기본) — report.html과 동일한 글라스모피즘 원칙 ── */
+  :root {
+    --bg:       #080a0f;
+    --card:     #11141d;
+    --card2:    #171b26;
+    --border:   rgba(255,255,255,0.08);
+    --border2:  rgba(255,255,255,0.15);
+    --text:     #f8fafc;
+    --text2:    #cbd5e1;
+    --muted:    #8b95a7;
+    --muted2:   #64748b;
+    --topbar:   rgba(8,10,15,0.84);
+    --green:    #00d4aa;
+    --red:      #ff4b6e;
+    --up:       #ff4b6e;
+    --down:     #3b82f6;
+    --yellow:   #fbbf24;
+    --blue:     #3b82f6;
+    --shadow:   rgba(0,0,0,.45);
+    --sidebar:  260px;
+  }
+
+  /* ── CSS 변수: 라이트 모드 — index.html과 동일 ── */
+  html.light {
+    --bg:       #f6f7fb;
+    --card:     #ffffff;
+    --card2:    #f1f4f9;
+    --border:   rgba(15,23,42,0.08);
+    --border2:  rgba(15,23,42,0.16);
+    --text:     #0f172a;
+    --text2:    #1e293b;
+    --muted:    #475569;
+    --muted2:   #64748b;
+    --topbar:   rgba(246,247,251,0.92);
+    --green:    #047857;
+    --red:      #be123c;
+    --up:       #be123c;
+    --down:     #1d4ed8;
+    --yellow:   #b45309;
+    --blue:     #1d4ed8;
+    --shadow:   rgba(15,23,42,.08);
+  }
+
+  body {
+    font-family: 'Space Grotesk', 'Noto Sans KR', -apple-system, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    overscroll-behavior: none;
+    transition: background .25s, color .25s;
+  }
+
+  /* ── Ambient Glow (index.html과 동일) ── */
+  .ambient-glow {
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: -1;
+    background:
+      radial-gradient(circle at 16% 0%, rgba(252, 114, 255, 0.08), transparent 36%),
+      radial-gradient(circle at 84% 6%, rgba(0, 212, 170, 0.07), transparent 34%);
+  }
+  #main-wrap {
+    position: relative;
+    z-index: 1;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    /* iOS Safe Area: viewport-fit=cover 시 노치/Dynamic Island 아래부터 콘텐츠 시작 */
+    padding-top: env(safe-area-inset-top, 0px);
+    box-sizing: border-box;
+  }
+
+  /* ── Topbar ── */
+  .topbar {
+    height: 52px;
+    background: var(--topbar);
+    backdrop-filter: blur(20px) saturate(1.4);
+    -webkit-backdrop-filter: blur(20px) saturate(1.4);
+    border-bottom: 1px solid var(--border);
+    box-shadow: 0 1px 0 rgba(255,255,255,0.04), 0 4px 24px var(--shadow);
+    display: flex;
+    align-items: center;
+    padding: 0 20px;
+    gap: 14px;
+    flex-shrink: 0;       /* flex 구조가 상단 고정을 담당 */
+    z-index: 400;         /* 드로어(300)보다 위 */
+    position: relative;   /* sticky 제거: body{overflow:hidden}에서 iOS sticky 오동작 방지 */
+  }
+  html.light .topbar {
+    background: rgba(255,255,255,0.75);
+    border-bottom: 1px solid rgba(180,160,140,0.18);
+    box-shadow: 0 2px 24px rgba(120,90,70,0.10);
+    backdrop-filter: blur(24px) saturate(1.6);
+    -webkit-backdrop-filter: blur(24px) saturate(1.6);
+  }
+
+  .topbar-logo {
+    display: flex;
+    align-items: center;
+    text-decoration: none;
+  }
+  .topbar-logo-img {
+    height: 26px;
+    width: auto;
+    border-radius: 5px;
+    transition: filter 0.2s, opacity 0.2s;
+  }
+  html:not(.light) .topbar-logo-img {
+    filter: invert(1) brightness(0.92);
+    opacity: 0.92;
+  }
+  html.light .topbar-logo-img {
+    filter: none;
+    opacity: 0.85;
+  }
+  .topbar-sep-bar {
+    width: 1px;
+    height: 18px;
+    background: var(--border2);
+    margin: 0 4px;
+  }
+  .topbar-title {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--muted);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .topbar-sep { flex: 1; min-width: 0; }
+  .topbar-user {
+    font-size: 0.75rem;
+    color: var(--muted);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-shrink: 0;
+    white-space: nowrap;
+  }
+  .topbar-user span { color: var(--text2); font-weight: 600; }
+  .btn-logout {
+    height: 30px;
+    padding: 0 12px;
+    border-radius: 8px;
+    border: 1px solid var(--border2);
+    background: transparent;
+    color: var(--muted);
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    font-family: inherit;
+    transition: background .15s, color .15s;
+  }
+  .btn-logout:hover { background: rgba(255,75,110,0.1); color: var(--red); border-color: rgba(255,75,110,0.3); }
+
+  /* ── Main layout: PC 5트랙 (사이드바 | 리사이저 | 스냅샷 | 리사이저 | 리포트) ── */
+  .main {
+    display: grid;
+    grid-template-columns: 220px 5px 520px 5px 1fr;
+    grid-template-rows: 1fr;
+    flex: 1;
+    overflow: hidden;
+  }
+
+  /* ── Sidebar ── */
+  .sidebar {
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    border-right: 1px solid var(--border);
+    background: var(--card2);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+  }
+
+  /* ── 사이드바 토글 바 (모바일 전용, 스냅샷 토글과 동일 패턴) ── */
+  .sidebar-toggle-bar {
+    display: none; /* PC에서는 숨김 */
+    align-items: center;
+    justify-content: center;
+    height: 32px;
+    background: var(--card2);
+    border-bottom: 1px solid var(--border);
+    cursor: pointer;
+    flex-shrink: 0;
+    transition: background .15s;
+    user-select: none;
+    gap: 6px;
+    color: var(--muted);
+    font-size: 0.7rem;
+    font-weight: 600;
+  }
+  .sidebar-toggle-bar:hover { background: var(--card); color: var(--text2); }
+  .sidebar-toggle-bar .toggle-arrow { font-size: 0.85rem; transition: transform .25s; }
+  /* 접힌 상태: 토글 바만 남기고 나머지 숨김 */
+  .sidebar.sidebar-collapsed { max-height: 32px; }
+  .sidebar.sidebar-collapsed .sidebar-toggle-bar .toggle-arrow { transform: rotate(180deg); }
+
+  .sidebar-header {
+    padding: 20px 16px 10px;   /* 상단 20px: 검색바 위 여백 확보 (PC·모바일 공통) */
+    border-bottom: 1px solid var(--border);
+    flex-shrink: 0;
+  }
+  .sidebar-header-title {
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: .1em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 10px;
+  }
+  .sidebar-search {
+    width: 100%;
+    height: 34px;
+    border-radius: 8px;
+    border: 1px solid var(--border2);
+    background: var(--card);
+    backdrop-filter: blur(8px);
+    color: var(--text);
+    font-size: 13px;
+    padding: 0 10px;
+    outline: none;
+    font-family: inherit;
+    transition: border-color .15s;
+  }
+  .sidebar-search:focus { border-color: var(--blue); }
+  .sidebar-search::placeholder { color: var(--muted2); }
+
+  .sidebar-count {
+    padding: 8px 16px 6px;
+    font-size: 0.68rem;
+    color: var(--muted2);
+    flex-shrink: 0;
+  }
+
+  .sidebar-list {
+    overflow-y: auto;
+    flex: 1;
+  }
+  .sidebar-list::-webkit-scrollbar { width: 4px; }
+  .sidebar-list::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 2px; }
+
+  .report-item {
+    padding: 11px 16px;
+    border-bottom: 1px solid var(--border);
+    cursor: pointer;
+    transition: background .12s;
+    position: relative;
+    touch-action: manipulation;  /* 모바일 300ms 탭 딜레이 제거 */
+  }
+  .report-item:hover { background: var(--card); }
+  .report-item.active  { background: rgba(59,130,246,0.1); border-left: 2px solid var(--blue); }
+  .report-item.in-compare { background: rgba(0,212,170,0.08); border-left: 2px solid var(--green); }
+
+  /* ── 비교 버튼 (사이드바 항목 우측) ── */
+  .btn-compare-add {
+    position: absolute;
+    right: 28px; top: 50%;
+    transform: translateY(-50%);
+    background: none;
+    border: 1px solid var(--border2);
+    border-radius: 5px;
+    color: var(--muted2);
+    font-size: 0.62rem;
+    font-weight: 700;
+    cursor: pointer;
+    padding: 2px 5px;
+    opacity: 0;
+    transition: opacity .15s, background .15s, color .15s, border-color .15s;
+    line-height: 1.4;
+  }
+  .report-item:hover .btn-compare-add { opacity: 1; }
+  .report-item.in-compare .btn-compare-add {
+    opacity: 1;
+    background: rgba(0,212,170,0.15);
+    color: var(--green);
+    border-color: rgba(0,212,170,0.4);
+  }
+  .btn-compare-add:hover { background: rgba(0,212,170,0.2) !important; color: var(--green) !important; border-color: var(--green) !important; }
+
+  /* ── 비교 실행 바 (사이드바 하단) ── */
+  #compare-bar {
+    display: none;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 12px;
+    background: rgba(0,212,170,0.08);
+    border-top: 1px solid rgba(0,212,170,0.25);
+    flex-shrink: 0;
+  }
+  #compare-bar span { font-size: 0.72rem; color: var(--green); font-weight: 700; flex: 1; }
+  .btn-do-compare {
+    height: 26px; padding: 0 10px;
+    border-radius: 6px; border: none;
+    background: var(--green); color: #fff;
+    font-size: 0.7rem; font-weight: 700;
+    cursor: pointer; font-family: inherit;
+    transition: opacity .15s;
+  }
+  .btn-do-compare:hover { opacity: .85; }
+  .btn-clear-compare {
+    height: 26px; width: 26px;
+    border-radius: 6px; border: 1px solid var(--border2);
+    background: transparent; color: var(--muted);
+    font-size: 0.75rem; cursor: pointer;
+    transition: background .15s;
+  }
+  .btn-clear-compare:hover { background: var(--card); }
+
+  .report-item-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 4px;
+  }
+  .report-item-name {
+    font-size: 0.82rem;
+    font-weight: 600;
+    color: var(--text);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 140px;
+  }
+  .badge-action {
+    font-size: 0.6rem;
+    font-weight: 700;
+    padding: 2px 7px;
+    border-radius: 5px;
+    flex-shrink: 0;
+  }
+  .badge-BUY  { background: rgba(0,212,170,0.15); color: var(--green); }
+  .badge-SELL { background: rgba(255,75,110,0.15); color: var(--red); }
+  .badge-HOLD { background: rgba(251,191,36,0.15); color: var(--yellow); }
+
+  .report-item-ticker {
+    font-size: 0.7rem;
+    color: var(--muted);
+    margin-bottom: 3px;
+  }
+  .report-item-date {
+    font-size: 0.66rem;
+    color: var(--muted2);
+  }
+
+  /* ── Empty state ── */
+  .sidebar-empty {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    color: var(--muted2);
+    font-size: 0.8rem;
+    padding: 24px;
+    text-align: center;
+  }
+  .sidebar-empty .icon { font-size: 2rem; }
+
+  /* ── 스냅샷 컬럼 (PC 중간) ── */
+  .snapshot-col {
+    display: flex;
+    flex-direction: column;
+    border-right: 1px solid var(--border);
+    overflow: hidden;
+    position: relative;
+  }
+
+  /* ── 상/하 레이아웃 접기 토글 바 (모바일·태블릿 전용) ── */
+  .snap-toggle-bar {
+    display: none; /* PC에서는 숨김 */
+    align-items: center;
+    justify-content: center;
+    height: 32px;
+    background: var(--card2);
+    border-top: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
+    cursor: pointer;
+    flex-shrink: 0;
+    transition: background .15s;
+    user-select: none;
+    gap: 6px;
+    color: var(--muted);
+    font-size: 0.7rem;
+    font-weight: 600;
+  }
+  .snap-toggle-bar:hover { background: var(--card); color: var(--text2); }
+  .snap-toggle-bar .toggle-arrow { font-size: 0.85rem; transition: transform .25s; }
+
+  /* 스냅샷 접힌 상태 (상/하 전용) */
+  .snapshot-col.snap-collapsed .snap-body {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height .3s ease;
+  }
+  .snapshot-col:not(.snap-collapsed) .snap-body {
+    max-height: 2000px;
+    transition: max-height .35s ease;
+    overflow: visible;
+  }
+  .snapshot-col.snap-collapsed .snap-toggle-bar .toggle-arrow { transform: rotate(180deg); }
+  .col-empty {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    color: var(--muted2);
+    padding: 24px;
+    text-align: center;
+  }
+  .col-empty .icon { font-size: 2.4rem; }
+  .col-empty p { font-size: 0.82rem; }
+
+  #snapshot-panel {
+    display: none;
+    flex-direction: column;
+    overflow-y: auto;
+    flex: 1;
+    padding: 20px 16px;
+    gap: 14px;
+  }
+  .snap-inner {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    width: 100%;
+  }
+  .snap-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+  .snap-title { font-size: 1.05rem; font-weight: 700; color: var(--text); line-height: 1.3; }
+  .snap-meta  { font-size: 0.68rem; color: var(--muted); margin-top: 2px; }
+  .snap-action-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+  .snap-badge {
+    font-size: 0.72rem;
+    font-weight: 700;
+    padding: 3px 12px;
+    border-radius: 20px;
+    letter-spacing: .04em;
+  }
+  .snap-badge.BUY  { background: rgba(0,212,170,0.15); color: var(--green); border: 1px solid rgba(0,212,170,0.3); }
+  .snap-badge.SELL { background: rgba(255,75,110,0.15); color: var(--red);   border: 1px solid rgba(255,75,110,0.3); }
+  .snap-badge.HOLD { background: rgba(251,191,36,0.12); color: var(--yellow);border: 1px solid rgba(251,191,36,0.25); }
+  .snap-section {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 22px;
+    padding: 14px 16px;
+  }
+  .snap-section-title {
+    font-size: 0.66rem;
+    color: var(--muted);
+    font-weight: 600;
+    letter-spacing: .06em;
+    text-transform: uppercase;
+    margin-bottom: 10px;
+  }
+  /* 스냅샷 타일: 알약(Pill) 스타일, 공간에 따라 자동 리플로우 */
+  .snap-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+    gap: 8px;
+  }
+  .snap-kv {
+    display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px;
+    background: var(--card2); border: 1px solid var(--border);
+    border-radius: 999px; padding: 7px 14px; text-align: center;
+  }
+  .snap-kv-label { font-size: 0.64rem; color: var(--muted); }
+  .snap-kv-val   { font-size: 0.82rem; font-weight: 600; color: var(--text2); }
+  .snap-signal-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 7px;
+  }
+  /* 홀수 개일 때 마지막 칩이 혼자 남으면 가운데 정렬 */
+  .snap-signal-grid > .snap-sig-chip:last-child:nth-child(odd) {
+    grid-column: 1 / -1;
+    justify-self: center;
+    width: 50%;
+  }
+  .snap-sig-chip {
+    border-radius: 999px;
+    padding: 8px 12px;
+    text-align: center;
+  }
+  .snap-sig-chip .sig-name { font-size: 0.62rem; color: var(--muted); margin-bottom: 2px; }
+  .snap-sig-chip .sig-val  { font-size: 0.76rem; font-weight: 700; }
+  .btn-reanalyze {
+    height: 32px;
+    padding: 0 16px;
+    border-radius: 999px;
+    border: 1px solid var(--border2);
+    background: rgba(59,130,246,0.12);
+    color: var(--blue);
+    font-size: 0.72rem;
+    font-weight: 600;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: background .15s;
+  }
+  .btn-reanalyze:hover { background: rgba(59,130,246,0.25); }
+
+  /* ── PC 스냅샷 접기/펼치기 버튼 (좌/우 전용) ── */
+  .btn-snap-pc {
+    display: none; /* 기본 숨김, PC에서만 표시 */
+    align-items: center;
+    justify-content: center;
+    width: 18px;
+    height: 48px;
+    background: var(--card2);
+    border: 1px solid var(--border2);
+    border-radius: 0 6px 6px 0;
+    cursor: pointer;
+    color: var(--muted);
+    font-size: 0.75rem;
+    transition: background .15s, color .15s;
+    position: absolute;
+    right: -18px;
+    top: 50%;
+    transform: translateY(-50%);
+    z-index: 20;
+    writing-mode: horizontal-tb;
+  }
+  .btn-snap-pc:hover { background: var(--card); color: var(--blue); }
+  @media (min-width: 1025px) { .btn-snap-pc { display: flex; } }
+
+  /* PC 접힌 상태 */
+  .snapshot-col.pc-collapsed {
+    overflow: visible !important;
+  }
+  .snapshot-col.pc-collapsed .snap-body,
+  .snapshot-col.pc-collapsed .snap-toggle-bar { display: none !important; }
+
+  /* ── 컬럼 리사이저 ── */
+  .col-resizer {
+    width: 5px;
+    cursor: col-resize;
+    background: var(--border);
+    flex-shrink: 0;
+    transition: background .15s;
+    position: relative;
+    z-index: 10;
+  }
+  .col-resizer:hover,
+  .col-resizer.dragging { background: var(--blue); }
+  @media (max-width: 767px) { .col-resizer { display: none; } }
+
+  /* ── 리포트 컬럼 (PC 우측) ── */
+  .report-col {
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+  #report-frame {
+    flex: 1;
+    border: none;
+    width: 100%;
+    height: 100%;
+    display: none;
+  }
+
+  /* ── 반응형: 태블릿 세로 (769px ~ 1024px) ── */
+  @media (min-width: 768px) and (max-width: 1024px) {
+    /* 2컬럼: 사이드바(160px) | 콘텐츠(1fr), 스냅샷+리포트 상하 배치 */
+    .main {
+      grid-template-columns: 160px 1fr !important;
+      grid-template-rows: auto minmax(460px, 1fr) !important;
+    }
+    .col-resizer { display: none; }
+    /* 사이드바: 1열, 두 행 모두 차지 */
+    .sidebar {
+      grid-column: 1;
+      grid-row: 1 / span 2;
+      overflow-y: auto;
+    }
+    /* 스냅샷: 2열 1행 */
+    .snapshot-col {
+      grid-column: 2;
+      grid-row: 1;
+      border-right: none;
+      border-bottom: 1px solid var(--border);
+      overflow-y: auto;
+    }
+    #snapshot-panel { max-width: none; }
+    /* 리포트: 2열 2행 — 최소 460px 확보 */
+    .report-col {
+      grid-column: 2;
+      grid-row: 2;
+      overflow: hidden;
+      min-height: 460px;
+    }
+    #report-frame {
+      flex: 1;
+      min-height: 0;
+      height: 100%;
+      display: block;          /* 태블릿에서 항상 표시 영역 확보 */
+    }
+  }
+
+  /* 태블릿·모바일에서 접기 버튼 숨김 */
+  /* 모바일·태블릿에서 토글 바 표시 */
+  @media (max-width: 1024px) { .snap-toggle-bar { display: flex; } }
+
+  /* ── 반응형: 태블릿 가로 (1025px ~ 1280px) ── */
+  @media (min-width: 1025px) and (max-width: 1280px) {
+    /* 3컬럼 유지, 사이드바·스냅샷 조금 좁게 */
+    .main {
+      grid-template-columns: 180px 5px 260px 5px 1fr !important;
+    }
+  }
+
+  /* ── 반응형: 모바일 (768px 이하) ── */
+  @media (max-width: 767px) {
+    .col-resizer { display: none; }
+    /* topbar: 이메일 숨김, 제목 축소 */
+    #user-email-display { display: none; }
+    .topbar-sep-bar { display: none; }
+    .topbar-title { font-size: 0.75rem; }
+    .topbar { padding: 0 12px; gap: 8px; }
+    /* 메인: PC 그리드 대신 세로 스택 */
+    .main {
+      display: flex !important;
+      flex-direction: column;
+      overflow-y: auto;
+      overflow-x: hidden;
+      overscroll-behavior: contain;
+      -webkit-overflow-scrolling: touch;
+    }
+    /* 사이드바 토글 바: 모바일에서만 표시 */
+    .sidebar-toggle-bar { display: flex; }
+    /* 사이드바: 인라인 표시 (드로어 아님), 높이 제한 + 접기 트랜지션 */
+    .sidebar {
+      border-right: none;
+      border-bottom: 1px solid var(--border);
+      max-height: 252px;   /* 32px 토글바 + 220px 콘텐츠 */
+      flex-shrink: 0;
+      transition: max-height .3s ease;
+    }
+    /* compare-bar 표시 시 사이드바 높이 추가 확보 */
+    .sidebar:has(#compare-bar[style*="flex"]) {
+      max-height: 296px;   /* 252 + compare-bar ~44px */
+    }
+    /* 접힌 상태 */
+    .sidebar.sidebar-collapsed {
+      max-height: 32px;
+    }
+    /* 스냅샷 컬럼 */
+    .snapshot-col {
+      border-right: none;
+      border-bottom: 1px solid var(--border);
+      overflow: visible;
+    }
+    #snapshot-panel {
+      overflow-y: visible;
+      flex: unset;
+      padding: 20px 16px;
+      max-width: 680px;
+      margin: 0 auto;
+      width: 100%;
+      box-sizing: border-box;
+    }
+    /* 리포트 컬럼 */
+    .report-col {
+      overflow: visible;
+      flex: 1;
+      min-height: 320px;
+    }
+    #report-frame {
+      height: 60vh;
+      min-height: 320px;
+      border-top: 1px solid var(--border);
+      width: 100%;
+      max-width: 680px;
+      margin: 0 auto;
+      box-sizing: border-box;
+    }
+    .col-empty { min-height: 120px; flex: unset; }
+    .report-item-name { max-width: 140px; }
+    /* 모바일: 비교 버튼 항상 표시 (hover 없음) */
+    .btn-compare-add {
+      opacity: 1 !important;
+      right: 46px;  /* 삭제 버튼(✕)과 겹치지 않도록 */
+    }
+    .btn-delete-report { opacity: 1 !important; }
+  }
+
+  /* ── Not logged in overlay ── */
+  #not-logged-in {
+    position: fixed;
+    inset: 0;
+    z-index: 500;
+    background: rgba(5,8,16,0.72);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 14px;
+  }
+  #not-logged-in .icon { font-size: 3rem; }
+  #not-logged-in p { color: var(--muted); font-size: 0.9rem; }
+  .btn-go-main {
+    height: 42px;
+    padding: 0 24px;
+    border-radius: 10px;
+    border: none;
+    background: var(--blue);
+    color: #fff;
+    font-size: 14px;
+    font-weight: 700;
+    cursor: pointer;
+    font-family: inherit;
+    transition: opacity .2s;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+  }
+  .btn-go-main:hover { opacity: .85; }
+
+  /* ── Delete button ── */
+  .btn-delete-report {
+    position: absolute;
+    right: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: none;
+    border: none;
+    color: var(--muted2);
+    font-size: 0.75rem;
+    cursor: pointer;
+    padding: 4px;
+    opacity: 0;
+    transition: opacity .15s, color .15s;
+  }
+  .report-item:hover .btn-delete-report { opacity: 1; }
+  .btn-delete-report:hover { color: var(--red); }
+
+  /* scrollbar global */
+  * { scrollbar-width: thin; scrollbar-color: var(--border2) transparent; }
+</style>
+</head>
+<body>
+
+<div class="ambient-glow"></div>
+
+<div id="main-wrap">
+
+<!-- Not logged in -->
+<div id="not-logged-in" style="display:none">
+  <div class="icon">🔒</div>
+  <div style="font-size:1.1rem;font-weight:700;color:var(--text)">로그인이 필요합니다</div>
+  <p>아카이브는 로그인 후 이용할 수 있습니다.</p>
+  <a href="index.html" class="btn-go-main">← 메인으로 돌아가기</a>
+</div>
+
+<!-- Topbar -->
+<header class="topbar" id="topbar" style="display:none">
+  <a href="index.html" class="topbar-logo">
+    <img class="topbar-logo-img" src="assets/signnith-logo-white.png" alt="Signnith" />
+  </a>
+  <div class="topbar-sep-bar"></div>
+  <span class="topbar-title">📂 아카이브</span>
+  <div class="topbar-sep"></div>
+  <div class="topbar-user">
+    <span id="user-email-display"></span>
+    <button class="btn-logout" onclick="logout()">로그아웃</button>
+  </div>
+</header>
+
+<!-- Main -->
+<div class="main" id="main-area" style="display:none">
+
+  <!-- Sidebar -->
+  <aside class="sidebar" id="sidebar">
+    <!-- 모바일 전용 접기/펼치기 토글 바 -->
+    <div class="sidebar-toggle-bar" id="sidebar-toggle-bar" onclick="toggleSidebarCollapse()">
+      <span class="toggle-arrow">↑</span>
+      <span id="sidebar-toggle-label">종목 검색 접기</span>
+    </div>
+    <div class="sidebar-header">
+      <div class="sidebar-header-title">아카이브</div>
+      <input class="sidebar-search" id="sidebar-search" type="text" placeholder="종목명·티커 검색…" oninput="filterList()">
+    </div>
+    <div class="sidebar-count" id="sidebar-count"></div>
+    <div class="sidebar-list" id="sidebar-list"></div>
+    <!-- 비교 실행 바 (2개 선택 시 표시) -->
+    <div id="compare-bar">
+      <span id="compare-bar-label">0 / 2 선택</span>
+      <button class="btn-do-compare" onclick="showComparison()" id="btn-do-compare" disabled>비교하기</button>
+      <button class="btn-clear-compare" onclick="clearCompare()" title="선택 초기화">✕</button>
+    </div>
+  </aside>
+
+  <!-- 스냅샷 컬럼 -->
+  <div class="col-resizer" id="resizer-left"></div>
+  <section class="snapshot-col" id="snapshot-col">
+    <!-- PC 전용 접기/펼치기 버튼 -->
+    <button class="btn-snap-pc" id="btn-snap-pc" onclick="toggleSnapshotPC()" title="스냅샷 접기/펼치기">◀</button>
+    <!-- 상/하 레이아웃 전용 토글 바 -->
+    <div class="snap-toggle-bar" id="snap-toggle-bar" onclick="toggleSnapshotCollapse()">
+      <span class="toggle-arrow">↑</span>
+      <span id="snap-toggle-label">스냅샷 접기</span>
+    </div>
+    <!-- 스냅샷 콘텐츠 (접기 대상) -->
+    <div class="snap-body">
+      <div class="col-empty" id="snap-empty">
+        <div class="icon">📋</div>
+        <p>종목을 선택하면<br>저장된 분석이 표시됩니다</p>
+      </div>
+      <div id="snapshot-panel"></div>
+    </div>
+  </section>
+
+  <!-- 리포트 컬럼 -->
+  <div class="col-resizer" id="resizer-right"></div>
+  <section class="report-col">
+    <div class="col-empty" id="report-empty">
+      <div class="icon">📈</div>
+      <p>현재 기준 재분석을<br>실행하면 리포트가 표시됩니다</p>
+    </div>
+    <iframe id="report-frame" title="리포트"></iframe>
+  </section>
+
+</div><!-- /#main-wrap -->
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+<script>
+// ── 테마 동기화 (report.html과 동일한 key) ──
+const THEME_KEY = 'tsa_theme';
+function applyThemeA(theme) {
+  const isLight = theme === 'light' || (theme === 'system' && window.matchMedia('(prefers-color-scheme: light)').matches);
+  document.documentElement.classList.toggle('light', isLight);
+}
+const _qThemeA = new URLSearchParams(location.search).get('theme');
+if (_qThemeA === 'light' || _qThemeA === 'dark') { try { localStorage.setItem(THEME_KEY, _qThemeA); } catch {} }
+applyThemeA(_qThemeA || localStorage.getItem(THEME_KEY) || 'dark');
+
+// ── Particle Network Background ──
+(function initParticles() {
+  const canvas = document.getElementById('particle-canvas');
+  if (!canvas) return;
+  const ctx = canvas.getContext('2d');
+  const CFG = { SPEED_MAX:0.38, RADIUS:1.5, GLOW_RADIUS:3.2, LINK_DIST:150, MOUSE_DIST:150, REPEL_STRENGTH:5.0, REPEL_EASE:0.08 };
+  function isDark() { return !document.documentElement.classList.contains('light'); }
+  const DARK_P=[160,200,255],DARK_L=[100,160,255],DARK_ML=[140,110,255];
+  const LIGHT_P=[80,120,200],LIGHT_L=[60,100,180],LIGHT_ML=[110,70,200];
+  let W,H,particles; const mouse={x:-9999,y:-9999};
+  class Particle {
+    constructor() {
+      this.x=Math.random()*W; this.y=Math.random()*H;
+      const spd=0.08+Math.random()*CFG.SPEED_MAX,ang=Math.random()*Math.PI*2;
+      this.vx=Math.cos(ang)*spd; this.vy=Math.sin(ang)*spd;
+      this.rx=0; this.ry=0;
+      this.alpha=0.25+Math.random()*0.45; this.r=CFG.RADIUS*(0.7+Math.random()*0.6);
+      this.phase=Math.random()*Math.PI*2; this.wobble=(Math.random()-0.5)*0.005;
+    }
+    update(dt) {
+      this.phase+=this.wobble*dt;
+      const cos=Math.cos(this.phase*0.35),sin=Math.sin(this.phase*0.35);
+      const nx=this.vx*cos-this.vy*sin,ny=this.vx*sin+this.vy*cos;
+      this.vx=nx; this.vy=ny;
+      const dx=this.x-mouse.x,dy=this.y-mouse.y,d=Math.hypot(dx,dy);
+      if(d<CFG.MOUSE_DIST&&d>0){const f=(1-d/CFG.MOUSE_DIST)*CFG.REPEL_STRENGTH;this.rx+=(dx/d)*f;this.ry+=(dy/d)*f;}
+      this.vx+=this.rx*CFG.REPEL_EASE; this.vy+=this.ry*CFG.REPEL_EASE;
+      this.rx*=0.82; this.ry*=0.82;
+      const spd=Math.hypot(this.vx,this.vy),max=CFG.SPEED_MAX*2.4;
+      if(spd>max){this.vx=(this.vx/spd)*max;this.vy=(this.vy/spd)*max;}
+      this.x+=this.vx*(dt/16); this.y+=this.vy*(dt/16);
+      if(this.x<-20)this.x=W+20; if(this.x>W+20)this.x=-20;
+      if(this.y<-20)this.y=H+20; if(this.y>H+20)this.y=-20;
+    }
+    draw(cp) {
+      const[r,g,b]=cp;
+      const grd=ctx.createRadialGradient(this.x,this.y,0,this.x,this.y,CFG.GLOW_RADIUS*this.r);
+      grd.addColorStop(0,`rgba(${r},${g},${b},${this.alpha*0.85})`);
+      grd.addColorStop(0.4,`rgba(${r},${g},${b},${this.alpha*0.25})`);
+      grd.addColorStop(1,`rgba(${r},${g},${b},0)`);
+      ctx.beginPath();ctx.arc(this.x,this.y,CFG.GLOW_RADIUS*this.r,0,Math.PI*2);ctx.fillStyle=grd;ctx.fill();
+      ctx.beginPath();ctx.arc(this.x,this.y,this.r,0,Math.PI*2);ctx.fillStyle=`rgba(${r},${g},${b},${this.alpha})`;ctx.fill();
+    }
+  }
+  function resize(){W=canvas.width=window.innerWidth;H=canvas.height=window.innerHeight;const count=Math.min(Math.floor((W*H)/10000),180);if(!particles||Math.abs(particles.length-count)>15)particles=Array.from({length:count},()=>new Particle());}
+  let last=0;
+  function frame(ts){
+    const dt=Math.min(ts-last,50);last=ts;
+    const dark=isDark(),cp=dark?DARK_P:LIGHT_P,cl=dark?DARK_L:LIGHT_L,cm=dark?DARK_ML:LIGHT_ML;
+    const maxLA=dark?0.52:0.22,maxMA=dark?0.50:0.28;
+    ctx.clearRect(0,0,W,H);
+    for(const p of particles)p.update(dt);
+    for(let i=0;i<particles.length;i++){for(let j=i+1;j<particles.length;j++){const a=particles[i],b=particles[j],d=Math.hypot(a.x-b.x,a.y-b.y);if(d<CFG.LINK_DIST){const op=(1-d/CFG.LINK_DIST)*maxLA;ctx.beginPath();ctx.moveTo(a.x,a.y);ctx.lineTo(b.x,b.y);ctx.strokeStyle=`rgba(${cl[0]},${cl[1]},${cl[2]},${op})`;ctx.lineWidth=op*1.8;ctx.stroke();}}}
+    const mx=mouse.x,my=mouse.y;
+    for(const p of particles){const d=Math.hypot(p.x-mx,p.y-my);if(d<CFG.MOUSE_DIST){const op=(1-d/CFG.MOUSE_DIST)*maxMA;ctx.beginPath();ctx.moveTo(p.x,p.y);ctx.lineTo(mx,my);ctx.strokeStyle=`rgba(${cm[0]},${cm[1]},${cm[2]},${op*0.55})`;ctx.lineWidth=op*1.1;ctx.stroke();}}
+    for(const p of particles)p.draw(cp);
+    if(mouse.x>0){const mg=ctx.createRadialGradient(mx,my,0,mx,my,CFG.MOUSE_DIST*0.55);mg.addColorStop(0,dark?'rgba(110,80,220,0.05)':'rgba(80,100,200,0.04)');mg.addColorStop(1,'rgba(0,0,0,0)');ctx.beginPath();ctx.arc(mx,my,CFG.MOUSE_DIST*0.55,0,Math.PI*2);ctx.fillStyle=mg;ctx.fill();}
+    requestAnimationFrame(frame);
+  }
+  window.addEventListener('mousemove',e=>{mouse.x=e.clientX;mouse.y=e.clientY;});
+  window.addEventListener('mouseleave',()=>{mouse.x=-9999;mouse.y=-9999;});
+  window.addEventListener('touchmove',e=>{mouse.x=e.touches[0].clientX;mouse.y=e.touches[0].clientY;},{passive:true});
+  window.addEventListener('touchend',()=>{mouse.x=-9999;mouse.y=-9999;});
+  let rt; window.addEventListener('resize',()=>{clearTimeout(rt);rt=setTimeout(resize,120);});
+  resize(); requestAnimationFrame(frame);
+})();
+
+// ── Aurora Blob Background ──
+(function initAurora() {
+  const canvas = document.getElementById('aurora-canvas');
+  if (!canvas) return;
+  const ctx = canvas.getContext('2d');
+  const darkBlobs=[
+    {x:.18,y:.22,r:.38,color:'rgba(108,92,231,',vx:.00012,vy:.00008,phase:0},
+    {x:.72,y:.15,r:.32,color:'rgba(0,153,255,',vx:-.0001,vy:.00013,phase:1.2},
+    {x:.55,y:.72,r:.42,color:'rgba(0,212,170,',vx:.00009,vy:-.0001,phase:2.4},
+    {x:.10,y:.75,r:.28,color:'rgba(167,139,250,',vx:.00014,vy:.00006,phase:0.7},
+    {x:.88,y:.58,r:.34,color:'rgba(236,72,153,',vx:-.0001,vy:-.0001,phase:3.1},
+    {x:.42,y:.42,r:.25,color:'rgba(56,189,248,',vx:.00007,vy:.00015,phase:1.8},
+  ];
+  const lightBlobs=[
+    {x:.20,y:.18,r:.40,color:'rgba(255,182,159,',vx:.00010,vy:.00007,phase:0},
+    {x:.75,y:.20,r:.35,color:'rgba(129,236,236,',vx:-.0009,vy:.00012,phase:1.4},
+    {x:.50,y:.68,r:.44,color:'rgba(253,242,180,',vx:.00008,vy:-.0009,phase:2.6},
+    {x:.12,y:.70,r:.30,color:'rgba(210,196,255,',vx:.00013,vy:.00006,phase:0.9},
+    {x:.85,y:.55,r:.32,color:'rgba(255,214,214,',vx:-.0008,vy:-.0008,phase:3.3},
+    {x:.40,y:.38,r:.28,color:'rgba(180,235,220,',vx:.00006,vy:.00014,phase:2.0},
+  ];
+  let W,H,t=0;
+  function resize(){W=canvas.width=window.innerWidth;H=canvas.height=window.innerHeight;}
+  window.addEventListener('resize',resize); resize();
+  function isDark(){return !document.documentElement.classList.contains('light');}
+  function draw(){
+    ctx.clearRect(0,0,W,H);
+    const dark=isDark();
+    const angle=160*Math.PI/180,L=Math.sqrt(W*W+H*H),cx=W/2,cy=H/2;
+    const x0=cx-Math.cos(angle)*L/2,y0=cy-Math.sin(angle)*L/2,x1=cx+Math.cos(angle)*L/2,y1=cy+Math.sin(angle)*L/2;
+    const bg=ctx.createLinearGradient(x0,y0,x1,y1);
+    if(dark){bg.addColorStop(0,'#050810');bg.addColorStop(1,'#080520');}
+    else{bg.addColorStop(0,'#F8F1EE');bg.addColorStop(0.5,'#ECF8F8');bg.addColorStop(1,'#FCFAF2');}
+    ctx.fillStyle=bg; ctx.fillRect(0,0,W,H);
+    const blobs=dark?darkBlobs:lightBlobs,coreAlpha=dark?0.14:0.50,midAlpha=dark?0.06:0.22;
+    for(const b of blobs){
+      const pulse=1+0.06*Math.sin(t*0.0008+b.phase);
+      const bx=(b.x+Math.sin(t*b.vx+b.phase)*0.18)*W,by=(b.y+Math.cos(t*b.vy+b.phase)*0.15)*H;
+      const br=b.r*Math.min(W,H)*pulse;
+      const grad=ctx.createRadialGradient(bx,by,0,bx,by,br);
+      grad.addColorStop(0,b.color+coreAlpha+')');
+      grad.addColorStop(0.4,b.color+midAlpha+')');
+      grad.addColorStop(1,b.color+'0)');
+      ctx.beginPath();ctx.arc(bx,by,br,0,Math.PI*2);ctx.fillStyle=grad;ctx.fill();
+    }
+    ctx.fillStyle=dark?'rgba(0,0,0,0.38)':'rgba(255,255,255,0.28)'; ctx.fillRect(0,0,W,H);
+    t++; requestAnimationFrame(draw);
+  }
+  new MutationObserver(()=>{}).observe(document.documentElement,{attributes:true,attributeFilter:['class']});
+  requestAnimationFrame(draw);
+})();
+
+// ── Supabase 초기화 ──
+const _SB_URL = 'https://anvgqeyghquwrvsjmivj.supabase.co';
+const _SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFudmdxZXlnaHF1d3J2c2ptaXZqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzE4Mjg4MzcsImV4cCI6MjA4NzQwNDgzN30.Lwr3BWTRDyaxN9kEGdj26i-P82Aw_h052e_Ia31WBk0';
+const _sb = supabase.createClient(_SB_URL, _SB_KEY);
+
+(async () => {
+  'use strict';
+
+  // ── Supabase 세션에서 이메일 획득 ──
+  const { data: { session } } = await _sb.auth.getSession();
+  const email = session?.user?.email
+    // fallback: index.html이 기록한 호환 키
+    || (() => { try { return JSON.parse(localStorage.getItem('signnith_session')||'null')?.email; } catch{ return null; } })();
+
+  if (!email) {
+    document.getElementById('not-logged-in').style.display = 'flex';
+    return;
+  }
+
+  // signnith_session 호환 키 갱신 (compare.html 동기 접근 대비)
+  localStorage.setItem('signnith_session', JSON.stringify({ email, loginAt: Date.now() }));
+
+  // ── 로그인 상태: topbar / main 노출 ──
+  document.getElementById('topbar').style.display = 'flex';
+  document.getElementById('user-email-display').textContent = email.split('@')[0];
+
+  // ── 반응형 레이아웃 동기화 ──
+  function syncLayout() {
+    const m   = document.getElementById('main-area');
+    const col = document.getElementById('snapshot-col');
+    if (!m) return;
+    const w = window.innerWidth;
+    if (w <= 767) {
+      // 모바일: CSS가 flex-column으로 처리 (JS는 display만 보장)
+      m.style.display = 'flex';
+      m.style.gridTemplateColumns = '';
+    } else if (w <= 1024) {
+      m.style.display = 'grid';
+      m.style.gridTemplateColumns = '160px 1fr';
+      if (col) col.classList.remove('pc-collapsed');
+      updatePcBtn(false);
+    } else {
+      m.style.display = 'grid';
+      m.style.gridTemplateColumns = '';
+      if (col) col.classList.remove('snap-collapsed');
+      const lbl = document.getElementById('snap-toggle-label');
+      if (lbl) lbl.textContent = '스냅샷 접기';
+    }
+  }
+  syncLayout();
+  window.addEventListener('resize', syncLayout);
+
+  // ── 리포트 불러오기 ──
+  const REPORTS_KEY = `signnith_reports_${email}`;
+  let allReports = [];
+  let activeId   = null;
+
+  function loadReports() {
+    allReports = JSON.parse(localStorage.getItem(REPORTS_KEY) || '[]');
+  }
+
+  function saveReports() {
+    localStorage.setItem(REPORTS_KEY, JSON.stringify(allReports));
+  }
+
+  // ── 날짜 포맷 ──
+  function fmtDate(iso) {
+    const d = new Date(iso);
+    const yy = d.getFullYear();
+    const mm = String(d.getMonth()+1).padStart(2,'0');
+    const dd = String(d.getDate()).padStart(2,'0');
+    const hh = String(d.getHours()).padStart(2,'0');
+    const mi = String(d.getMinutes()).padStart(2,'0');
+    return `${yy}.${mm}.${dd} ${hh}:${mi}`;
+  }
+
+  // ── 국기 ──
+  function flag(isKr, ticker) {
+    if (isKr) return '🇰🇷';
+    if (/\.(T)$/i.test(ticker)) return '🇯🇵';
+    if (/\.(L)$/i.test(ticker)) return '🇬🇧';
+    if (/\.(HK)$/i.test(ticker)) return '🇭🇰';
+    return '🇺🇸';
+  }
+
+  // ── 목록 렌더링 ──
+  function renderList(reports) {
+    const listEl  = document.getElementById('sidebar-list');
+    const countEl = document.getElementById('sidebar-count');
+    countEl.textContent = `총 ${reports.length}건`;
+
+    if (!reports.length) {
+      listEl.innerHTML = `<div class="sidebar-empty">
+        <div class="icon">📭</div>
+        <div>저장된 리포트가 없습니다</div>
+        <div style="font-size:0.72rem;margin-top:4px">메인에서 종목을 분석하면<br>자동으로 저장됩니다.</div>
+      </div>`;
+      return;
+    }
+
+    listEl.innerHTML = reports.map(r => `
+      <div class="report-item${r.id === activeId ? ' active' : ''}${compareSet.has(r.id) ? ' in-compare' : ''}" onclick="selectReport(${r.id})" data-id="${r.id}">
+        <div class="report-item-top">
+          <div class="report-item-name">${flag(r.isKr, r.ticker)} ${r.companyName || r.ticker}</div>
+          <span class="badge-action badge-${r.action}">${r.action}</span>
+        </div>
+        <div class="report-item-ticker">${r.ticker} · 신뢰도 ${Math.round((r.confidence||0)*100)}%</div>
+        <div class="report-item-date">🕐 ${fmtDate(r.savedAt)}</div>
+        <button class="btn-compare-add" onclick="toggleCompare(event,${r.id})" title="비교에 추가/제거">${compareSet.has(r.id) ? '✓비교' : '+비교'}</button>
+        <button class="btn-delete-report" onclick="deleteReport(event, ${r.id})" title="삭제">✕</button>
+      </div>
+    `).join('');
+  }
+
+  // ── 사이드바 항목 터치 이벤트 위임 (iOS 즉시 반응, 300ms 딜레이 제거) ──
+  (function() {
+    const list = document.getElementById('sidebar-list');
+    if (!list) return;
+    let touchStartY = 0;
+    list.addEventListener('touchstart', function(e) {
+      touchStartY = e.touches[0].clientY;
+    }, { passive: true });
+    list.addEventListener('touchend', function(e) {
+      const dy = Math.abs(e.changedTouches[0].clientY - touchStartY);
+      if (dy > 8) return;                                    // 스크롤이면 무시
+      const item = e.target.closest('.report-item');
+      if (!item) return;
+      if (e.target.closest('.btn-delete-report')) return;   // 삭제 버튼은 onclick 사용
+      if (e.target.closest('.btn-compare-add'))  return;   // 비교 버튼은 onclick 사용
+      const id = Number(item.dataset.id);
+      if (!id) return;
+      e.preventDefault();    // 이후 발생하는 300ms ghost click 차단
+      window.selectReport(id);
+    }, { passive: false });
+  })();
+
+  // ── 검색 필터 ──
+  window.filterList = function() {
+    const q = document.getElementById('sidebar-search').value.trim().toLowerCase();
+    const filtered = q
+      ? allReports.filter(r =>
+          (r.ticker||'').toLowerCase().includes(q) ||
+          (r.companyName||'').toLowerCase().includes(q))
+      : allReports;
+    renderList(filtered);
+  };
+
+  // ── 숫자 포맷 ──
+  function fmtNum(v, isKr) {
+    if (v == null || isNaN(v)) return '-';
+    if (isKr) return v >= 1000 ? v.toLocaleString('ko-KR') : v.toFixed(0);
+    return v >= 1000 ? v.toLocaleString('en-US', { maximumFractionDigits: 2 }) : v.toFixed(2);
+  }
+
+  // ── 스냅샷 패널 렌더링 ──
+  function renderSnapshot(r) {
+    const adv  = r.advanced;
+    const ipp  = r.ipp;
+    const ki   = r.keyIndicators;
+    const isKr = r.isKr;
+
+    const actionColor = r.action === 'BUY' ? 'var(--green)' : r.action === 'SELL' ? 'var(--red)' : 'var(--yellow)';
+    const confPct = Math.round((r.confidence || 0) * 100);
+
+    // 고급 시그널 칩
+    const sigNameMap = { cs:'캔들스틱', ew:'엘리어트', ichi:'일목균형표', smc:'SMC', quant:'퀀트', wacc:'WACC', ipp:'변곡점(IPP)' };
+    const sigChips = adv ? Object.entries(adv.details).map(([k, v]) => {
+      const bg = v.score > 0 ? 'rgba(0,212,170,0.12)' : v.score < 0 ? 'rgba(255,75,110,0.12)' : 'rgba(128,128,128,0.08)';
+      const tc = v.score > 0 ? 'var(--green)' : v.score < 0 ? 'var(--red)' : 'var(--muted)';
+      return `<div class="snap-sig-chip" style="background:${bg}">
+        <div class="sig-name">${sigNameMap[k] || k}</div>
+        <div class="sig-val" style="color:${tc}">${v.label}</div>
+      </div>`;
+    }).join('') : '<div style="color:var(--muted);font-size:0.78rem">데이터 없음 (구버전 저장)</div>';
+
+    // IPP 섹션
+    const ippDirMap = { BULLISH_REVERSAL: '🟢 상승전환 임박', BEARISH_REVERSAL: '🔴 하락전환 임박', NEUTRAL: '🟡 중립' };
+    const ippSection = ipp ? `
+      <div class="snap-section">
+        <div class="snap-section-title">변곡점 예측 (IPP)</div>
+        <div class="snap-grid">
+          <div class="snap-kv"><span class="snap-kv-label">IPP 스코어</span><span class="snap-kv-val" style="color:${ipp.ipp_score>=20?'var(--green)':ipp.ipp_score<=-20?'var(--red)':'var(--yellow)'}">${ipp.ipp_score >= 0 ? '+' : ''}${ipp.ipp_score}</span></div>
+          <div class="snap-kv"><span class="snap-kv-label">방향</span><span class="snap-kv-val">${ippDirMap[ipp.direction] || ipp.direction}</span></div>
+          <div class="snap-kv"><span class="snap-kv-label">ETA / 신뢰도</span><span class="snap-kv-val">${ipp.eta_days}일 · ${ipp.confidence}%</span></div>
+        </div>
+        ${ipp.signals?.length ? `<div style="margin-top:10px;font-size:0.72rem;color:var(--muted2)">${ipp.signals.join(' · ')}</div>` : ''}
+      </div>` : '';
+
+    // 기술 지표
+    const kiSection = ki ? `
+      <div class="snap-section">
+        <div class="snap-section-title">주요 기술 지표</div>
+        <div class="snap-grid">
+          <div class="snap-kv"><span class="snap-kv-label">RSI</span><span class="snap-kv-val" style="color:${ki.rsi<30?'var(--green)':ki.rsi>70?'var(--red)':'var(--text2)'}">${ki.rsi?.toFixed(1) ?? '-'}</span></div>
+          <div class="snap-kv"><span class="snap-kv-label">MACD Hist</span><span class="snap-kv-val" style="color:${(ki.macd??0)>0?'var(--green)':'var(--red)'}">${ki.macd?.toFixed(3) ?? '-'}</span></div>
+          <div class="snap-kv"><span class="snap-kv-label">BB %B</span><span class="snap-kv-val">${ki.bbPct != null ? (ki.bbPct*100).toFixed(0)+'%' : '-'}</span></div>
+          <div class="snap-kv"><span class="snap-kv-label">Stoch %K</span><span class="snap-kv-val">${ki.stochK?.toFixed(1) ?? '-'}</span></div>
+          <div class="snap-kv"><span class="snap-kv-label">ATR</span><span class="snap-kv-val">${fmtNum(ki.atr, isKr)}</span></div>
+          <div class="snap-kv"><span class="snap-kv-label">거래량 비율</span><span class="snap-kv-val">${ki.volRatio?.toFixed(2) ?? '-'}x</span></div>
+        </div>
+      </div>` : '';
+
+    return `<div class="snap-inner">
+      <div class="snap-header">
+        <div>
+          <div class="snap-title">${flag(isKr, r.ticker)} ${r.companyName || r.ticker}</div>
+          <div class="snap-meta">${r.ticker} · ${fmtDate(r.savedAt)} 저장</div>
+        </div>
+        <button class="btn-reanalyze" id="btn-reanalyze-${r.id}" onclick="reanalyze(${r.id})">🔄 현재 기준 재분석</button>
+      </div>
+
+      <div class="snap-action-row">
+        <span class="snap-badge ${r.action}">${r.action}</span>
+        <span style="font-size:0.82rem;color:var(--text2)">신뢰도 <b style="color:${actionColor}">${confPct}%</b></span>
+        <span style="font-size:0.82rem;color:var(--muted)">저장 가격 <b style="color:var(--text2)">${fmtNum(r.price, isKr)} ${r.currency}</b></span>
+        <span style="font-size:0.82rem;color:var(--muted)">복합점수 <b style="color:${actionColor}">${r.combined >= 0 ? '+' : ''}${(r.combined||0).toFixed(3)}</b></span>
+      </div>
+
+      ${adv ? `
+      <div class="snap-section">
+        <div class="snap-section-title">고급 분석 시그널 · 복합점수 ${adv.composite >= 0 ? '+' : ''}${adv.composite.toFixed(3)}</div>
+        <div class="snap-signal-grid">${sigChips}</div>
+      </div>` : ''}
+
+      ${ippSection}
+      ${kiSection}
+    </div>`;
+  }
+
+  // ── 리포트 선택 ──
+  window.selectReport = function(id) {
+    const r = allReports.find(x => x.id === id);
+    if (!r) return;
+    activeId = id;
+
+    const snap        = document.getElementById('snapshot-panel');
+    const snapEmpty   = document.getElementById('snap-empty');
+    const frame       = document.getElementById('report-frame');
+    const reportEmpty = document.getElementById('report-empty');
+
+    // 스냅샷 표시
+    snapEmpty.style.display = 'none';
+    snap.style.display      = 'flex';
+    snap.innerHTML          = renderSnapshot(r);
+
+    // 모바일/PC 모두 리포트 자동 로드
+    const period = r.period || '6mo';
+    const style  = r.style  || 'balanced';
+    const url    = `report.html?ticker=${encodeURIComponent(r.ticker)}&period=${encodeURIComponent(period)}&style=${encodeURIComponent(style)}&embedded=1`;
+    reportEmpty.style.display = 'none';
+    frame.style.display       = 'block';
+    frame.src                 = url;
+
+    const isMobile = window.innerWidth <= 767;
+    if (isMobile) {
+      fitMobileFrame();
+      snap.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+
+    document.querySelectorAll('.report-item').forEach(el => {
+      el.classList.toggle('active', Number(el.dataset.id) === id);
+    });
+  };
+
+  // ── 재분석 (모바일: 토글 / PC: 새탭) ──
+  window.reanalyze = function(id) {
+    const r = allReports.find(x => x.id === id);
+    if (!r) return;
+    const period = r.period || '6mo';
+    const style  = r.style  || 'balanced';
+    const url    = `report.html?ticker=${encodeURIComponent(r.ticker)}&period=${encodeURIComponent(period)}&style=${encodeURIComponent(style)}&embedded=1`;
+
+    if (window.innerWidth <= 767) {
+      // 모바일: 항상 새로고침 (토글 없음)
+      const frame       = document.getElementById('report-frame');
+      const reportEmpty = document.getElementById('report-empty');
+      const btn         = document.getElementById(`btn-reanalyze-${id}`);
+      reportEmpty.style.display = 'none';
+      frame.style.display       = 'block';
+      frame.src                 = url;
+      if (btn) btn.textContent  = '🔄 리포트 새로고침';
+      fitMobileFrame();
+      setTimeout(() => frame.scrollIntoView({ behavior: 'smooth', block: 'start' }), 100);
+    } else {
+      // PC: 리포트 컬럼에 이미 표시 중 — 새로고침
+      const frame       = document.getElementById('report-frame');
+      const reportEmpty = document.getElementById('report-empty');
+      reportEmpty.style.display = 'none';
+      frame.style.display       = 'block';
+      frame.src                 = url;
+    }
+  };
+
+  // ── 모바일 iframe 높이 동적 조정 ──
+  function fitMobileFrame() {
+    if (window.innerWidth > 767) return;
+    const frame = document.getElementById('report-frame');
+    // inline style 기준으로 체크 (CSS display:block 제거 후 JS가 inline으로 제어)
+    if (!frame || !frame.src || frame.src === window.location.href) return;
+    if (frame.style.display === 'none' || frame.style.display === '') return;
+    const topbar   = document.getElementById('topbar');
+    const snapCol  = document.querySelector('.snapshot-col');
+    const topH     = topbar  ? topbar.offsetHeight  : 52;
+    const snapH    = snapCol ? snapCol.offsetHeight  : 0;
+    const available = window.innerHeight - topH - snapH - 8; // 8px 여백
+    frame.style.height = Math.max(320, available) + 'px';
+  }
+  window.addEventListener('resize', fitMobileFrame);
+
+  // ── 리포트 삭제 ──
+  window.deleteReport = function(e, id) {
+    e.stopPropagation();
+    allReports = allReports.filter(r => r.id !== id);
+    saveReports();
+    if (activeId === id) {
+      activeId = null;
+      document.getElementById('report-frame').style.display = 'none';
+      document.getElementById('report-frame').src           = '';
+      document.getElementById('snapshot-panel').style.display = 'none';
+      document.getElementById('snap-empty').style.display   = 'flex';
+      document.getElementById('report-empty').style.display = 'flex';
+    }
+    filterList();
+  };
+
+  // ── 로그아웃 ──
+  window.logout = async function() {
+    await _sb.auth.signOut();
+    localStorage.removeItem('signnith_session');
+    window.location.href = 'index.html';
+  };
+
+  // ── 스냅샷 접기/펼치기 (상/하 레이아웃 전용) ──
+  // ══════════════════════════════════════════════════════
+  //  종목 비교 기능
+  // ══════════════════════════════════════════════════════
+  const compareSet = new Set(); // 최대 2개 id 보관
+
+  window.toggleCompare = function(e, id) {
+    e.stopPropagation();
+    if (compareSet.has(id)) {
+      compareSet.delete(id);
+    } else {
+      if (compareSet.size >= 2) {
+        // 가장 먼저 선택된 항목을 제거하고 새 항목 추가
+        const first = compareSet.values().next().value;
+        compareSet.delete(first);
+      }
+      compareSet.add(id);
+    }
+    updateCompareBar();
+    renderList(allReports.filter(r => {
+      const q = document.getElementById('sidebar-search').value.trim().toLowerCase();
+      if (!q) return true;
+      return (r.ticker||'').toLowerCase().includes(q) || (r.companyName||'').toLowerCase().includes(q);
+    }));
+  };
+
+  function updateCompareBar() {
+    const bar  = document.getElementById('compare-bar');
+    const lbl  = document.getElementById('compare-bar-label');
+    const btn  = document.getElementById('btn-do-compare');
+    bar.style.display  = compareSet.size > 0 ? 'flex' : 'none';
+    lbl.textContent    = `${compareSet.size} / 2 선택됨`;
+    btn.disabled       = compareSet.size < 2;
+  }
+
+  window.clearCompare = function() {
+    compareSet.clear();
+    updateCompareBar();
+    renderList(allReports);
+  };
+
+  window.showComparison = function() {
+    if (compareSet.size < 2) return;
+    const ids = [...compareSet];
+    // compareSet의 id가 실제 목록에 있는지 재확인 (재분석 후 id 교체 방어)
+    const missing = ids.filter(id => !allReports.find(r => r.id === id));
+    if (missing.length) {
+      alert('선택한 종목 중 일부가 재분석으로 교체됐습니다.\n목록에서 다시 선택해주세요.');
+      compareSet.clear();
+      updateCompareBar();
+      renderList(allReports);
+      return;
+    }
+    window.open(`compare.html?a=${ids[0]}&b=${ids[1]}`, '_blank');
+  };
+
+  // ── 사이드바 접기/펼치기 (모바일 전용) ──
+  window.toggleSidebarCollapse = function() {
+    const sidebar  = document.getElementById('sidebar');
+    const label    = document.getElementById('sidebar-toggle-label');
+    const collapsed = sidebar.classList.toggle('sidebar-collapsed');
+    if (label) label.textContent = collapsed ? '종목 검색 펼치기' : '종목 검색 접기';
+  };
+
+  window.toggleSnapshotCollapse = function() {
+    const col       = document.getElementById('snapshot-col');
+    const label     = document.getElementById('snap-toggle-label');
+    const collapsed = col.classList.toggle('snap-collapsed');
+    if (label) label.textContent = collapsed ? '스냅샷 펼치기' : '스냅샷 접기';
+    // 트랜지션(300ms) 완료 후 iframe 높이 재계산
+    setTimeout(fitMobileFrame, 320);
+  };
+
+  // ── 스냅샷 접기/펼치기 (PC 좌/우 전용) ──
+  function updatePcBtn(collapsed) {
+    const btn = document.getElementById('btn-snap-pc');
+    if (btn) btn.textContent = collapsed ? '▶' : '◀';
+    if (btn) btn.title = collapsed ? '스냅샷 펼치기' : '스냅샷 접기';
+  }
+  window.toggleSnapshotPC = function() {
+    const col   = document.getElementById('snapshot-col');
+    const main  = document.getElementById('main-area');
+    const collapsed = col.classList.toggle('pc-collapsed');
+    updatePcBtn(collapsed);
+    if (collapsed) {
+      // 접힘: 스냅샷 컬럼을 버튼 너비(18px)만큼만 남김
+      const sw = window._resizerState?.sidebarW ?? 220;
+      main.style.gridTemplateColumns = `${sw}px 5px 18px 5px 1fr`;
+    } else {
+      // 펼침: 이전 너비 복원
+      const sw   = window._resizerState?.sidebarW    ?? 220;
+      const snap = window._resizerState?.snapshotPrevW ?? 520;
+      if (window._resizerState) window._resizerState.snapshotW = snap;
+      main.style.gridTemplateColumns = `${sw}px 5px ${snap}px 5px 1fr`;
+    }
+  };
+
+  // ── 컬럼 리사이저 ──
+  (function initResizer() {
+    if (window.innerWidth <= 1024) return;   // 모바일·태블릿 세로는 CSS가 레이아웃 담당
+    const main = document.getElementById('main-area');
+
+    // JS 변수로 너비 직접 관리 (getComputedStyle 의존 X)
+    let sidebarW  = 220;
+    let snapshotW = 520;
+
+    // 접기/펼치기 함수와 상태 공유
+    window._resizerState = { get sidebarW(){ return sidebarW; }, set sidebarW(v){ sidebarW=v; },
+                              get snapshotW(){ return snapshotW; }, set snapshotW(v){ snapshotW=v; },
+                              snapshotPrevW: 520 };
+
+    function applyWidths() {
+      const col = document.getElementById('snapshot-col');
+      if (col && col.classList.contains('pc-collapsed')) return; // 접힌 상태면 스킵
+      window._resizerState.snapshotPrevW = snapshotW;
+      main.style.gridTemplateColumns =
+        `${sidebarW}px 5px ${snapshotW}px 5px 1fr`;
+    }
+
+    function attach(resizer, isLeft) {
+      resizer.addEventListener('mousedown', e => {
+        e.preventDefault();
+        resizer.classList.add('dragging');
+        document.body.style.userSelect = 'none';
+
+        const startX = e.clientX;
+        const startW = isLeft ? sidebarW : snapshotW;
+
+        function onMove(e) {
+          const newW = Math.max(160, Math.min(520, startW + (e.clientX - startX)));
+          if (isLeft) sidebarW  = newW;
+          else        snapshotW = newW;
+          applyWidths();
+        }
+
+        const frame = document.getElementById('report-frame');
+        if (frame) frame.style.pointerEvents = 'none';
+
+        function onUp() {
+          resizer.classList.remove('dragging');
+          document.body.style.userSelect = '';
+          if (frame) frame.style.pointerEvents = '';
+          document.removeEventListener('mousemove', onMove);
+          document.removeEventListener('mouseup',   onUp);
+        }
+
+        document.addEventListener('mousemove', onMove);
+        document.addEventListener('mouseup',   onUp);
+      });
+    }
+
+    attach(document.getElementById('resizer-left'),  true);
+    attach(document.getElementById('resizer-right'), false);
+  })();
+
+  // ── 초기 로드 ──
+  loadReports();
+  filterList();
+
+  // ── localStorage 변경 감지 (다른 탭에서 저장 시 자동 갱신) ──
+  window.addEventListener('storage', e => {
+    if (e.key === REPORTS_KEY) {
+      loadReports();
+      filterList();
+    }
+  });
+
+})(); // async IIFE end
+</script>
+</body>
+</html>

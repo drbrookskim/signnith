@@ -1,0 +1,54 @@
+/*
+ * Signnith Suite Design Tokens (Kinetics Graphite × Warm Bone)
+ * Shared across: signnith, newsfinder, equisense, chartdeepdive, buythedip
+ */
+:root {
+  --bg:        #0e0e10;
+  --card:      #17171a;
+  --card2:     #212125;
+  --border:    rgba(237,233,224,0.09);
+  --border2:   rgba(237,233,224,0.18);
+  --text:      #ede9e0;
+  --text2:     #c9c5bc;
+  --muted:     #a8a6a0;
+  --muted2:    #827f7a;
+  --topbar:    rgba(14,14,16,0.86);
+  --metric-bd: rgba(237,233,224,0.07);
+  --green:     #4cd08a;
+  --red:       #ff5c5c;
+  --yellow:    #fbbf24;
+  --blue:      #5b8def;
+  --up:        #ff4b6e;
+  --down:      #3b82f6;
+  --purple:    #a78bfa;
+  --orange:    #ff8a00;
+  --accent:    #ff8a00;
+  --shadow:    rgba(0,0,0,.48);
+  --suite-font-sans: 'Space Grotesk', 'Noto Sans KR', -apple-system, sans-serif;
+  --suite-font-mono: 'Geist Mono', ui-monospace, SFMono-Regular, monospace;
+  --suite-font-serif: 'Instrument Serif', Georgia, serif;
+}
+
+html.light {
+  --bg:        #f5f3ee;
+  --card:      #fcfbf8;
+  --card2:     #ece9e1;
+  --border:    rgba(14,14,16,0.09);
+  --border2:   rgba(14,14,16,0.18);
+  --text:      #121214;
+  --text2:     #2c2c30;
+  --muted:     #5e5c58;
+  --muted2:    #73706a;
+  --topbar:    rgba(245,243,238,0.90);
+  --metric-bd: rgba(14,14,16,0.07);
+  --green:     #047857;
+  --red:       #be123c;
+  --yellow:    #b45309;
+  --blue:      #1d4ed8;
+  --up:        #be123c;
+  --down:      #1d4ed8;
+  --purple:    #6d28d9;
+  --orange:    #d97706;
+  --accent:    #d97706;
+  --shadow:    rgba(14,14,16,.07);
+}

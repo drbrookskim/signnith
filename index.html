@@ -213,11 +213,12 @@
   /* ── Scramble Text Market Strip (DesignBookmark) ── */
   .db-scr-strip {
     display: inline-flex; flex-wrap: nowrap; align-items: center; gap: 10px;
-    margin-top: 0;
+    margin-top: 0; min-width: 0; flex: 1 1 auto; overflow-x: auto; scrollbar-width: none;
     font-family: "Geist Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
     font-size: 11px; font-weight: 500; letter-spacing: -0.02em; line-height: 1.4;
     white-space: nowrap;
   }
+  .db-scr-strip::-webkit-scrollbar { display: none; }
   .db-scr-item {
     display: inline-flex; align-items: center; gap: 4px;
     white-space: pre; cursor: default; color: var(--muted2);
@@ -237,9 +238,8 @@
   .page-head p { font-size: 0.86rem; color: var(--muted); margin-top: 4px; }
   .market-strip-row {
     display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: nowrap;
-    margin-top: 8px; width: 100%; max-width: 100%; overflow-x: auto; scrollbar-width: none;
+    margin-top: 8px; width: 100%; max-width: 100%;
   }
-  .market-strip-row::-webkit-scrollbar { display: none; }
   .cmd-controls { display: inline-flex; align-items: center; gap: 6px; flex-wrap: nowrap; flex-shrink: 0; margin-left: auto; }
   .icon-select-wrap {
     position: relative; width: 30px; height: 30px; padding: 0; border-radius: 999px;
@@ -247,7 +247,7 @@
     display: inline-flex; align-items: center; justify-content: center;
     cursor: pointer; transition: color .15s, border-color .15s, background .15s;
   }
-  .icon-select-wrap:hover { color: var(--text); border-color: var(--border2); background: var(--card2); }
+  .icon-select-wrap:hover { color: var(--text); border-color: var(--border2); }
   .icon-select-wrap select {
     position: absolute; inset: 0; width: 100%; height: 100%;
     opacity: 0; cursor: pointer; appearance: none; -webkit-appearance: none;
@@ -324,7 +324,8 @@
   #fav-btn.starred svg { fill: currentColor; }
   .db-morph-bar .sk-ico { margin-right: 0 !important; }
   .db-morph-bar { position: relative; }
-  .db-morph-bar button { position: relative; z-index: 1; will-change: transform; }
+  .db-morph-bar button,
+  .db-morph-bar .icon-select-wrap { position: relative; z-index: 1; will-change: transform; }
   .db-morph-hl {
     position: absolute; left: 0; top: 0; height: 34px; border-radius: 999px;
     background: rgba(148, 163, 184, 0.16);
@@ -1756,7 +1757,7 @@
       <div class="market-strip-row">
         <div class="db-scr-strip" id="market-scramble-strip" aria-label="주요 시장 지수"></div>
         <div class="cmd-controls">
-          <div class="icon-select-wrap" id="period-select-wrap" title="분석 기간: 6개월">
+          <div class="icon-select-wrap" id="period-select-wrap" data-morph-tip="분석 기간: 6개월">
             <svg class="sk-ico" role="img" aria-label="분석 기간" width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><title>분석 기간</title><rect x="2" y="3" width="12" height="11" rx="2"/><path d="M5 1.8v2.4M11 1.8v2.4M2 6.5h12"/></svg>
             <select id="period-select" aria-label="분석 기간">
               <option value="1mo">1개월</option>
@@ -1766,7 +1767,7 @@
               <option value="2y">2년</option>
             </select>
           </div>
-          <div class="icon-select-wrap" id="style-select-wrap" title="투자 전략: 균형">
+          <div class="icon-select-wrap" id="style-select-wrap" data-morph-tip="투자 전략: 균형">
             <svg class="sk-ico" role="img" aria-label="투자 전략" width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><title>투자 전략</title><path d="M2.5 4.5h11M2.5 8h11M2.5 11.5h11"/><circle cx="5.5" cy="4.5" r="1.4" fill="var(--bg)"/><circle cx="10.5" cy="8" r="1.4" fill="var(--bg)"/><circle cx="6.5" cy="11.5" r="1.4" fill="var(--bg)"/></svg>
             <select id="style-select" aria-label="투자 전략">
               <option value="balanced" selected>균형</option>
@@ -1774,10 +1775,10 @@
               <option value="long_term">장기</option>
             </select>
           </div>
-          <button type="button" class="icon-select-wrap" id="fav-modal-btn" onclick="openFavModal(this)" aria-label="즐겨찾기" title="즐겨찾기 관심 종목 관리">
+          <button type="button" class="icon-select-wrap" id="fav-modal-btn" onclick="openFavModal(this)" aria-label="즐겨찾기" data-morph-tip="즐겨찾기 관심 종목 관리">
             <svg class="sk-ico" role="img" aria-label="즐겨찾기" width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"><title>즐겨찾기</title><path d="M8 2.1l1.8 3.7 4.1.6-3 2.9.7 4.1L8 11.5l-3.6 1.9.7-4.1-3-2.9 4.1-.6z"/></svg>
           </button>
-          <button type="button" class="icon-select-wrap" id="history-modal-btn" onclick="openHistoryModal(this)" aria-label="분석 히스토리" title="최근 검색·분석 히스토리 보기">
+          <button type="button" class="icon-select-wrap" id="history-modal-btn" onclick="openHistoryModal(this)" aria-label="분석 히스토리" data-morph-tip="최근 검색·분석 히스토리 보기">
             <svg class="sk-ico" role="img" aria-label="분석 히스토리" width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><title>분석 히스토리</title><circle cx="8" cy="8" r="5.5"/><path d="M8 5v3.2l2.2 1.3"/></svg>
           </button>
         </div>
@@ -2868,7 +2869,12 @@ function attachMorphTooltipBar(bar, btnSelector = 'button') {
     const label = getLabel(b);
     meas.textContent = label;
     const tw = Math.max(44, Math.ceil(meas.getBoundingClientRect().width));
-    const tl = cx - tw / 2, tr = cx + tw / 2;
+    let tl = cx - tw / 2, tr = cx + tw / 2;
+    const barRect = bar.getBoundingClientRect();
+    const minTl = 8 - barRect.left;
+    const maxTr = (window.innerWidth - 8) - barRect.left;
+    if (tr > maxTr) { const d = tr - maxTr; tl -= d; tr -= d; }
+    if (tl < minTl) { const d = minTl - tl; tl += d; tr += d; }
     const tipTop = top - 38, tailTop = top - 12;
 
     if (!shown) {
@@ -2906,7 +2912,7 @@ function attachMorphTooltipBar(bar, btnSelector = 'button') {
 
   btns.forEach((b, i) => {
     b.addEventListener('pointerenter', () => aim(i));
-    b.addEventListener('focus', () => aim(i));
+    b.addEventListener('focusin', () => aim(i));
     b.addEventListener('click', () => { btnScales[i].x = 0.92; btnScales[i].t = 1; });
   });
   bar.addEventListener('pointerleave', leave);
@@ -2951,6 +2957,7 @@ function attachMorphTooltipBar(bar, btnSelector = 'button') {
 
 if (typeof document !== 'undefined') {
   const _bindExploreMorph = () => {
+    attachMorphTooltipBar(document.querySelector('.cmd-controls'), '.icon-select-wrap');
     attachMorphTooltipBar(document.getElementById('explore-filter-pills'), '.f-pill');
     const roll = document.getElementById('explore-word-roll');
     const slot = document.getElementById('explore-roll-slot');
@@ -3181,7 +3188,8 @@ if (typeof document !== 'undefined') {
     if (!sel || !wrap) return;
     const upd = () => {
       const txt = sel.options[sel.selectedIndex]?.text || '';
-      wrap.title = `${prefix}: ${txt}`;
+      wrap.dataset.morphTip = `${prefix}: ${txt}`;
+      wrap.removeAttribute('title');
     };
     sel.addEventListener('change', upd);
     upd();
@@ -3443,8 +3451,8 @@ function renderExploreStats(enrichedList = []) {
   if (hs) hs.textContent = h.length ? `최근: ${h[0].name || h[0].ticker}` : '분석 기록 없음';
   const favBtn = document.getElementById('fav-modal-btn');
   const histBtn = document.getElementById('history-modal-btn');
-  if (favBtn) favBtn.title = `즐겨찾기 (${f.us.length + f.kr.length}종목)`;
-  if (histBtn) histBtn.title = h.length ? `분석 히스토리 (${h.length}건 · 최근: ${h[0].name || h[0].ticker})` : '분석 히스토리 (기록 없음)';
+  if (favBtn) { favBtn.dataset.morphTip = `즐겨찾기 (${f.us.length + f.kr.length}종목)`; favBtn.removeAttribute('title'); }
+  if (histBtn) { histBtn.dataset.morphTip = h.length ? `분석 히스토리 (${h.length}건 · 최근: ${h[0].name || h[0].ticker})` : '분석 히스토리 (기록 없음)'; histBtn.removeAttribute('title'); }
 
   const total = enrichedList.length || 1;
   const buyCnt = enrichedList.filter(x => x.ins?.signal === 'buy').length;

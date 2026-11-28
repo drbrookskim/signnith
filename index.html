@@ -1322,7 +1322,9 @@
   .autocomplete-list {
     position: absolute;
     top: calc(100% + 6px);
-    left: 0; right: 0;
+    left: auto; right: 0;
+    width: min(360px, max(240px, calc(100vw - 40px)));
+    box-sizing: border-box;
     background: var(--card);
     border: 1px solid var(--border);
     border-radius: 10px;

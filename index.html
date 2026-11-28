@@ -5398,38 +5398,7 @@ function renderDashboard({ ticker, bars, ind, tech, fund, decision: d, price, is
   </div>
 
   <!-- Executive Hero (ux-fusion-sample 동일 2단 구조) -->
-  ${(() => {
-    const fbs = _loadSuiteFeedbacks(ticker);
-    if (!fbs.length || !window.SignnithCore?.applyFeedbacks) return '';
-    const cons = SignnithCore.applyFeedbacks(d, fbs);
-    const badgeCls = act => act === 'BUY' ? 'sig-buy' : act === 'SELL' ? 'sig-sell' : 'sig-hold';
-    const pills = cons.feedbackBreakdown.map(fb => {
-      const s = fb.score >= 0 ? `+${fb.score.toFixed(2)}` : fb.score.toFixed(2);
-      const col = fb.score > 0.1 ? 'var(--green)' : fb.score < -0.1 ? 'var(--red)' : 'var(--muted)';
-      return `<span style="display:inline-flex;align-items:center;gap:6px;padding:4px 10px;border-radius:999px;border:1px solid var(--border2);background:var(--card2);font-size:0.75rem"><strong>${escapeHtml(fb.source)}</strong> <span style="color:${col};font-weight:700">${s}</span>${fb.summary ? ` <span style="color:var(--muted)">(${escapeHtml(fb.summary)})</span>` : ''}</span>`;
-    }).join('');
-    return `
-    <div class="card" id="sec-orchestrator" style="margin-bottom:16px;border-color:rgba(255,138,0,0.35)">
-      <div class="card-header" style="flex-direction:row;justify-content:space-between;align-items:center;width:100%;margin-bottom:10px">
-        <span><span class="dot" style="background:var(--accent)"></span>오케스트레이터 종합 판정 (연결 서비스 피드백 ${cons.feedbackCount}건 반영)</span>
-        <button type="button" class="btn-pill-sm" style="font-size:0.72rem;padding:3px 10px" onclick="_clearSuiteFeedbacks('${ticker}');runAnalysis();">피드백 초기화</button>
-      </div>
-      <div style="display:flex;gap:18px;flex-wrap:wrap;align-items:center;margin-bottom:10px">
-        <div style="display:flex;align-items:center;gap:8px">
-          <span style="font-size:0.76rem;color:var(--muted)">Signnith 독립</span>
-          <span class="sig-badge ${badgeCls(cons.baseAction)}">${cons.baseAction}</span>
-          <span style="font-size:0.8rem;color:var(--text2)">점수 ${cons.baseCombined.toFixed(2)} · 신뢰도 ${Math.round(cons.baseConfidence * 100)}%</span>
-        </div>
-        <span style="color:var(--muted)">→</span>
-        <div style="display:flex;align-items:center;gap:8px">
-          <span style="font-size:0.76rem;color:var(--accent);font-weight:700">종합 보정</span>
-          <span class="sig-badge ${badgeCls(cons.adjustedAction)}">${cons.adjustedAction}</span>
-          <span style="font-size:0.8rem;color:var(--text);font-weight:600">점수 ${cons.adjustedCombined.toFixed(2)} · 신뢰도 ${Math.round(cons.adjustedConfidence * 100)}%</span>
-        </div>
-      </div>
-      <div style="display:flex;gap:8px;flex-wrap:wrap">${pills}</div>
-    </div>`;
-  })()}
+  <div id="sec-orchestrator-slot">${_buildOrchestratorCardHtml(ticker, d)}</div>
   <div class="hero-grid" id="sec-hero">
     <div class="card">
       <div class="card-header" style="flex-direction:row;justify-content:space-between;align-items:center;width:100%">
@@ -6041,6 +6010,9 @@ function renderDashboard({ ticker, bars, ind, tech, fund, decision: d, price, is
       toggleFavFromResult(ticker, companyName || ticker, isKr ? '' : guessExchange(ticker));
     attachMorphTooltipBar(document.getElementById('detail-action-pills'), '.btn-pill-sm');
     attachMorphTooltipBar(document.querySelector('#dashboard .tabs-bar'), 'button');
+    if (typeof _hydrateFeedbacksFromSupabase === 'function') {
+      _hydrateFeedbacksFromSupabase(ticker, d).catch(() => {});
+    }
   }
 
   // Uniswap-style 실시간 SVG 차트 바인딩
@@ -8807,6 +8779,85 @@ async function _syncFeedbackToSupabase(ticker, fb) {
     score: fb.score,
     summary: fb.summary || ''
   }, { onConflict: 'signal_id,source_app' });
+}
+
+function _buildOrchestratorCardHtml(ticker, decision) {
+  const fbs = _loadSuiteFeedbacks(ticker);
+  if (!fbs.length || !window.SignnithCore?.applyFeedbacks) return '';
+  const cons = SignnithCore.applyFeedbacks(decision, fbs);
+  const badgeCls = act => act === 'BUY' ? 'sig-buy' : act === 'SELL' ? 'sig-sell' : 'sig-hold';
+  const pills = cons.feedbackBreakdown.map(fb => {
+    const s = fb.score >= 0 ? `+${fb.score.toFixed(2)}` : fb.score.toFixed(2);
+    const col = fb.score > 0.1 ? 'var(--green)' : fb.score < -0.1 ? 'var(--red)' : 'var(--muted)';
+    return `<span style="display:inline-flex;align-items:center;gap:6px;padding:4px 10px;border-radius:999px;border:1px solid var(--border2);background:var(--card2);font-size:0.75rem"><strong>${escapeHtml(fb.source)}</strong> <span style="color:${col};font-weight:700">${s}</span>${fb.summary ? ` <span style="color:var(--muted)">(${escapeHtml(fb.summary)})</span>` : ''}</span>`;
+  }).join('');
+  return `
+  <div class="card" id="sec-orchestrator" style="margin-bottom:16px;border-color:rgba(255,138,0,0.35)">
+    <div class="card-header" style="flex-direction:row;justify-content:space-between;align-items:center;width:100%;margin-bottom:10px">
+      <span><span class="dot" style="background:var(--accent)"></span>오케스트레이터 종합 판정 (연결 서비스 피드백 ${cons.feedbackCount}건 반영)</span>
+      <button type="button" class="btn-pill-sm" style="font-size:0.72rem;padding:3px 10px" onclick="_clearSuiteFeedbacks('${escapeHtml(ticker)}');_renderOrchestratorCard('${escapeHtml(ticker)}', window.__lastRenderedDecision);">피드백 초기화</button>
+    </div>
+    <div style="display:flex;gap:18px;flex-wrap:wrap;align-items:center;margin-bottom:10px">
+      <div style="display:flex;align-items:center;gap:8px">
+        <span style="font-size:0.76rem;color:var(--muted)">Signnith 독립</span>
+        <span class="sig-badge ${badgeCls(cons.baseAction)}">${cons.baseAction}</span>
+        <span style="font-size:0.8rem;color:var(--text2)">점수 ${cons.baseCombined.toFixed(2)} · 신뢰도 ${Math.round(cons.baseConfidence * 100)}%</span>
+      </div>
+      <span style="color:var(--muted)">→</span>
+      <div style="display:flex;align-items:center;gap:8px">
+        <span style="font-size:0.76rem;color:var(--accent);font-weight:700">종합 보정</span>
+        <span class="sig-badge ${badgeCls(cons.adjustedAction)}">${cons.adjustedAction}</span>
+        <span style="font-size:0.8rem;color:var(--text);font-weight:600">점수 ${cons.adjustedCombined.toFixed(2)} · 신뢰도 ${Math.round(cons.adjustedConfidence * 100)}%</span>
+      </div>
+    </div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap">${pills}</div>
+  </div>`;
+}
+
+function _renderOrchestratorCard(ticker, decision) {
+  window.__lastRenderedDecision = decision;
+  const slot = document.getElementById('sec-orchestrator-slot');
+  if (slot && decision) slot.innerHTML = _buildOrchestratorCardHtml(ticker, decision);
+}
+
+async function _hydrateFeedbacksFromSupabase(ticker, decision) {
+  window.__lastRenderedDecision = decision;
+  if (!_sb || !ticker) return;
+  try {
+    const { data: userData } = await _sb.auth.getUser();
+    const uid = userData?.user?.id;
+    if (!uid) return;
+    const normTicker = String(ticker).trim().toUpperCase();
+    const { data: sigRow } = await _sb.from('signals')
+      .select('id')
+      .eq('user_id', uid)
+      .eq('ticker', normTicker)
+      .order('created_at', { ascending: false })
+      .limit(1)
+      .maybeSingle();
+    if (!sigRow?.id) return;
+    const { data: fbRows } = await _sb.from('signal_feedbacks')
+      .select('source_app,score,summary,signal_id,created_at')
+      .eq('signal_id', sigRow.id);
+    if (!Array.isArray(fbRows) || !fbRows.length) return;
+    const map = _loadAllSuiteFeedbacks();
+    const merged = Array.isArray(map[normTicker]) ? [...map[normTicker]] : [];
+    for (const row of fbRows) {
+      const idx = merged.findIndex(x => x.source === row.source_app);
+      const item = {
+        source: row.source_app,
+        score: Number(row.score),
+        summary: row.summary || '',
+        signalId: row.signal_id,
+        updatedAt: row.created_at
+      };
+      if (idx >= 0) merged[idx] = item;
+      else merged.push(item);
+    }
+    map[normTicker] = merged;
+    try { localStorage.setItem(_SUITE_FB_KEY, JSON.stringify(map)); } catch {}
+    _renderOrchestratorCard(normTicker, decision);
+  } catch {}
 }
 
 (function initSuiteInboundContext() {

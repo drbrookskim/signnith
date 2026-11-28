@@ -426,7 +426,7 @@
   .logo {
     display: flex; align-items: center;
     text-decoration: none;
-    cursor: default;
+    cursor: pointer;
   }
   .logo-img {
     height: 26px;
@@ -1680,9 +1680,9 @@
 <div id="main-wrap">
 <header class="topbar">
   <div style="display:flex;align-items:center">
-    <div class="logo">
+    <a class="logo" href="./" onclick="event.preventDefault(); goHome();" aria-label="Signnith 홈" title="홈으로">
       <img class="logo-img" src="assets/signnith-logo-white.png" alt="Signnith" />
-    </div>
+    </a>
     <nav class="topbar-nav" aria-label="주 메뉴">
       <button class="topbar-nav-btn active" onclick="window.scrollTo({top:0,behavior:'smooth'})" data-tip="Explore" title="Explore" aria-label="Explore" style="display:inline-flex;align-items:center;justify-content:center;padding:6px 10px"><svg class="sk-ico" role="img" aria-label="Explore" width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><title>Explore</title><circle cx="8" cy="8" r="5.5"/><path d="M10.2 5.8l-1.4 3.4-3.4 1.4 1.4-3.4z"/></svg></button>
       <button class="topbar-nav-btn" onclick="openArchive()" data-tip="아카이브" title="아카이브" aria-label="아카이브" style="display:inline-flex;align-items:center;justify-content:center;padding:6px 10px"><svg class="sk-ico" role="img" aria-label="아카이브" width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><title>아카이브</title><rect x="2" y="3" width="12" height="3" rx="1"/><path d="M3 6v7a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1V6"/><path d="M6.5 9.5h3"/></svg></button>
@@ -3908,6 +3908,22 @@ function _scrollToSearchWorkspace() {
   requestAnimationFrame(() => {
     document.querySelector('.fav-section')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
   });
+}
+
+function goHome() {
+  if (typeof _analysisSeq === 'number') ++_analysisSeq;
+  const dash = document.getElementById('dashboard');
+  if (dash) dash.innerHTML = '';
+  document.getElementById('fav-card')?.classList.remove('compact');
+  favCollapsed = false;
+  const body = document.getElementById('fav-body');
+  if (body) body.style.display = '';
+  const st = document.getElementById('explore-stats');
+  if (st) st.style.display = 'grid';
+  const btn = document.querySelector('.fav-toggle');
+  if (btn) { btn.innerHTML = _CHEV_UP; btn.title = '피드 접기'; btn.setAttribute('aria-label', '피드 접기'); }
+  if (location.search) history.replaceState(null, '', location.pathname);
+  window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
 function selectFavStock(ticker) {

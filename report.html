@@ -1,6 +1,18 @@
 <!DOCTYPE html>
-<html lang="ko" class="light">
+<html lang="ko">
 <head>
+<script>
+  (function () {
+    try {
+      var k = 'tsa_theme';
+      var q = new URLSearchParams(location.search).get('theme');
+      if (q === 'light' || q === 'dark') localStorage.setItem(k, q);
+      var t = q || localStorage.getItem(k) || 'dark';
+      var isLight = t === 'light' || (t === 'system' && window.matchMedia('(prefers-color-scheme: light)').matches);
+      document.documentElement.classList.toggle('light', isLight);
+    } catch (e) {}
+  })();
+</script>
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-H36GJE20EL"></script>
 <script>
   window.dataLayer = window.dataLayer || [];
@@ -61,13 +73,13 @@
   }
 
   *{ box-sizing:border-box; margin:0; padding:0; }
+  html { background: var(--bg); }
   .sk-ico { display:inline-block; vertical-align:-2px; flex-shrink:0; }
   body{
     font-family:'Space Grotesk','Noto Sans KR',-apple-system,sans-serif;
     background: var(--bg);
     min-height:100vh;
     color: var(--text);
-    transition: background .25s, color .25s;
   }
 
   /* ── Ambient Glow (index.html과 동일) ── */

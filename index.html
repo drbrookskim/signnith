@@ -435,15 +435,17 @@
     border-radius: 6px;
     transition: filter 0.2s, opacity 0.2s;
   }
-  /* 다크 모드: 로고를 밝게 반전해 어두운 배경에서 가시성 확보 */
+  /* 다크 모드: 로고를 밝게 반전 + screen 블렌딩으로 상단바 배경과 일치 */
   html:not(.light) .logo-img {
-    filter: invert(1) brightness(0.92);
+    filter: invert(1) brightness(0.95);
+    mix-blend-mode: screen;
     opacity: 0.92;
   }
-  /* 라이트 모드: 로고 원본 색상 그대로 표시 */
+  /* 라이트 모드: multiply 블렌딩으로 흰 배경 제거해 상단바 배경과 일치 */
   html.light .logo-img {
     filter: none;
-    opacity: 0.85;
+    mix-blend-mode: multiply;
+    opacity: 0.88;
   }
   /* 로그인 모달: 투명 없는 솔리드 배경 */
   #auth-modal-inner { background: #111827; }
@@ -744,13 +746,27 @@
     font-size: 0.68rem; font-weight: 700; padding: 4px 10px; border-radius: 999px; cursor: pointer;
   }
   .view-sw-btn.active { background: var(--card); color: var(--text); box-shadow: 0 1px 3px rgba(0,0,0,.2); }
+  .fav-section { scroll-margin-top: 76px; }
   .fav-tiles {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(310px, 1fr));
     gap: 16px;
     padding: 6px 2px 10px;
     align-items: start;
+    scrollbar-width: none;
   }
+  .fav-tiles.is-scrolling {
+    scrollbar-width: thin;
+    scrollbar-color: var(--border2) transparent;
+  }
+  .fav-tiles::-webkit-scrollbar { height: 5px; }
+  .fav-tiles::-webkit-scrollbar-track { background: transparent; }
+  .fav-tiles::-webkit-scrollbar-thumb {
+    background: transparent;
+    border-radius: 999px;
+    transition: background .2s ease;
+  }
+  .fav-tiles.is-scrolling::-webkit-scrollbar-thumb { background: var(--border2); }
   .fav-card.compact .fav-tiles {
     display: flex; overflow-x: auto; gap: 10px; padding: 8px 6px 12px;
   }
@@ -3673,6 +3689,24 @@ function renderFavs() {
   };
 
   body.innerHTML = `<div class="fav-tiles">${enriched.map(tileHtml).join('')}</div>`;
+  const tilesEl = body.querySelector('.fav-tiles');
+  if (tilesEl) {
+    let scrollTimer = 0;
+    const showScrollbar = () => {
+      tilesEl.classList.add('is-scrolling');
+      clearTimeout(scrollTimer);
+      scrollTimer = setTimeout(() => tilesEl.classList.remove('is-scrolling'), 900);
+    };
+    tilesEl.addEventListener('scroll', showScrollbar, { passive: true });
+    tilesEl.addEventListener('wheel', (e) => {
+      if (tilesEl.scrollWidth <= tilesEl.clientWidth + 1) return;
+      if (Math.abs(e.deltaY) <= Math.abs(e.deltaX)) return;
+      e.preventDefault();
+      const unit = e.deltaMode === 1 ? 32 : e.deltaMode === 2 ? tilesEl.clientWidth : 1;
+      tilesEl.scrollLeft += e.deltaY * unit;
+      showScrollbar();
+    }, { passive: false });
+  }
   body.querySelectorAll('.fav-tile[data-stat-idx]').forEach(tile => {
     const entry = enriched[Number(tile.dataset.statIdx)];
     if (entry) mountTileStatCard(tile, _buildTileStatRanges(entry.item.ticker, entry.ins));
@@ -3859,7 +3893,7 @@ async function prefetchFavoritesReady() {
 }
 setTimeout(() => { if (typeof prefetchFavoritesReady === 'function') prefetchFavoritesReady(); }, 500);
 
-function selectFavStock(ticker) {
+function _enterCompactFavView() {
   favCollapsed = false;
   const body = document.getElementById('fav-body');
   if (body) body.style.display = '';
@@ -3868,10 +3902,17 @@ function selectFavStock(ticker) {
   if (stats) stats.style.display = 'none';
   const btn = document.querySelector('.fav-toggle');
   if (btn) { btn.innerHTML = _CHEV_DN; btn.title = '피드 펼치기'; btn.setAttribute('aria-label', '피드 펼치기'); }
+}
+
+function _scrollToSearchWorkspace() {
+  requestAnimationFrame(() => {
+    document.querySelector('.fav-section')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  });
+}
+
+function selectFavStock(ticker) {
+  _enterCompactFavView();
   setTickerAndRun(ticker);
-  setTimeout(() => {
-    document.getElementById('dashboard')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-  }, 120);
 }
 
 // Command Button Search (DesignBookmark)
@@ -4705,12 +4746,14 @@ async function runAnalysis(forceRefresh = false) {
   const btn  = document.getElementById('run-btn');
   if (btn) btn.disabled = true;
   hideAC();
+  _enterCompactFavView();
 
   // destroy existing charts
   [priceChart, rsiChart, macdChart].forEach(c => c?.destroy());
   priceChart = rsiChart = macdChart = null;
 
   dash.innerHTML = `<div class="center-msg"><div class="spinner"></div><div>"${escapeHtml(raw)}" 종목 검색 중…</div></div>`;
+  _scrollToSearchWorkspace();
 
   let ticker;
   try {
@@ -4842,6 +4885,7 @@ async function runAnalysis(forceRefresh = false) {
     </div>`;
 
   const _dialMount = document.getElementById('dash-detent-mount');
+  _scrollToSearchWorkspace();
   const _dial = _dialMount ? createTimeDetentDial(_dialMount, {
     minSec: 0,
     maxSec: _dialMaxSec,
@@ -8881,7 +8925,13 @@ async function _hydrateFeedbacksFromSupabase(ticker, decision) {
     }
     if (inputEl && ctx.ticker) {
       inputEl.value = ctx.ticker;
-      runAnalysis();
+      _enterCompactFavView();
+      requestAnimationFrame(() => {
+        runAnalysis();
+      });
+      if (document.readyState !== 'complete') {
+        window.addEventListener('load', () => _scrollToSearchWorkspace(), { once: true });
+      }
     }
   };
   if (document.readyState === 'loading') {

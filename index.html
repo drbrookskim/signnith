@@ -3785,7 +3785,10 @@ function _loadAnalysisCacheMap() {
   catch { return {}; }
 }
 function _reviveAnalysisPayload(payload) {
-  if (!payload) return null;
+  if (!payload || !payload.ticker || !Array.isArray(payload.bars) || !payload.bars.length ||
+      !payload.decision || !payload.tech || !payload.fund || !payload.mtf || !payload.advanced || !payload.waccResult) {
+    return null;
+  }
   const copy = { ...payload };
   if (Array.isArray(copy.bars)) {
     copy.bars = copy.bars.map(b => ({
@@ -4810,7 +4813,7 @@ async function runAnalysis(forceRefresh = false) {
     if (inputEl) inputEl.value = '';
     try {
       sessionStorage.setItem('last_ticker', ticker);
-      const _nfName = cached.companyName || resolveTickerName(ticker) || ticker;
+      const _nfName = resolveTickerName(ticker) || cached.companyName || ticker;
       sessionStorage.setItem('last_name', _nfName);
       sessionStorage.setItem('last_period', period);
       sessionStorage.setItem('last_style', style);
@@ -4827,7 +4830,13 @@ async function runAnalysis(forceRefresh = false) {
       }
     } catch(e) {}
 
-    renderDashboard({ ...cached, fromCache: true, quoteChecking: true });
+    try {
+      renderDashboard({ ...cached, fromCache: true, quoteChecking: true });
+    } catch (e) {
+      console.warn('[CacheRenderFallback]', e);
+      invalidateCachedAnalysis(ticker, period, style);
+      return runAnalysis(true);
+    }
 
     if (/\.(KS|KQ)$/i.test(ticker)) {
       const nxtEl = document.getElementById('nxt-price-val');
@@ -5022,7 +5031,7 @@ async function runAnalysis(forceRefresh = false) {
     try {
       sessionStorage.setItem('last_ticker',  ticker);
       const nfBtn = document.getElementById('newsfinder-btn');
-      const _nfName = fundInfo.companyName || quote?.longName || quote?.shortName || resolveTickerName(ticker) || ticker;
+      const _nfName = resolveTickerName(ticker) || fundInfo.companyName || quote?.longName || quote?.shortName || ticker;
       sessionStorage.setItem('last_name', _nfName);
       if (nfBtn) nfBtn.innerHTML = `${skIcon('news', 13)}<span class="btn-label"> ${escapeHtml(_nfName)} 뉴스 확인!</span>`;
       sessionStorage.setItem('last_period',  document.getElementById('period-select').value);

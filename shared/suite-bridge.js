@@ -116,8 +116,13 @@
     if (c.from) params.set('from', c.from);
 
     if (cfg.prefersName) {
-      var query = name || ticker;
-      if (query) params.set(cfg.tickerParam, query);
+      if (ticker) {
+        params.set(cfg.tickerParam, ticker);
+        params.set('market', c.market || detectMarket(ticker));
+        if (name && name !== ticker) params.set('name', name);
+      } else if (name) {
+        params.set(cfg.tickerParam, name);
+      }
       attachSignalParams(params, c.signal);
       return cfg.baseUrl + '?' + params.toString();
     }
